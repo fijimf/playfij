@@ -5,6 +5,7 @@ case class Result(id: Long, gameId: Long, homeScore: Int, awayScore: Int, numOts
 trait ResultDao {
   self: Profile with GameDao =>
 
+  import profile.simple._
 
   object Results extends Table[Result]("results") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)

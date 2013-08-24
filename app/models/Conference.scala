@@ -1,6 +1,5 @@
 package models
 
-import org.apache.commons.lang.StringUtils
 import scala.slick.lifted.DDL
 import org.apache.commons.lang3.StringUtils
 

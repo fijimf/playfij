@@ -20,6 +20,8 @@ trait TeamDao {
 
   this: Profile =>
 
+  import profile.simple._
+
 
   object Teams extends Table[Team]("teams") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
