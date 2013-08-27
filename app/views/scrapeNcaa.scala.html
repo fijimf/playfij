@@ -1,0 +1,177 @@
+@(message: String)
+
+@main("Fridge Rules") {
+
+<h1>Fridge rules</h1>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="#">Project name</a>
+
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <h1>Games</h1>
+
+
+    <form class="form well">
+        <legend>Game Details</legend>
+        <div class="controls controls-row">
+            <label class="span1" for="gamedate">Date</label>
+            <input id="gamedate" class="span2" type="date"  style = "width: 145px;" placeholder="12-31-2013">
+            <label class="checkbox span2">
+                <input type="checkbox" >Neutral Site
+            </label>
+            <label class="checkbox span3">
+                <input type="checkbox">Conference Tournament
+            </label>
+            <label class="checkbox span2">
+                <input type="checkbox">NCAA Tournament
+            </label>
+        </div>
+
+        <div class="controls controls-row">
+            <label class="span1" for="homeTeam">Home</label>
+            <select id="homeTeam" class="span5">
+                <option>Georgetown</option>
+                <option>Villanova</option>
+                <option>St. John's</option>
+                <option>Syracuse</option>
+                <option>Butler</option>
+                <option>Alabama</option>
+                <option>SDSU</option>
+                <option>Penn State</option>
+                <option>Georgia</option>
+            </select>
+            <input type="text" class="span1">
+        </div>
+
+        <div class="controls controls-row">
+            <label class="span1" for="awayTeam">Away</label>
+            <select id="awayTeam" class="span5">
+                <option>Georgetown</option>
+                <option>Villanova</option>
+                <option>St. John's</option>
+                <option>Syracuse</option>
+                <option>Butler</option>
+                <option>Alabama</option>
+                <option>SDSU</option>
+                <option>Penn State</option>
+                <option>Georgia</option>
+            </select>
+            <input type="text" class="span1">
+        </div>
+        <div class="controls controls-row">
+
+        </div>
+        <div class="controls controls-row">
+            <button type="submit" class="btn btn-success span2">Update</button>
+            <button type="reset" class="btn span2">Reset</button>
+            <div class="span2">&nbsp;</div>
+            <button class="btn btn-danger span2">Delete</button>
+        </div>
+    </form>
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Home</th>
+            <th>Score</th>
+            <th>Away</th>
+            <th>Score</th>
+            <th>Neutral?</th>
+            <th>Conf Trn?</th>
+            <th>NCAA Tourn</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>2013-12-13</td>
+            <td>Georgetown</td>
+            <th>99</th>
+            <th>Butler</th>
+            <th>88</th>
+            <th>N</th>
+            <th>N</th>
+            <th>N</th>
+        </tr>
+        <tr>
+            <td>2013-12-13</td>
+            <td>Georgetown</td>
+            <th>99</th>
+            <th>Butler</th>
+            <th>88</th>
+            <th>N</th>
+            <th>N</th>
+            <th>N</th>
+        </tr>
+        <tr>
+            <td>2013-12-13</td>
+            <td>Georgetown</td>
+            <th>99</th>
+            <th>Butler</th>
+            <th>88</th>
+            <th>N</th>
+            <th>N</th>
+            <th>N</th>
+        </tr>
+        <tr>
+            <td>2013-12-13</td>
+            <td>Georgetown</td>
+            <th>99</th>
+            <th>Butler</th>
+            <th>88</th>
+            <th>N</th>
+            <th>N</th>
+            <th>N</th>
+        </tr>
+        <tr>
+            <td>2013-12-13</td>
+            <td>Georgetown</td>
+            <th>99</th>
+            <th>Butler</th>
+            <th>88</th>
+            <th>N</th>
+            <th>N</th>
+            <th>N</th>
+        </tr>
+        <tr>
+            <td>2013-12-13</td>
+            <td>Georgetown</td>
+            <th>99</th>
+            <th>Butler</th>
+            <th>88</th>
+            <th>N</th>
+            <th>N</th>
+            <th>N</th>
+        </tr>
+        <tr>
+            <td>2013-12-13</td>
+            <td>Georgetown</td>
+            <th>99</th>
+            <th>Butler</th>
+            <th>88</th>
+            <th>N</th>
+            <th>N</th>
+            <th>N</th>
+        </tr>
+        </tbody>
+    </table>
+</div>
+}
