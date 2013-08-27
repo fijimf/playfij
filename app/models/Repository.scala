@@ -22,29 +22,4 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
   def createConference(conference: Conference) {
     Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.officialUrl, conference.officialTwitter, conference.logoUrl)
   }
-
-
-  def loadSchedule(key:String):Schedule = {
-
-  }
-
-}
-
-object Junk {
-  def main(args: Array[String]) {
-    val driver: H2Driver.type = H2Driver
-    val repository: Repository = new Repository(driver)
-    import driver.simple._
-
-    val db: Database = forURL("jdbc:h2:mem:tests", driver = "org.h2.Driver")
-    db withSession {
-      (repository.ddl).create
-
-      repository.newSeason("2013")
-      repository.listSeasons()
-
-      (repository.ddl.createStatements.foreach(println(_)))
-    }
-
-  }
 }
