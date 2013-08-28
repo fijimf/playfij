@@ -1,6 +1,8 @@
 package controllers
 
 import play.api.mvc._
+import models.Season
+import models.SeasonDao.Seasons
 
 object Application extends Controller {
 
@@ -18,6 +20,7 @@ object Application extends Controller {
   }
 
   def teamList = Action {
+
     Ok(views.html.notImplemented("Teamlist not implemented."))
   }
 }
