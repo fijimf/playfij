@@ -1,6 +1,7 @@
 package models
 
 import org.apache.commons.lang3.StringUtils
+import play.api.db.slick.Profile
 
 case class Alias(id: Long,
                  teamId: Long,

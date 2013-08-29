@@ -2,6 +2,7 @@ package models
 
 import org.joda.time.DateMidnight
 import util.DateMidnightMapper._
+import play.api.db.slick.Profile
 
 case class Game(id: Long, seasonId: Long, homeTeamId: Long, awayTeamId: Long, date: DateMidnight, location: Option[String], isNeutralSite: Boolean) {
   require(homeTeamId != awayTeamId)

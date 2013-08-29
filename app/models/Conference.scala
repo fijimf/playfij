@@ -2,6 +2,7 @@ package models
 
 import scala.slick.lifted.DDL
 import org.apache.commons.lang3.StringUtils
+import play.api.db.slick.Profile
 
 case class Conference(id: Long,
                       key:String,

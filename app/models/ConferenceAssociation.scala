@@ -1,5 +1,7 @@
 package models
 
+import play.api.db.slick.Profile
+
 case class ConferenceAssociation(id: Long,
                                  seasonId: Long,
                                  conferenceId: Long,

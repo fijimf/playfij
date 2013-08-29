@@ -1,5 +1,7 @@
 package models
 
+import play.api.db.slick.Profile
+
 case class Result(id: Long, gameId: Long, homeScore: Int, awayScore: Int, numOts: Int)
 
 trait ResultDao {

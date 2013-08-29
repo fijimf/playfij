@@ -1,5 +1,7 @@
 package models
 
+import play.api.db.slick.Profile
+
 case class Season(id: Long, year: String)
 
 trait SeasonDao {

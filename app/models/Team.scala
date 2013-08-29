@@ -2,6 +2,7 @@ package models
 
 import scala.slick.lifted.DDL
 import org.apache.commons.lang3.StringUtils
+import play.api.db.slick.Profile
 
 
 case class Team(id: Long, key: String, name: String, longName: String, nickname: String, primaryColor: Option[String], secondaryColor: Option[String], logoUrl: Option[String], officialUrl: Option[String], officialTwitter: Option[String]) {
