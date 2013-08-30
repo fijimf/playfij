@@ -54,22 +54,22 @@ trait ConferenceDao {
     override def ddl: DDL = {
       var constraints: DDL = DDL(
         Nil,
-        List(
-          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"checkKey\" CHECK (\"conference_key\"<>'')",
-          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"checkName\" CHECK (\"name\"<>'')",
-          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"checkShortName\" CHECK (\"short_name\"<>'')",
-          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"checkUrl\" CHECK (\"official_url\"<>'')",
-          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"checkTwitter\" CHECK (\"official_twitter\"<>'')",
-          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"checkLogo\" CHECK (\"logo_url\"<>'')"
-        ),
-        List(
-          "DROP CONSTRAINT \"checkKey\"",
-          "DROP CONSTRAINT \"checkName\"",
-          "DROP CONSTRAINT \"checkShortName\"",
-          "DROP CONSTRAINT \"checkUrl\"",
-          "DROP CONSTRAINT \"checkTwitter\"",
-          "DROP CONSTRAINT \"checkLogo\""
-        ),
+//        List(
+//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_key\" CHECK (\"conference_key\"<>'')",
+//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_name\" CHECK (\"name\"<>'')",
+//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_short_name\" CHECK (\"short_name\"<>'')",
+//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_url\" CHECK (\"official_url\"<>'')",
+//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_twitter\" CHECK (\"official_twitter\"<>'')",
+//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_logo\" CHECK (\"logo_url\"<>'')"
+//        ),
+//        List(
+//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_key\"",
+//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_name\"",
+//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_short_name\"",
+//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_url\"",
+//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_twitter\"",
+//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_logo\""
+//        ),
         Nil)
       super.ddl ++ constraints
     }

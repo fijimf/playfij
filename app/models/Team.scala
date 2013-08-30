@@ -56,26 +56,26 @@ trait TeamDao {
     override def ddl: DDL = {
       var constraints: DDL = DDL(
         Nil,
-        List(
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkKey\" CHECK (\"team_key\"<>'')",
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkName\" CHECK (\"name\"<>'')",
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkLongName\" CHECK (\"long_name\"<>'')",
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkUrl\" CHECK (\"official_url\"<>'')",
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkTwitter\" CHECK (\"official_twitter\"<>'')",
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkPColor\" CHECK (\"primary_color\"<>'')",
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkSColor\" CHECK (\"secondary_color\"<>'')",
-          "ALTER TABLE \"teams\" ADD CONSTRAINT \"checkLogo\" CHECK (\"logo_url\"<>'')"
-        ),
-        List(
-          "DROP CONSTRAINT \"checkKey\"",
-          "DROP CONSTRAINT \"checkName\"",
-          "DROP CONSTRAINT \"checkLongName\"",
-          "DROP CONSTRAINT \"checkUrl\"",
-          "DROP CONSTRAINT \"checkTwitter\"",
-          "DROP CONSTRAINT \"checkPColor\"",
-          "DROP CONSTRAINT \"checkSColor\"",
-          "DROP CONSTRAINT \"checkLogo\""
-        ),
+//        List(
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_key\" CHECK (\"team_key\"<>'')",
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_name\" CHECK (\"name\"<>'')",
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_long_ame\" CHECK (\"long_name\"<>'')",
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_url\" CHECK (\"official_url\"<>'')",
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_twitter\" CHECK (\"official_twitter\"<>'')",
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_p_color\" CHECK (\"primary_color\"<>'')",
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_s_color\" CHECK (\"secondary_color\"<>'')",
+//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_logo\" CHECK (\"logo_url\"<>'')"
+//        ),
+//        List(
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_key\"",
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_name\"",
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_long_ame\"",
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_url\"",
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_twitter\"",
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_p_color\"",
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_s_color\"",
+//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_logo\""
+//        ),
         Nil)
       super.ddl ++ constraints
     }

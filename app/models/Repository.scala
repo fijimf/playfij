@@ -4,12 +4,11 @@ import scala.slick.driver.{ExtendedProfile}
 import scala.slick.lifted.DDL
 import scala.slick.session.Database._
 import play.api.db.slick.Profile
+import scala.slick.session.Session
 
 class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with TeamDao with GameDao with ResultDao with Profile {
 
   val profile = p
-
-  import profile._
 
   val ddl: DDL = Seasons.ddl ++ Conferences.ddl ++ Teams.ddl ++ Games.ddl ++ Results.ddl
 
@@ -24,4 +23,11 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
   def createConference(conference: Conference) {
     Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.officialUrl, conference.officialTwitter, conference.logoUrl)
   }
+
+  def rebuildDatabase {
+    import profile.simple._
+    ddl.drop
+    ddl.create
+  }
+
 }

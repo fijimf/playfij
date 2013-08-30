@@ -8,6 +8,9 @@ GET     /game/list                  controllers.Application.gameList
 GET     /conference/list            controllers.Application.conferenceList
 GET     /team/list                  controllers.Application.teamList
 
+GET     /app/database               controllers.Application.dataOperations
+POST    /app/database/rebuild       controllers.Application.rebuildDatabase
+
 GET     /api/game/{id}              controllers.Game.get
 GET     /api/game/list              controllers.Game.list
 POST    /api/game/{id}              controllers.Game.update
