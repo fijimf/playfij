@@ -1,11 +1,11 @@
 package models
 
-import scala.slick.lifted.DDL
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
+import java.util.Date
 
 case class Conference(id: Long,
-                      key:String,
+                      key: String,
                       name: String,
                       shortName: String,
                       officialUrl: Option[String],
@@ -17,7 +17,6 @@ case class Conference(id: Long,
   require(officialUrl.map(StringUtils.isNotBlank).getOrElse(true), "Official URL cannot be blank")
   require(officialTwitter.map(StringUtils.isNotBlank).getOrElse(true), "Official twitter cannot be blank")
   require(logoUrl.map(StringUtils.isNotBlank).getOrElse(true), "logo URL cannot be blank")
-
 }
 
 trait ConferenceDao {
@@ -41,6 +40,7 @@ trait ConferenceDao {
 
     def logoUrl = column[Option[String]]("logo_url")
 
+
     def * = id ~ key ~ name ~ shortName ~ officialUrl ~ officialTwitter ~ logoUrl <>(Conference.apply _, Conference.unapply _)
 
     def autoInc = key ~ name ~ shortName ~ officialUrl ~ officialTwitter ~ logoUrl returning id
@@ -51,30 +51,6 @@ trait ConferenceDao {
 
     def shortNameIndex = index("conf_short_name", shortName, unique = true)
 
-    override def ddl: DDL = {
-      var constraints: DDL = DDL(
-        Nil,
-//        List(
-//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_key\" CHECK (\"conference_key\"<>'')",
-//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_name\" CHECK (\"name\"<>'')",
-//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_short_name\" CHECK (\"short_name\"<>'')",
-//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_url\" CHECK (\"official_url\"<>'')",
-//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_twitter\" CHECK (\"official_twitter\"<>'')",
-//          "ALTER TABLE \"conferences\" ADD CONSTRAINT \"conf_check_logo\" CHECK (\"logo_url\"<>'')"
-//        ),
-//        List(
-//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_key\"",
-//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_name\"",
-//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_short_name\"",
-//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_url\"",
-//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_twitter\"",
-//          "ALTER TABLE \"conferences\" DROP CONSTRAINT \"conf_check_logo\""
-//        ),
-        Nil)
-      super.ddl ++ constraints
-    }
-
   }
-
 
 }

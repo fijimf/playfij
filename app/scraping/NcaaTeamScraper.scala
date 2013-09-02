@@ -4,7 +4,7 @@ import xml.{NodeSeq, Node}
 import collection.immutable.{Map, List}
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.forkjoin.ForkJoinPool
-import play.Logger
+import play.api.Logger
 
 object NcaaTeamScraper extends HttpScraper {
 
@@ -20,8 +20,7 @@ object NcaaTeamScraper extends HttpScraper {
     val LogoUrl = "logo"
   }
 
-  val logger = Logger.of(NcaaTeamScraper.getClass)
-
+  val logger = Logger("Scraper")
 
   lazy val teamData: List[Map[String, String]] = {
     logger.info("Scraping NCAA.com for teams and conferences.")

@@ -1,6 +1,5 @@
 package models
 
-import scala.slick.lifted.DDL
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
 
@@ -50,36 +49,10 @@ trait TeamDao {
     def autoInc = key ~ name ~ longName ~ nickname ~ primaryColor ~ secondaryColor ~ logoUrl ~ officialUrl ~ officialTwitter returning id
 
     def keyIndex = index("tea_key", key, unique = true)
+
     def nameIndex = index("tea_name", name, unique = true)
+
     def longNameIndex = index("tea_long_name", longName, unique = true)
-
-    override def ddl: DDL = {
-      var constraints: DDL = DDL(
-        Nil,
-//        List(
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_key\" CHECK (\"team_key\"<>'')",
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_name\" CHECK (\"name\"<>'')",
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_long_ame\" CHECK (\"long_name\"<>'')",
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_url\" CHECK (\"official_url\"<>'')",
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_twitter\" CHECK (\"official_twitter\"<>'')",
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_p_color\" CHECK (\"primary_color\"<>'')",
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_s_color\" CHECK (\"secondary_color\"<>'')",
-//          "ALTER TABLE \"teams\" ADD CONSTRAINT \"team_check_logo\" CHECK (\"logo_url\"<>'')"
-//        ),
-//        List(
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_key\"",
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_name\"",
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_long_ame\"",
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_url\"",
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_twitter\"",
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_p_color\"",
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_s_color\"",
-//          "ALTER TABLE \"teams\" DROP CONSTRAINT \"team_check_logo\""
-//        ),
-        Nil)
-      super.ddl ++ constraints
-    }
-
   }
 
 }

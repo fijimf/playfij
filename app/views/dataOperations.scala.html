@@ -1,37 +1,75 @@
-@(message: String)
+@(status: DatabaseStatus)(implicit flash: Flash)
 
-@main("Fridge Rules") {
 
-<h1>Fridge rules</h1>
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="brand" href="#">Project name</a>
-
-            <div class="nav-collapse collapse">
-                <ul class="nav">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
-        </div>
-    </div>
-</div>
+@main("Databse Ops") {
 
 <div class="container">
-    <h1>Operations</h1>
+    <h1>Database Operations</h1>
+    @if(flash.get("success").isDefined) {
+            <div class="alert alert-success"><p>@flash.get("success").get</p></div>
+    }
+    @if(flash.get("error").isDefined) {
+            <div class="alert alert-error"><p>@flash.get("error").get</p></div>
+    }
+    <table class="table table-condensed  table-bordered">
+        <h3>Database Status</h3>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Seasons</th>
+            <th>Conferences</th>
+            <th>Teams</th>
+            <th>Games</th>
+            <th>Results</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>Row Count</th>
+            <td>@{status.seasonCount.map(_.toString ).getOrElse("N/A")}</td>
+            <td>@{status.conferenceCount.map(_.toString ).getOrElse("N/A")}</td>
+            <td>@{status.teamCount.map(_.toString ).getOrElse("N/A")}</td>
+            <td>@{status.gameCount.map(_.toString ).getOrElse("N/A")}</td>
+            <td>@{status.resultCount.map(_.toString ).getOrElse("N/A")}</td>
+        </tr>
+        <tr>
+            <th></th>
+            <td>
+                <button class="btn btn-default">Edit</button>
+                <button class="btn btn-default">View</button>
+            </td>
+            <td>
+                <button class="btn btn-default">Edit</button>
+                <button class="btn btn-default">View</button> </td>
+            <td>
+                <button class="btn btn-default">Edit</button>
+                <button class="btn btn-default">View</button></td>
+            <td>
+                <button class="btn btn-default">Edit</button>
+                <button class="btn btn-default">View</button></td>
+            <td>
+                <button class="btn btn-default">Edit</button>
+                <button class="btn btn-default">View</button></td>
+        </tr>
+        </tbody>
+    </table>
     <form class="form well" method="post" action="database/rebuild">
-        <legend>Build database</legend>
-        <div class="controls controls-row">
-            <button type="submit" class="btn btn-success span2">Build</button>
-        </div>
+        <legend>Rebuild database</legend>
+        <input type="submit" class="btn btn-danger span2" value="Rebuild"/>
+        <span class="help-inline">Warning: Rebuilding the database will drop ALL data.</span>
+    </form>
+    <form class="form well" method="post"  action="database/scrape-ncaa-teams">
+        <legend>Scrape teams and conferences from <i>ncaa.com</i></legend>
+        <input type="submit" class="btn btn-primary span2" value="Scrape"/>
+    </form>
+    <form class="form well" method="post">
+        <legend>Scrape current games from <i>ncaa.com</i></legend>
+        <input type="submit" class="btn btn-primary span2" value="Scrape"/>
+    </form>
+    <form class="form well" method="post">
+        <legend>Scrape games and results from <i>kenpom.com</i></legend>
+        <label for="url">URL</label> <input id="url" type="text"/>
+        <input type="submit" class="btn btn-primary span2" value="Scrape"/>
     </form>
 </div>
 }

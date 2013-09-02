@@ -3,19 +3,20 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
-GET     /game/list                  controllers.Application.gameList
-GET     /conference/list            controllers.Application.conferenceList
-GET     /team/list                  controllers.Application.teamList
+GET     /                                 controllers.Application.index
+GET     /game/list                        controllers.Application.gameList
+GET     /conference/list                  controllers.Application.conferenceList
+GET     /team/list                        controllers.Application.teamList
 
-GET     /app/database               controllers.Application.dataOperations
-POST    /app/database/rebuild       controllers.Application.rebuildDatabase
+GET     /app/database                     controllers.DatabaseOperations.index
+POST    /app/database/rebuild             controllers.DatabaseOperations.rebuildDatabase
+POST    /app/database/scrape-ncaa-teams   controllers.DatabaseOperations.scrapeNcaaTeams
 
-GET     /api/game/{id}              controllers.Game.get
-GET     /api/game/list              controllers.Game.list
-POST    /api/game/{id}              controllers.Game.update
-POST    /api/game/new               controllers.Game.create
-POST    /api/game/{id}/delete       controllers.Game.delete
+GET     /api/game/{id}                    controllers.Game.get
+GET     /api/game/list                    controllers.Game.list
+POST    /api/game/{id}                    controllers.Game.update
+POST    /api/game/new                     controllers.Game.create
+POST    /api/game/{id}/delete             controllers.Game.delete
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+GET     /assets/*file                     controllers.Assets.at(path="/public", file)
