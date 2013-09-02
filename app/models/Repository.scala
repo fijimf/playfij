@@ -10,6 +10,7 @@ import play.api.Logger
 import scraping.NcaaTeamScraper.TeamData
 
 class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with TeamDao with GameDao with ResultDao with Profile {
+  val logger: Logger = Logger("Repository")
 
   val profile = p
 
@@ -56,6 +57,8 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
     val conferenceMap: Map[String, String] = NcaaTeamScraper.conferenceMap
     val teamData: List[Map[String, String]] = NcaaTeamScraper.teamData
 
+    logger.info("Loaded team data")
+
 
     upsertConferences(conferenceMap)
     upsertTeams(teamData)
@@ -88,7 +91,7 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
       val longName = data.get(TeamData.LongName)
       val name = data.get(TeamData.Name)
       val nickname = data.get(TeamData.Nickname)
-      val officalUrl = data.get(TeamData.OfficialUrl)
+      val officialUrl = data.get(TeamData.OfficialUrl)
       val primaryColor = data.get(TeamData.PrimaryColor)
       val secondaryColor = data.get(TeamData.SecondaryColor)
       if (key.isDefined) {
@@ -99,14 +102,14 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
             andThen(copyIfDefined[String]((tm, x) => tm.copy(longName = x.get), longName)).
             andThen(copyIfDefined[String]((tm, x) => tm.copy(nickname = x.get), nickname)).
             andThen(copyIfDefined[String]((tm, x) => tm.copy(logoUrl = x), logoUrl)).
-            andThen(copyIfDefined[String]((tm, x) => tm.copy(officialUrl = x), officalUrl)).
+            andThen(copyIfDefined[String]((tm, x) => tm.copy(officialUrl = x), officialUrl)).
             andThen(copyIfDefined[String]((tm, x) => tm.copy(primaryColor = x), primaryColor)).
             andThen(copyIfDefined[String]((tm, x) => tm.copy(secondaryColor = x), secondaryColor)).apply(ot.get)
           Teams.where(_.key === key).update(team)
         } else {
           Logger("Repository").info("Inserting team '%s'".format(key))
           if (name.isDefined && longName.isDefined && nickname.isDefined) {
-            Teams.autoInc.insert(key.get, name.get, longName.get, nickname.get, primaryColor, secondaryColor, logoUrl, None, None)
+            Teams.autoInc.insert(key.get, name.get, longName.get, nickname.get, primaryColor, secondaryColor, logoUrl, officialUrl, None)
           }
         }
       }
