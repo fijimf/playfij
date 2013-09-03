@@ -1,0 +1,34 @@
+@(teams: List[Team])
+
+@main("Teams") {
+
+<div class="container">
+    <h1>Teams</h1>
+    <table class="table table-condensed  table-bordered">
+        <thead>
+        <tr>
+            <th colspan="3" class="span2"></th>
+            <th >Team</a></th>
+            <th >Nickname</th>
+            <th class="span2">Long Name</th>
+            <th class="span2">Official URL</th>
+            <th class="span2">Official Twitter</th>
+        </tr>
+        </thead>
+        <tbody>
+        @teams.map { team=>
+        <tr>
+            <td><img src="@team.logoUrl.getOrElse("")"/></td>
+            <td style="background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
+            <td style="background-color:@team.secondaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
+            <td><a href="/team/@team.key/edit">@team.name</a></td>
+            <td>@team.nickname</td>
+            <td>@team.longName</td>
+            <td style="overflow:hidden;">@team.officialUrl.getOrElse("")</td>
+            <td>@team.officialTwitter.getOrElse("")</td>
+        </tr>
+        }
+        </tbody>
+    </table>
+</div>
+}

@@ -6,7 +6,9 @@
 GET     /                                 controllers.Application.index
 GET     /game/list                        controllers.Application.gameList
 GET     /conference/list                  controllers.Application.conferenceList
-GET     /team/list                        controllers.Application.teamList
+GET     /team/list                        controllers.Team.list
+GET     /team/:key/edit                  controllers.Team.edit(key)
+
 
 GET     /app/database                     controllers.DatabaseOperations.index
 POST    /app/database/rebuild             controllers.DatabaseOperations.rebuildDatabase

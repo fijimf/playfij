@@ -1,0 +1,59 @@
+@(team: Team)
+
+@main(team.name) {
+
+<div class="container">
+    <h1>@team.name</h1>
+
+    <div class="row">
+        <div class="span2">
+            <a class="btn btn-block btn-primary" href="#">Previous</a>
+        </div>
+        <div class="offset8 span2">
+            <a class="btn btn-block btn-primary" href="#">Next</a>
+        </div>
+    </div>
+    <div style="padding-top:30px;" class="row">
+        <form class="form well">
+            <div class="container">
+                <div class="row">
+                    <div class="span9">
+                        <label for="key">Key </label>
+                        <input id="key" class="input-large" type="text" value="@team.key"/>
+                        <label for="name">Name </label>
+                        <input id="name" type="text" value="@team.name"/>
+                        <label for="longName">Long Name </label>
+                        <input id="longName" class="input-xlarge" type="text" value="@team.longName"/>
+
+                        <label for="nickname">Nickname </label>
+                        <input id="nickname" type="text" value="@team.nickname"/>
+                        <label for="logoUrl">Logo Image </label>
+                        <input id="logoUrl" class="input-xxlarge" type="text" value="@team.logoUrl"/>
+                        <label for="officialUrl">Official URL </label>
+                        <input id="officialUrl" class="input-xlarge" type="text" value="@team.officialUrl.getOrElse("")"/>
+                        <label for="officialTwitter">Official Twitter </label>
+                        <input id="officialTwitter" class="input-large" type="text"
+                               value="@team.officialTwitter.getOrElse("")"/>
+                        <label for="primaryColor">Primary Color</label>
+                        <input id="primaryColor" class="input-large" type="text" value="@team.primaryColor.getOrElse("")"/>
+                        <label for="secondaryColor">Secondary Color</label>
+                        <input id="secondaryColor" class="input-large" type="text"
+                               value="@team.secondaryColor.getOrElse("")"/>
+                    </div>
+                    <div class="span3">
+                        <img style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background-color: white"
+                             src="@team.logoUrl.getOrElse("")" />
+                        <img style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%,   @team.primaryColor.getOrElse("")
+                        27%, @team.primaryColor.getOrElse("") 73%, #eee 100%);" src="@team.logoUrl.getOrElse("")" />
+                        <img style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%, @team.secondaryColor.getOrElse("")
+                        27%, @team.secondaryColor.getOrElse("") 73%, #eee 100%);" src="@team.logoUrl.getOrElse("")" />
+                    </div>
+                </div>
+
+            </div>
+            <input type="submit" class="btn btn-primary" value="Save"/>
+            <input type="reset" class="btn btn-primary" value="Reset"/>
+        </form>
+    </div>
+</div>
+}

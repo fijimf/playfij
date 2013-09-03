@@ -26,6 +26,15 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
     Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.officialUrl, conference.officialTwitter, conference.logoUrl)
   }
 
+  def getTeams:List[Team] ={
+    import profile.simple._
+    Query(Teams).to[List]
+  }
+
+  def getTeam(key:String):Option[Team] ={
+    import profile.simple._
+    Query(Teams).where(_.key === key).firstOption
+  }
 
   def checkDatabase(): DatabaseStatus = {
     import profile.simple._
