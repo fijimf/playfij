@@ -1,0 +1,84 @@
+@(teamForm: Form[models.Team], title:String)
+
+@import helper._
+@import helper.twitterBootstrap._
+
+
+@main(title) {
+
+
+<script>
+    function updateLogos() {
+    var url = $("#logoUrl").val();
+    $("#logo-white-background").attr("src",url);
+    $("#logo-primary-background").attr("src",url);
+    $("#logo-secondary-background").attr("src",url);
+    }
+    function updatePrimaryColor() {
+    var color = $("#primaryColor").val();
+    $("#logo-primary-background").css("background","linear-gradient(to bottom, #eee 0%, "+color+" 27%, "+color+" 73%, #eee 100%)");
+    }
+    function updateSecondaryColor() {
+    var color = $("#secondaryColor").val();
+    $("#logo-secondary-background").css("background","linear-gradient(to bottom, #eee 0%, "+color+" 27%, "+color+" 73%, #eee 100%)");
+    }
+</script>
+<div class="container">
+    <h1>@title</h1>
+    @if(teamForm.hasErrors) {
+    <div class="alert-message error">
+        <p>Please correct errors in the form.</p>
+    </div>
+    }
+
+    <div class="row" style="margin-bottom:15px;">
+        <div class="span2">
+            <a class="btn btn-block btn-primary" href="#">Previous</a>
+        </div>
+        <div class="offset8 span2">
+            <a class="btn btn-block btn-primary" href="#">Next</a>
+        </div>
+    </div>
+
+        @helper.form(action = routes.Team.submit, 'class->"form form-horizontal well") {
+    <div class="container" style="padding-top:5px;">
+        <div  class="row">
+        <div class="span9">
+            <fieldset>
+                <input type="hidden" name="id" value='@teamForm("id").value.getOrElse(-1)'>
+                @inputText( teamForm("key"), '_label -> "Key", '_showConstraints -> false, 'class->"input-large" )
+                @inputText( teamForm("name"), '_label -> "Name", '_showConstraints -> false )
+                @inputText( teamForm("longName"), '_label -> "Long Name", '_showConstraints -> false,
+                'class->"input-xxlarge" )
+                @inputText( teamForm("nickname"), '_label -> "Nickname", '_showConstraints -> false )
+                @inputText( teamForm("logoUrl"), '_label -> "Logo URL", 'class->"input-xxlarge", 'onchange->"updateLogos()" )
+                @inputText( teamForm("officialUrl"), '_label -> "URL", 'class->"input-xlarge" )
+                @inputText( teamForm("officialTwitter"), '_label -> "Twitter" )
+                @inputText( teamForm("primaryColor"), '_label -> "Primary Color",'onchange->"updatePrimaryColor()" )
+                @inputText( teamForm("secondaryColor"), '_label -> "Secondary Color",'onchange->"updateSecondaryColor()" )
+            </fieldset>
+        </div>
+        <div class="span3">
+            <img id="logo-white-background"
+                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background-color: white"
+                 src="@teamForm("logoUrl").value.getOrElse("")" />
+            <img id="logo-primary-background"
+                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%, @teamForm("primaryColor").value.getOrElse("") 27%, @teamForm("primaryColor").value.getOrElse("") 73%, #eee 100%);"
+                 src="@teamForm("logoUrl").value.getOrElse("")" />
+            <img id="logo-secondary-background"
+                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%, @teamForm("secondaryColor").value.getOrElse("") 27%, @teamForm("secondaryColor").value.getOrElse("") 73%, #eee 100%);"
+                 src="@teamForm("logoUrl").value.getOrElse("")" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="actions span12">
+            <input type="submit" class="btn primary" value="Save">
+            <input type="reset" class="btn primary" value="Reset">
+            <a href="@routes.Team.list" class="btn">Cancel</a>
+        </div>
+    </div>
+        </div>
+    }
+</div>
+</div>
+}

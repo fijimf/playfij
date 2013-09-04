@@ -9,8 +9,9 @@ GET     /conference/list                  controllers.Application.conferenceList
 GET     /team/list                        controllers.Team.list
 GET     /team/new                         controllers.Team.create
 GET     /team/:key/edit                   controllers.Team.edit(key)
-POST    /team/update                      controllers.Team.update
-POST    /team/delete                      controllers.Team.delete(key)
+GET     /team/:key/update                   controllers.Team.update(key)
+POST    /team/update                      controllers.Team.submit
+POST    /team/delete                      controllers.Team.delete
 
 
 GET     /app/database                     controllers.DatabaseOperations.index
