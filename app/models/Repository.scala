@@ -9,7 +9,15 @@ import scraping.{ScrapingUtil, NcaaTeamScraper}
 import play.api.Logger
 import scraping.NcaaTeamScraper.TeamData
 
-class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with TeamDao with GameDao with ResultDao with Profile {
+class Repository(p: ExtendedProfile)
+  extends SeasonDao
+  with ConferenceDao
+  with TeamDao
+  with GameDao
+  with ResultDao
+  with AliasDao
+  with QuoteDao
+  with Profile {
   val logger: Logger = Logger("Repository")
 
   val profile = p
@@ -45,7 +53,9 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
       if (tables.contains("teams")) Query(Teams.length).firstOption else None,
       if (tables.contains("conferences")) Query(Conferences.length).firstOption else None,
       if (tables.contains("games")) Query(Games.length).firstOption else None,
-      if (tables.contains("results")) Query(Results.length).firstOption else None
+      if (tables.contains("results")) Query(Results.length).firstOption else None,
+      if (tables.contains("aliases")) Query(Aliases.length).firstOption else None,
+      if (tables.contains("quotes")) Query(Quotes.length).firstOption else None
     )
   }
 
@@ -129,4 +139,10 @@ class Repository(p: ExtendedProfile) extends SeasonDao with ConferenceDao with T
     (team: Team) => if (t.isDefined) f(team, t) else team
 }
 
-case class DatabaseStatus(seasonCount: Option[Int], teamCount: Option[Int], conferenceCount: Option[Int], gameCount: Option[Int], resultCount: Option[Int])
+case class DatabaseStatus(seasonCount: Option[Int],
+                          teamCount: Option[Int],
+                          conferenceCount: Option[Int],
+                          gameCount: Option[Int],
+                          resultCount: Option[Int],
+                          aliasCount:Option[Int],
+                          quoteCount:Option[Int])

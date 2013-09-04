@@ -15,7 +15,7 @@ trait AliasDao {
 
   import profile.simple._
 
-  object Aliases extends Table[Alias]("alias") {
+  object Aliases extends Table[Alias]("aliases") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def teamId = column[Long]("team_id")

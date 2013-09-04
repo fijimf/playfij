@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Controller, Action}
-import models.{Repository}
+import models.Repository
 
 object Team extends Controller {
 
@@ -15,17 +15,22 @@ object Team extends Controller {
         Ok(views.html.teamList(repo.getTeams))
       }
   }
-  def edit(key:String) = Action {
+
+  def edit(key: String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
         val oTeam: Option[models.Team] = repo.getTeam(key)
-        if (oTeam.isDefined){
+        if (oTeam.isDefined) {
           Ok(views.html.teamEdit(oTeam.get))
         } else {
           NotFound("bbbbb")
         }
       }
   }
+
+  def create = TODO
+  def delete = TODO
+  def update = TODO
 
 
 
