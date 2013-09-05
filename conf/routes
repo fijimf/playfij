@@ -3,25 +3,73 @@
 # ~~~~
 
 # Home page
-GET     /                                 controllers.Application.index
-GET     /game/list                        controllers.Application.gameList
-GET     /conference/list                  controllers.Application.conferenceList
-GET     /team/list                        controllers.Team.list
-GET     /team/new                         controllers.Team.create
-GET     /team/:key/edit                   controllers.Team.edit(key)
-POST    /team/update                      controllers.Team.submit
-POST    /team/delete                      controllers.Team.delete
+GET  /                                    controllers.Application.index
 
+GET  /seasons                             controllers.Season.list
+POST /seasons                             controllers.Season.submit  
+GET  /seasons/new                         controllers.Season.create
+GET  /seasons/:key                        controllers.Season.view(key)
+GET  /seasons/:key/edit                   controllers.Season.edit(key)
+POST /seasons/delete                      controllers.Season.delete
+
+GET  /conferences                         controllers.Conference.list
+POST /conferences                         controllers.Conference.submit  
+GET  /conferences/new                     controllers.Conference.create
+GET  /conferences/:key                    controllers.Conference.view(key)
+GET  /conferences/:key/edit               controllers.Conference.edit(key)
+POST /conferences/delete                  controllers.Conference.delete
+
+GET  /teams                               controllers.Team.list
+POST /teams                               controllers.Team.submit  
+GET  /teams/new                           controllers.Team.create
+GET  /teams/:key                          controllers.Team.view(key)
+GET  /teams/:key/edit                     controllers.Team.edit(key)
+POST /teams/delete                        controllers.Team.delete
+
+#Note that aliases do not need their own page, as they are associated with at most one team
+
+GET  /games                               controllers.Game.list
+POST /games                               controllers.Game.submit  
+GET  /games/new                           controllers.Game.create
+GET  /games/:key                          controllers.Game.view(key)
+GET  /games/:key/edit                     controllers.Game.edit(key)
+POST /games/delete                        controllers.Game.delete
+
+#Note that results do not need their own page as they are associated with at most one game
+
+GET  /quotes                               controllers.Quote.list
+POST /quotes                               controllers.Quote.submit  
+GET  /quotes/new                           controllers.Quote.create
+GET  /quotes/:key                          controllers.Quote.view(key)
+GET  /quotes/:key/edit                     controllers.Quote.edit(key)
+POST /quotes/delete                        controllers.Quote.delete
+
+GET  /users                               controllers.User.list
+POST /users                               controllers.User.submit  
+GET  /users/new                           controllers.User.create
+GET  /users/:key                          controllers.User.view(key)
+GET  /users/:key/edit                     controllers.User.edit(key)
+POST /users/delete                        controllers.User.delete
+
+GET  /roles                               controllers.Role.list
+POST /roles                               controllers.Role.submit  
+GET  /roles/new                           controllers.Role.create
+GET  /roles/:key                          controllers.Role.view(key)
+GET  /roles/:key/edit                     controllers.Role.edit(key)
+POST /roles/delete                        controllers.Role.delete
+
+GET  /permissions                         controllers.Permission.list
+POST /permissions                         controllers.Permission.submit  
+GET  /permissions/new                     controllers.Permission.create
+GET  /permissions/:key                    controllers.Permission.view(key)
+GET  /permissions/:key/edit               controllers.Permission.edit(key)
+POST /permissions/delete                  controllers.Permission.delete
 
 GET     /app/database                     controllers.DatabaseOperations.index
 POST    /app/database/rebuild             controllers.DatabaseOperations.rebuildDatabase
 POST    /app/database/scrape-ncaa-teams   controllers.DatabaseOperations.scrapeNcaaTeams
 
-GET     /api/game/{id}                    controllers.Game.get
-GET     /api/game/list                    controllers.Game.list
-POST    /api/game/{id}                    controllers.Game.update
-POST    /api/game/new                     controllers.Game.create
-POST    /api/game/{id}/delete             controllers.Game.delete
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                     controllers.Assets.at(path="/public", file)
