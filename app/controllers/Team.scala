@@ -43,7 +43,7 @@ object Team extends Controller {
         if (oTeam.isDefined) {
           Ok(views.html.teamForm(teamForm.fill(oTeam.get), oTeam.get.name + " " + oTeam.get.nickname))
         } else {
-          NotFound("bbbbb")
+          NotFound(views.html.resourceNotFound("team", key))
         }
       }
   }
