@@ -34,12 +34,12 @@ class Repository(p: ExtendedProfile)
     Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.officialUrl, conference.officialTwitter, conference.logoUrl)
   }
 
-  def getTeams:List[Team] ={
+  def getTeams: List[Team] = {
     import profile.simple._
     Query(Teams).to[List]
   }
 
-  def getTeam(key:String):Option[Team] ={
+  def getTeam(key: String): Option[Team] = {
     import profile.simple._
     Query(Teams).where(_.key === key).firstOption
   }
@@ -102,6 +102,11 @@ class Repository(p: ExtendedProfile)
     })
   }
 
+  def updateTeam(team: Team) {
+    import profile.simple._
+    Teams.where(_.id === team.id).update(team)
+  }
+
   def upsertTeams(teamData: List[Map[String, String]]) {
     import profile.simple._
     teamData.foreach((data: Map[String, String]) => {
@@ -135,7 +140,7 @@ class Repository(p: ExtendedProfile)
     })
   }
 
-  def copyIfDefined[T](f: (Team, Option[T]) => Team, t:Option[T]) =
+  def copyIfDefined[T](f: (Team, Option[T]) => Team, t: Option[T]) =
     (team: Team) => if (t.isDefined) f(team, t) else team
 }
 
@@ -144,5 +149,5 @@ case class DatabaseStatus(seasonCount: Option[Int],
                           conferenceCount: Option[Int],
                           gameCount: Option[Int],
                           resultCount: Option[Int],
-                          aliasCount:Option[Int],
-                          quoteCount:Option[Int])
+                          aliasCount: Option[Int],
+                          quoteCount: Option[Int])

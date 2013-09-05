@@ -24,7 +24,7 @@ object DatabaseOperations extends Controller {
         repo.rebuildDatabase()
       }
       catch {
-        case e: Exception => Redirect("/app/database").flashing("error" -> "Problem rebuilding the database")
+        case e: Exception => Redirect(routes.DatabaseOperations.index()).flashing("error" -> "Problem rebuilding the database")
       }
       Redirect("/app/database").flashing("success" -> "Database rebuilt")
     }
@@ -35,7 +35,7 @@ object DatabaseOperations extends Controller {
 
       repo.scrapeNcaaTeamsAndConferences()
 
-      Redirect("/app/database").flashing("success" -> "Database rebuilt")
+      Redirect(routes.DatabaseOperations.index()).flashing("success" -> "Database rebuilt")
 
     }
   }

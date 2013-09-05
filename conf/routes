@@ -9,7 +9,6 @@ GET     /conference/list                  controllers.Application.conferenceList
 GET     /team/list                        controllers.Team.list
 GET     /team/new                         controllers.Team.create
 GET     /team/:key/edit                   controllers.Team.edit(key)
-GET     /team/:key/update                   controllers.Team.update(key)
 POST    /team/update                      controllers.Team.submit
 POST    /team/delete                      controllers.Team.delete
 

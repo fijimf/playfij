@@ -6,31 +6,24 @@ case class UserRole(id: Long, userId: Long, roleId: Long)
 
 trait UserRoleDao {
 
-  self: Profile with SeasonDao with UserDao with RoleDao =>
+  self: Profile with UserDao with RoleDao =>
 
   import profile.simple._
 
-  object UserRoles extends Table[ConferenceAssociation]("conference_associations") {
+  object UserRoles extends Table[UserRole]("user_role") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def seasonId = column[Long]("season_id")
+    def userId = column[Long]("user_id")
 
-    def conferenceId = column[Long]("conference_id")
+    def roleId = column[Long]("role_id")
 
-    def teamId = column[Long]("team_id")
+    def * = id ~ userId ~ roleId  <>(UserRole.apply _, UserRole.unapply _)
 
-    def * = id ~ seasonId ~ conferenceId ~ teamId <>(ConferenceAssociation.apply _, ConferenceAssociation.unapply _)
+    def autoInc = id ~ userId ~ roleId  returning id
 
-    def autoInc = seasonId ~ conferenceId ~ teamId returning id
+    def roleFk = foreignKey("ur_role_fk", roleId, Roles)(_.id)
 
-    def seasonFk = foreignKey("cas_season_fk", seasonId, Seasons)(_.id)
+    def userFk = foreignKey("ur_user_fk", userId, Users)(_.id)
 
-    def teamFk = foreignKey("cas_team_fk", teamId, Teams)(_.id)
-
-    def conferenceFk = foreignKey("cas_conference_fk", conferenceId, Conferences)(_.id)
-
-    def teamIndex = index("cas_season_team", (seasonId, teamId), unique = true)
   }
-
-
 }

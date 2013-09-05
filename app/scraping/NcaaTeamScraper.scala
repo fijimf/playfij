@@ -20,7 +20,7 @@ object NcaaTeamScraper extends HttpScraper {
     val LogoUrl = "logo"
   }
 
-  val logger = Logger("Scraper")
+  val logger = Logger("NcaaTeamScraper")
 
   lazy val teamData: List[Map[String, String]] = {
     logger.info("Scraping NCAA.com for teams and conferences.")
