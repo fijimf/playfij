@@ -4,24 +4,16 @@ import play.api.mvc._
 
 object Game extends Controller {
 
-  def get = Action {
-    Ok(views.html.notImplemented("Game.get not implemnted"))
-  }
+  def list = TODO
 
-  def list = Action {
-    Ok(views.html.notImplemented("Game.list not implemnted"))
-  }
+  def submit = TODO
 
-  def update = Action {
-    Ok(views.html.notImplemented("Game.update not implemnted"))
-  }
+  def create = TODO
 
-  def create = Action {
-    Ok(views.html.notImplemented("Game.create not implemnted"))
-  }
+  def view = TODO
 
-  def delete = Action {
-    Ok(views.html.notImplemented("Game.delete not implemnted"))
-  }
+  def edit = TODO
+  
+  def delete = TODO
 
 }
