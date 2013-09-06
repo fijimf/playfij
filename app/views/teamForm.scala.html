@@ -59,6 +59,13 @@
             </fieldset>
         </div>
         <div class="span3">
+          <p>
+              <a class="btn btn-small btn-primary" href='@teamForm("officialUrl").value.getOrElse("#")' target="_blank">Check website</a>
+          </p>
+          <p>
+              <a class="btn btn-small btn-primary" href='@{"https://twitter.com/"+teamForm("officialTwitter").value.map(_.drop(1)).getOrElse("#")}' target="_blank">Check twitter</a>
+          </p>
+
             <img id="logo-white-background"
                  style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background-color: white"
                  src="@teamForm("logoUrl").value.getOrElse("")" />

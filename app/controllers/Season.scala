@@ -10,9 +10,9 @@ object Season extends Controller {
 
   def create = TODO
 
-  def view = TODO
+  def view(key:String) = TODO
 
-  def edit = TODO
+  def edit(key:String) = TODO
   
   def delete = TODO
 

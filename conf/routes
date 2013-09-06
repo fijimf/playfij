@@ -31,38 +31,38 @@ POST /teams/delete                        controllers.Team.delete
 GET  /games                               controllers.Game.list
 POST /games                               controllers.Game.submit  
 GET  /games/new                           controllers.Game.create
-GET  /games/:key                          controllers.Game.view(key)
-GET  /games/:key/edit                     controllers.Game.edit(key)
+GET  /games/:id                           controllers.Game.view(id)
+GET  /games/:id/edit                      controllers.Game.edit(id)
 POST /games/delete                        controllers.Game.delete
 
 #Note that results do not need their own page as they are associated with at most one game
 
-GET  /quotes                               controllers.Quote.list
-POST /quotes                               controllers.Quote.submit  
-GET  /quotes/new                           controllers.Quote.create
-GET  /quotes/:key                          controllers.Quote.view(key)
-GET  /quotes/:key/edit                     controllers.Quote.edit(key)
-POST /quotes/delete                        controllers.Quote.delete
+GET  /quotes                              controllers.Quote.list
+POST /quotes                              controllers.Quote.submit
+GET  /quotes/new                          controllers.Quote.create
+GET  /quotes/:id                          controllers.Quote.view(id)
+GET  /quotes/:id/edit                     controllers.Quote.edit(id)
+POST /quotes/delete                       controllers.Quote.delete
 
 GET  /users                               controllers.User.list
 POST /users                               controllers.User.submit  
 GET  /users/new                           controllers.User.create
-GET  /users/:key                          controllers.User.view(key)
-GET  /users/:key/edit                     controllers.User.edit(key)
+GET  /users/:id                           controllers.User.view(id)
+GET  /users/:id/edit                      controllers.User.edit(id)
 POST /users/delete                        controllers.User.delete
 
 GET  /roles                               controllers.Role.list
 POST /roles                               controllers.Role.submit  
 GET  /roles/new                           controllers.Role.create
-GET  /roles/:key                          controllers.Role.view(key)
-GET  /roles/:key/edit                     controllers.Role.edit(key)
+GET  /roles/:id                           controllers.Role.view(id)
+GET  /roles/:id/edit                      controllers.Role.edit(id)
 POST /roles/delete                        controllers.Role.delete
 
 GET  /permissions                         controllers.Permission.list
 POST /permissions                         controllers.Permission.submit  
 GET  /permissions/new                     controllers.Permission.create
-GET  /permissions/:key                    controllers.Permission.view(key)
-GET  /permissions/:key/edit               controllers.Permission.edit(key)
+GET  /permissions/:id                     controllers.Permission.view(id)
+GET  /permissions/:id/edit                controllers.Permission.edit(id)
 POST /permissions/delete                  controllers.Permission.delete
 
 GET     /app/database                     controllers.DatabaseOperations.index

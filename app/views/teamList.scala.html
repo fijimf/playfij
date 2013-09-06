@@ -2,33 +2,37 @@
 
 @main("Teams") {
 
-<div class="container">
+<div class="row-fluid"><div class="span12">
     <h1>Teams</h1>
-    <table class="table table-condensed  table-bordered">
+    <table class="table table-condensed  table-bordered" style="table-layout:fixed;">
         <thead>
         <tr>
-            <th colspan="3" class="span2"></th>
-            <th >Team</a></th>
-            <th >Nickname</th>
-            <th class="span2">Long Name</th>
-            <th class="span2">Official URL</th>
-            <th class="span2">Official Twitter</th>
+            <th style="width:8em;" colspan="3" </th>
+            <th style="width:4em;"></th>
+            <th style="width:12em;">Team</a></th>
+            <th style="width:8em;">Nickname</th>
+            <th style="width:18em;">Long Name</th>
+            <th style="width:14em;">Official URL</th>
+            <th style="width:10em;">Official Twitter</th>
+            <th style="width:4em;"></th>
         </tr>
         </thead>
         <tbody>
         @teams.map { team=>
         <tr>
             <td><img src="@team.logoUrl.getOrElse("")"/></td>
-            <td style="background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
-            <td style="background-color:@team.secondaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
-            <td><a href="/team/@team.key/edit">@team.name</a></td>
-            <td>@team.nickname</td>
-            <td>@team.longName</td>
-            <td style="overflow:hidden;">@team.officialUrl.getOrElse("")</td>
-            <td>@team.officialTwitter.getOrElse("")</td>
+            <td style="overflow-x:hidden; background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
+            <td style="overflow-x:hidden; background-color:@team.secondaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
+            <td><a class="btn btn-primary btn-small" href="@controllers.routes.Team.edit(team.key)">Edit</a></td>
+            <td style="overflow-x:hidden;" ><a href="@controllers.routes.Team.view(team.key)">@team.name</a></td>
+            <td style="overflow-x:hidden;" >@team.nickname</td>
+            <td style="overflow-x:hidden;" >@team.longName</td>
+            <td style="overflow-x:hidden;">@team.officialUrl.getOrElse("")</td>
+            <td style="overflow-x:hidden;" >@team.officialTwitter.getOrElse("")</td>
+            <td><button class="btn btn-danger btn-small">Delete</button></td>
         </tr>
         }
         </tbody>
     </table>
-</div>
+</div></div>
 }

@@ -7,11 +7,11 @@ import play.api.data.Forms._
 import play.api.Logger
 
 object Team extends Controller {
-
   import play.api.Play.current
-
   private val logger = Logger("TeamController")
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
+
+  def view(id:String) = TODO
 
   val teamForm: Form[models.Team] = Form(
     mapping(
@@ -27,7 +27,6 @@ object Team extends Controller {
       "officialTwitter" -> optional(text)
     )(models.Team.apply)(models.Team.unapply)
   )
-
 
   def list = Action {
     implicit request =>

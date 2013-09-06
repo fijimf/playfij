@@ -10,9 +10,9 @@ object Role extends Controller {
 
   def create = TODO
 
-  def view = TODO
+  def view(id:String) = TODO
 
-  def edit = TODO
+  def edit(id:String) = TODO
   
   def delete = TODO
 
