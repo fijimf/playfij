@@ -64,9 +64,18 @@ object Team extends Controller {
       }
   }
 
-  def create = TODO
+  def create = Action {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        Ok(views.html.teamForm(teamForm.empty, "New Team"))
+      }
+  }
 
-  def delete = TODO
-
+  def delete  = Action {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        repo.deleteTeamForId(request.getValue(id))
+      }
+  }
 
 }
