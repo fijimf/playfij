@@ -1,6 +1,11 @@
 @(teams: List[Team])
 
 @main("Teams") {
+<script>
+function deleteTeam(n){
+$.post("/teams/delete", { id: n} );
+}
+    </script>
 
 <div class="row-fluid"><div class="span12">
     <h1>Teams</h1>
@@ -29,7 +34,7 @@
             <td style="overflow-x:hidden;" >@team.longName</td>
             <td style="overflow-x:hidden;">@team.officialUrl.getOrElse("")</td>
             <td style="overflow-x:hidden;" >@team.officialTwitter.getOrElse("")</td>
-            <td><button class="btn btn-danger btn-small">Delete</button></td>
+            <td><button class="btn btn-danger btn-small" onclick="deleteTeam(@team.id)">Delete</button></td>
         </tr>
         }
         </tbody>
