@@ -107,6 +107,17 @@ class Repository(p: ExtendedProfile)
     Teams.where(_.id === team.id).update(team)
   }
 
+  def insertTeam(team: Team) {
+    import profile.simple._
+    logger.info("Inserting the team "+team)
+    Teams.autoInc.insert(team.key ,team.name,team.longName , team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl ,team.officialUrl ,team.officialTwitter )
+  }
+
+  def deleteTeam(id: String) {
+    import profile.simple._
+    Teams.where(_.id === id.toLong).delete
+  }
+
   def upsertTeams(teamData: List[Map[String, String]]) {
     import profile.simple._
     teamData.foreach((data: Map[String, String]) => {

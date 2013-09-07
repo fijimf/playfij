@@ -7,11 +7,13 @@ import play.api.data.Forms._
 import play.api.Logger
 
 object Team extends Controller {
+
   import play.api.Play.current
+
   private val logger = Logger("TeamController")
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
-  def view(id:String) = TODO
+  def view(id: String) = TODO
 
   val teamForm: Form[models.Team] = Form(
     mapping(
@@ -57,8 +59,13 @@ object Team extends Controller {
             BadRequest(views.html.teamForm(errors, "Save failed"))
           },
           team => {
-            repo.updateTeam(team)
-            Redirect(routes.Team.list())
+            if (team.id == 0) {
+              repo.insertTeam(team)
+              Redirect(routes.Team.list()).flashing("success"->("Added "+team.name))
+            } else {
+              repo.updateTeam(team)
+              Redirect(routes.Team.list()).flashing("success"->("Updated "+team.name))
+            }
           }
         )
       }
@@ -67,14 +74,22 @@ object Team extends Controller {
   def create = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        Ok(views.html.teamForm(teamForm.empty, "New Team"))
+        Ok(views.html.teamForm(teamForm.bind(Map.empty[String, String]), "New Team"))
       }
   }
 
-  def delete  = Action {
+  def delete = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        repo.deleteTeamForId(request.getValue(id))
+        val teamName: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("teamName")).flatMap(_.headOption)
+        val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
+        id match {
+          case Some(x) => {
+            repo.deleteTeam(x)
+            Redirect(routes.Team.list()).flashing("success" -> (teamName.getOrElse("Team #" + id.get) + " deleted."))
+          }
+          case None => Redirect(routes.Team.list()).flashing("error" -> "No id parameter passed to delete")
+        }
       }
   }
 
