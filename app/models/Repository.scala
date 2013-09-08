@@ -17,35 +17,25 @@ class Repository(p: ExtendedProfile)
   with ResultDao
   with AliasDao
   with QuoteDao
+  with RoleDao
+  with UserDao
+  with PermissionDao
   with Profile {
   val logger: Logger = Logger("Repository")
 
   val profile = p
 
+  import profile.simple._
+
   def createSeason(year: String): Long = {
     Seasons.autoInc.insert(year)
-  }
-
-  def createTeam(team: Team) {
-    Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.officialUrl, team.officialTwitter, team.logoUrl)
   }
 
   def createConference(conference: Conference) {
     Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.officialUrl, conference.officialTwitter, conference.logoUrl)
   }
 
-  def getTeams: List[Team] = {
-    import profile.simple._
-    Query(Teams).to[List]
-  }
-
-  def getTeam(key: String): Option[Team] = {
-    import profile.simple._
-    Query(Teams).where(_.key === key).firstOption
-  }
-
   def checkDatabase(): DatabaseStatus = {
-    import profile.simple._
     val tables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
 
     DatabaseStatus(
@@ -60,31 +50,26 @@ class Repository(p: ExtendedProfile)
   }
 
   def rebuildDatabase() {
-    import profile.simple._
     val tables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
-    val drops: List[DDL] = List(Seasons, Conferences, Teams, Games, Results).filter(t => tables.contains(t.tableName)).map(_.ddl)
+    val drops: List[DDL] = List(Seasons, Conferences, Teams, Games, Results, Aliases, Quotes, Roles, Users, Permissions).filter(t => tables.contains(t.tableName)).map(_.ddl)
     drops match {
       case Nil =>
       case d :: Nil => d.drop
       case d :: ds => ds.foldLeft(d)(_ ++ _).drop
     }
-    List(Seasons, Conferences, Teams, Games, Results).map(_.ddl).reduceLeft(_ ++ _).create
+    List(Seasons, Conferences, Teams, Games, Results, Roles, Users, Permissions).map(_.ddl).reduceLeft(_ ++ _).create
   }
 
 
   def scrapeNcaaTeamsAndConferences() {
     val conferenceMap: Map[String, String] = NcaaTeamScraper.conferenceMap
     val teamData: List[Map[String, String]] = NcaaTeamScraper.teamData
-
     logger.info("Loaded team data")
-
-
     upsertConferences(conferenceMap)
     upsertTeams(teamData)
   }
 
   def upsertConferences(conferenceMap: Map[String, String]) {
-    import profile.simple._
 
     val values: Iterable[String] = conferenceMap.values
     val toSet: Set[String] = values.toSet
@@ -102,24 +87,32 @@ class Repository(p: ExtendedProfile)
     })
   }
 
+
+  def getTeams: List[Team] = {
+    Query(Teams).to[List]
+  }
+
+  def getTeam(key: String): Option[Team] = {
+    Query(Teams).where(_.key === key).firstOption
+  }
+
+  def createTeam(team: Team) {
+    Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.officialUrl, team.officialTwitter, team.logoUrl)
+  }
+
   def updateTeam(team: Team) {
-    import profile.simple._
     Teams.where(_.id === team.id).update(team)
   }
 
   def insertTeam(team: Team) {
-    import profile.simple._
-    logger.info("Inserting the team "+team)
-    Teams.autoInc.insert(team.key ,team.name,team.longName , team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl ,team.officialUrl ,team.officialTwitter )
+    Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl, team.officialUrl, team.officialTwitter)
   }
 
   def deleteTeam(id: String) {
-    import profile.simple._
     Teams.where(_.id === id.toLong).delete
   }
 
   def upsertTeams(teamData: List[Map[String, String]]) {
-    import profile.simple._
     teamData.foreach((data: Map[String, String]) => {
       val key = data.get(TeamData.Key)
       val logoUrl = data.get(TeamData.LogoUrl)

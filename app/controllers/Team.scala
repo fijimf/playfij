@@ -13,8 +13,6 @@ object Team extends Controller {
   private val logger = Logger("TeamController")
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
-  def view(id: String) = TODO
-
   val teamForm: Form[models.Team] = Form(
     mapping(
       "id" -> longNumber,
@@ -29,6 +27,19 @@ object Team extends Controller {
       "officialTwitter" -> optional(text)
     )(models.Team.apply)(models.Team.unapply)
   )
+
+  def view(key: String) = Action {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        val oTeam: Option[models.Team] = repo.getTeam(key)
+        if (oTeam.isDefined) {
+          Ok(views.html.teamView(oTeam.get, oTeam.get.name + " " + oTeam.get.nickname))
+        } else {
+          NotFound(views.html.resourceNotFound("team", key))
+        }
+      }
+  }
+
 
   def list = Action {
     implicit request =>
@@ -61,10 +72,10 @@ object Team extends Controller {
           team => {
             if (team.id == 0) {
               repo.insertTeam(team)
-              Redirect(routes.Team.list()).flashing("success"->("Added "+team.name))
+              Redirect(routes.Team.list()).flashing("success" -> ("Added " + team.name))
             } else {
               repo.updateTeam(team)
-              Redirect(routes.Team.list()).flashing("success"->("Updated "+team.name))
+              Redirect(routes.Team.list()).flashing("success" -> ("Updated " + team.name))
             }
           }
         )
