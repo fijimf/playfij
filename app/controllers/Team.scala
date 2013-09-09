@@ -33,7 +33,19 @@ object Team extends Controller {
       play.api.db.slick.DB.withSession {
         val oTeam: Option[models.Team] = repo.getTeam(key)
         if (oTeam.isDefined) {
-          Ok(views.html.teamView(oTeam.get, oTeam.get.name + " " + oTeam.get.nickname))
+          val keys: List[String] = repo.teamKeys
+          val n = keys.indexOf(key)
+          val prevKey = if (n==0){
+             keys.last
+          } else {
+            keys(n-1)
+          }
+          val nextKey = if (n==(keys.size-1)){
+             keys.head
+          } else {
+            keys(n+1)
+          }
+          Ok(views.html.teamView(oTeam.get, oTeam.get.name + " " + oTeam.get.nickname, prevKey, nextKey))
         } else {
           NotFound(views.html.resourceNotFound("team", key))
         }
@@ -53,7 +65,19 @@ object Team extends Controller {
       play.api.db.slick.DB.withSession {
         val oTeam: Option[models.Team] = repo.getTeam(key)
         if (oTeam.isDefined) {
-          Ok(views.html.teamForm(teamForm.fill(oTeam.get), oTeam.get.name + " " + oTeam.get.nickname))
+          val keys: List[String] = repo.teamKeys
+          val n = keys.indexOf(key)
+          val prevKey = if (n==0){
+            keys.last
+          } else {
+            keys(n-1)
+          }
+          val nextKey = if (n==(keys.size-1)){
+            keys.head
+          } else {
+            keys(n+1)
+          }
+          Ok(views.html.teamForm(teamForm.fill(oTeam.get), oTeam.get.name + " " + oTeam.get.nickname, prevKey, nextKey))
         } else {
           NotFound(views.html.resourceNotFound("team", key))
         }
@@ -67,7 +91,7 @@ object Team extends Controller {
         teamForm.bindFromRequest.fold(
           errors => {
             logger.info("Problems saving " + errors)
-            BadRequest(views.html.teamForm(errors, "Save failed"))
+            BadRequest(views.html.teamForm(errors, "Save failed","#","#"))
           },
           team => {
             if (team.id == 0) {
@@ -85,7 +109,11 @@ object Team extends Controller {
   def create = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        Ok(views.html.teamForm(teamForm.bind(Map.empty[String, String]), "New Team"))
+        val keys: List[String] = repo.teamKeys
+        val prevKey =  keys.last
+        val nextKey =  keys.head
+
+        Ok(views.html.teamForm(teamForm.bind(Map.empty[String, String]), "New Team", prevKey, nextKey))
       }
   }
 

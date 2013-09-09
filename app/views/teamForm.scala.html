@@ -1,4 +1,4 @@
-@(teamForm: Form[models.Team], title:String)(implicit flash:Flash)
+@(teamForm: Form[models.Team], title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -41,10 +41,10 @@
 
     <div class="row" style="margin-bottom:15px;">
         <div class="span2">
-            <a class="btn btn-block btn-primary" href="#">Previous</a>
+            <a class="btn btn-block btn-primary" href="@routes.Team.edit(prevKey)">Previous</a>
         </div>
         <div class="offset8 span2">
-            <a class="btn btn-block btn-primary" href="#">Next</a>
+            <a class="btn btn-block btn-primary" href="@routes.Team.edit(nextKey)">Next</a>
         </div>
     </div>
 

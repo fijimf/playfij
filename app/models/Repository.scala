@@ -26,6 +26,8 @@ class Repository(p: ExtendedProfile)
 
   import profile.simple._
 
+  def teamKeys = Query(Teams).sortBy(_.name).map(_.key).to[List]
+
   def createSeason(year: String): Long = {
     Seasons.autoInc.insert(year)
   }
@@ -78,7 +80,7 @@ class Repository(p: ExtendedProfile)
   }
 
   def getTeams: List[Team] = {
-    Query(Teams).to[List]
+    Query(Teams).sortBy(_.name).to[List]
   }
 
   def getTeam(key: String): Option[Team] = {
