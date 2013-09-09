@@ -7,7 +7,6 @@ import play.api.db.slick.Profile
 import scala.slick.jdbc.meta.MTable
 import scraping.{ScrapingUtil, NcaaTeamScraper}
 import play.api.Logger
-import scraping.NcaaTeamScraper.TeamData
 
 class Repository(p: ExtendedProfile)
   extends SeasonDao
@@ -62,31 +61,21 @@ class Repository(p: ExtendedProfile)
 
 
   def scrapeNcaaTeamsAndConferences() {
-    val conferenceMap: Map[String, String] = NcaaTeamScraper.conferenceMap
-    val teamData: List[Map[String, String]] = NcaaTeamScraper.teamData
+    val conferences: List[Conference] = NcaaTeamScraper.conferenceMap.values.toSet.map((s:String) => Conference(0, ScrapingUtil.nameToKey(s), s, s, None, None, None)).toList
+    val teams: List[Team] = NcaaTeamScraper.teamList
     logger.info("Loaded team data")
-    upsertConferences(conferenceMap)
-    upsertTeams(teamData)
+    upsertConferenceListByKey(conferences)
+    upsertTeamListByKey(teams)
   }
 
-  def upsertConferences(conferenceMap: Map[String, String]) {
-
-    val values: Iterable[String] = conferenceMap.values
-    val toSet: Set[String] = values.toSet
-    toSet.foreach(name => {
-      val key = ScrapingUtil.nameToKey(name)
-      val oc = (for (c <- Conferences if c.key === key) yield c).firstOption
-      if (oc.isDefined) {
-        Logger("Repository").info("Updating conference '%s'".format(key))
-        val conference: Conference = oc.get.copy(name = name, shortName = name)
-        Conferences.where(_.key === key).update(conference)
-      } else {
-        Logger("Repository").info("Inserting conference '%s'".format(key))
-        Conferences.autoInc.insert((key, name, name, None, None, None))
+  def upsertConferenceListByKey(conferences: List[Conference]) {
+    conferences.foreach(c => {
+      Query(Conferences).filter(_.key === c.key).firstOption match {
+        case Some(d) => Conferences.where(_.key === c.key).update(c)
+        case None => Conferences.autoInc.insert(c.key, c.name, c.shortName, c.officialUrl, c.officialTwitter, c.logoUrl)
       }
     })
   }
-
 
   def getTeams: List[Team] = {
     Query(Teams).to[List]
@@ -94,10 +83,6 @@ class Repository(p: ExtendedProfile)
 
   def getTeam(key: String): Option[Team] = {
     Query(Teams).where(_.key === key).firstOption
-  }
-
-  def createTeam(team: Team) {
-    Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.officialUrl, team.officialTwitter, team.logoUrl)
   }
 
   def updateTeam(team: Team) {
@@ -112,40 +97,18 @@ class Repository(p: ExtendedProfile)
     Teams.where(_.id === id.toLong).delete
   }
 
-  def upsertTeams(teamData: List[Map[String, String]]) {
-    teamData.foreach((data: Map[String, String]) => {
-      val key = data.get(TeamData.Key)
-      val logoUrl = data.get(TeamData.LogoUrl)
-      val longName = data.get(TeamData.LongName)
-      val name = data.get(TeamData.Name)
-      val nickname = data.get(TeamData.Nickname)
-      val officialUrl = data.get(TeamData.OfficialUrl)
-      val primaryColor = data.get(TeamData.PrimaryColor)
-      val secondaryColor = data.get(TeamData.SecondaryColor)
-      if (key.isDefined) {
-        val ot = (for (t <- Teams if t.key === key.get) yield t).firstOption
-        if (ot.isDefined) {
-          Logger("Repository").info("Updating team '%s'".format(key.get))
-          val team = copyIfDefined[String]((tm, x) => tm.copy(name = x.get), name).
-            andThen(copyIfDefined[String]((tm, x) => tm.copy(longName = x.get), longName)).
-            andThen(copyIfDefined[String]((tm, x) => tm.copy(nickname = x.get), nickname)).
-            andThen(copyIfDefined[String]((tm, x) => tm.copy(logoUrl = x), logoUrl)).
-            andThen(copyIfDefined[String]((tm, x) => tm.copy(officialUrl = x), officialUrl)).
-            andThen(copyIfDefined[String]((tm, x) => tm.copy(primaryColor = x), primaryColor)).
-            andThen(copyIfDefined[String]((tm, x) => tm.copy(secondaryColor = x), secondaryColor)).apply(ot.get)
-          Teams.where(_.key === key).update(team)
-        } else {
-          Logger("Repository").info("Inserting team '%s'".format(key))
-          if (name.isDefined && longName.isDefined && nickname.isDefined) {
-            Teams.autoInc.insert(key.get, name.get, longName.get, nickname.get, primaryColor, secondaryColor, logoUrl, officialUrl, None)
-          }
+  def upsertTeamListByKey(teamData: List[Team]) {
+    teamData.foreach((t: Team) => {
+      if (t.id > 0) {
+        Query(Teams).filter(_.key === t.key).firstOption match {
+          case Some(u) => Teams.where(_.key === t.key).update(t)
+          case None => insertTeam(t)
         }
+      } else {
+        insertTeam(t)
       }
     })
   }
-
-  def copyIfDefined[T](f: (Team, Option[T]) => Team, t: Option[T]) =
-    (team: Team) => if (t.isDefined) f(team, t) else team
 }
 
 case class DatabaseStatus(seasonCount: Option[Int],
