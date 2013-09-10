@@ -27,6 +27,7 @@ class Repository(p: ExtendedProfile)
   import profile.simple._
 
   def teamKeys = Query(Teams).sortBy(_.name).map(_.key).to[List]
+  def conferenceKeys = Query(Conferences).sortBy(_.name).map(_.key).to[List]
 
   def createSeason(year: String): Long = {
     Seasons.autoInc.insert(year)
@@ -78,6 +79,29 @@ class Repository(p: ExtendedProfile)
       }
     })
   }
+
+
+  def getConferences: List[Conference] = {
+    Query(Conferences).sortBy(_.name).to[List]
+  }
+
+  def getConference(key: String): Option[Conference] = {
+    Query(Conferences).where(_.key === key).firstOption
+  }
+
+  def updateConference(conference: Conference) {
+    Conferences.where(_.id === conference.id).update(conference)
+  }
+
+  def insertConference(conference: Conference) {
+    Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.logoUrl, conference.officialUrl, conference.officialTwitter)
+  }
+
+  def deleteConference(id: String) {
+    Conferences.where(_.id === id.toLong).delete
+  }
+
+
 
   def getTeams: List[Team] = {
     Query(Teams).sortBy(_.name).to[List]

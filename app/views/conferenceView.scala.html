@@ -1,11 +1,9 @@
-@(team: models.Team, title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
+@(conference: models.Conference, title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
 
-
 @main(title) {
-
 
 <div class="container">
     <h1>@title</h1>
@@ -18,10 +16,10 @@
 
     <div class="row" style="margin-bottom:15px;">
         <div class="span2">
-            <a class="btn btn-block btn-primary" href="@routes.Team.view(prevKey)">Previous</a>
+            <a class="btn btn-block btn-primary" href="@routes.Conference.view(prevKey)">Previous</a>
         </div>
         <div class="offset8 span2">
-            <a class="btn btn-block btn-primary" href="@routes.Team.view(nextKey)">Next</a>
+            <a class="btn btn-block btn-primary" href="@routes.Conference.view(nextKey)">Next</a>
         </div>
     </div>
 
@@ -29,16 +27,12 @@
     <div class="container" style="padding-top:5px;">
         <div class="row">
             <div class="span9">
-                <img src='@team.logoUrl.getOrElse("#")'/>
-
-                <h1>@team.name @team.nickname</h1>
+                <img src='@conference.logoUrl.getOrElse("#")'/>
+                <h1>@conference.name</h1>
             </div>
             <div class="span3">
             </div>
         </div>
-
     </div>
-
-</div>
 </div>
 }
