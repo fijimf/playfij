@@ -13,16 +13,17 @@ trait SeasonDao {
 
   object Seasons extends Table[Season]("seasons") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
+    def key = column[String]("season_key")
     def season = column[String]("season")
     def from = column[DateMidnight]("from")
     def to = column[DateMidnight]("to")
 
-    def * = id ~ season ~ from ~ to <>(Season.apply _, Season.unapply _)
+    def * = id ~ key ~ season ~ from ~ to <>(Season.apply _, Season.unapply _)
 
-    def autoInc = season ~ from ~ to returning id
+    def autoInc = key ~ season ~ from ~ to returning id
 
-    def yearIndex = index("sea_seas", season, unique = true)
+    def keyIndex = index("sea_key", key, unique = true)
+    def seasonIndex = index("sea_seas", season, unique = true)
   }
 
 }
