@@ -1,10 +1,10 @@
 package models
 
 import play.api.db.slick.Profile
-import org.joda.time.DateMidnight
-import models.util.DateMidnightMapper._
+import org.joda.time.LocalDate
+import models.util.LocalDateMapper._
 
-case class Season(id: Long, season: String, from:DateMidnight, to:DateMidnight)
+case class Season(id: Long, key:String, season: String, from:LocalDate, to:LocalDate)
 
 trait SeasonDao {
   this: Profile =>
@@ -15,8 +15,8 @@ trait SeasonDao {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def key = column[String]("season_key")
     def season = column[String]("season")
-    def from = column[DateMidnight]("from")
-    def to = column[DateMidnight]("to")
+    def from = column[LocalDate]("from")
+    def to = column[LocalDate]("to")
 
     def * = id ~ key ~ season ~ from ~ to <>(Season.apply _, Season.unapply _)
 

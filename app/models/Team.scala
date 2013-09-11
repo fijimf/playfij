@@ -54,4 +54,9 @@ trait TeamDao {
     def longNameIndex = index("tea_long_name", longName, unique = true)
   }
 
+  def getTeams: List[Team] = {
+    Query(Teams).sortBy(_.name).to[List]
+  }
+
+
 }

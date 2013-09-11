@@ -17,13 +17,11 @@ object Season extends Controller {
   val seasonForm: Form[models.Season] = Form(
     mapping(
       "id" -> longNumber,
+      "key" -> nonEmptyText,
       "season" -> nonEmptyText,
-      "name" -> nonEmptyText,
-      "shortName" -> nonEmptyText,
-      "logoUrl" -> optional(text),
-      "officialUrl" -> optional(text),
-      "officialTwitter" -> optional(text)
-    )(models.Conference.apply)(models.Conference.unapply)
+      "from" -> jodaLocalDate,
+      "to" -> jodaLocalDate
+    )(models.Season.apply)(models.Season.unapply)
   )
 
   def list = Action {
@@ -36,9 +34,9 @@ object Season extends Controller {
   def edit(key: String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        loadConferenceAndKeys(key) match {
-          case Some((conf, prevKey, nextKey)) => Ok(views.html.conferenceForm(conferenceForm.fill(conf), conf.name , prevKey, nextKey))
-          case None => NotFound(views.html.resourceNotFound("team", key))
+        loadSeasonAndKeys(key) match {
+          case Some((season, prevKey, nextKey)) => Ok(views.html.seasonForm(seasonForm.fill(season), season.season , prevKey, nextKey))
+          case None => NotFound(views.html.resourceNotFound("season", key))
         }
       }
   }
@@ -47,18 +45,18 @@ object Season extends Controller {
     implicit request =>
       play.api.db.slick.DB.withSession {
 
-        conferenceForm.bindFromRequest.fold(
+        seasonForm.bindFromRequest.fold(
           errors => {
             logger.info("Problems saving " + errors)
-            BadRequest(views.html.conferenceForm(errors, "Save failed","#","#"))
+            BadRequest(views.html.seasonForm(errors, "Save failed","#","#"))
           },
-          conference => {
-            if (conference.id == 0) {
-              repo.insertConference(conference)
-              Redirect(routes.Conference.list()).flashing("success" -> ("Added " + conference.name))
+          season => {
+            if (season.id == 0) {
+              repo.insertSeason(season)
+              Redirect(routes.Season.list()).flashing("success" -> ("Added " + season.season))
             } else {
-              repo.updateConference(conference)
-              Redirect(routes.Conference.list()).flashing("success" -> ("Updated " + conference.name))
+              repo.updateSeason(season)
+              Redirect(routes.Season.list()).flashing("success" -> ("Updated " + season.season))
             }
           }
         )
@@ -72,19 +70,19 @@ object Season extends Controller {
         val prevKey =  keys.last
         val nextKey =  keys.head
 
-        Ok(views.html.conferenceForm(conferenceForm.bind(Map.empty[String, String]), "New Conference", prevKey, nextKey))
+        Ok(views.html.seasonForm(seasonForm.bind(Map.empty[String, String]), "New Season", prevKey, nextKey))
       }
   }
 
   def delete = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val confName: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("conferenceName")).flatMap(_.headOption)
+        val season: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("season")).flatMap(_.headOption)
         val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
         id match {
           case Some(x) => {
-            repo.deleteConference(x)
-            Redirect(routes.Conference.list()).flashing("success" -> (confName.getOrElse("Conference #" + id.get) + " deleted."))
+            repo.deleteSeason(x)
+            Redirect(routes.Season.list()).flashing("success" -> (season.getOrElse("Season #" + id.get) + " deleted."))
           }
           case None => Redirect(routes.Conference.list()).flashing("error" -> "No id parameter passed to delete")
         }
@@ -94,17 +92,17 @@ object Season extends Controller {
   def view(key:String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        loadConferenceAndKeys(key) match {
-          case Some((conf, prevKey, nextKey)) => Ok(views.html.conferenceView(conf, conf.name , prevKey, nextKey))
+        loadSeasonAndKeys(key) match {
+          case Some((season, prevKey, nextKey)) => Ok(views.html.seasonView(season, season.season, prevKey, nextKey))
           case None => NotFound(views.html.resourceNotFound("team", key))
         }
       }
   }
 
-  def loadConferenceAndKeys(key: String): Option[(models.Conference, String, String)] = {
-    val oConf: Option[models.Conference] = repo.getConference(key)
-    if (oConf.isDefined) {
-      val keys: List[String] = repo.conferenceKeys
+  def loadSeasonAndKeys(key: String): Option[(models.Season, String, String)] = {
+    val oSeason: Option[models.Season] = repo.getSeason(key)
+    if (oSeason.isDefined) {
+      val keys: List[String] = repo.seasonKeys
       val n = keys.indexOf(key)
       val prevKey = if (n == 0) {
         keys.last
@@ -116,7 +114,7 @@ object Season extends Controller {
       } else {
         keys(n + 1)
       }
-      Some(oConf.get, prevKey, nextKey)
+      Some(oSeason.get, prevKey, nextKey)
     } else {
       None
     }
