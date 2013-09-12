@@ -1,10 +1,10 @@
 package models
 
-import org.joda.time.DateMidnight
+import org.joda.time.{LocalDate, DateMidnight}
 import util.LocalDateMapper._
 import play.api.db.slick.Profile
 
-case class Game(id: Long, seasonId: Long, homeTeamId: Long, awayTeamId: Long, date: DateMidnight, location: Option[String], isNeutralSite: Boolean) {
+case class Game(id: Long, seasonId: Long, homeTeamId: Long, awayTeamId: Long, date: LocalDate, location: Option[String], isNeutralSite: Boolean) {
   require(homeTeamId != awayTeamId)
 }
 
@@ -23,7 +23,7 @@ trait GameDao {
 
     def awayTeamId = column[Long]("away_team_id")
 
-    def date = column[DateMidnight]("date")
+    def date = column[LocalDate]("date")
 
     def resultId = column[Long]("result_id")
 

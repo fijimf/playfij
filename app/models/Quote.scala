@@ -27,7 +27,7 @@ trait QuoteDao {
 
     def * = id ~ quote ~ source ~ url <>(Quote.apply _, Quote.unapply _)
 
-    def autoInc = id ~ quote ~ source ~ url <>(Quote.apply _, Quote.unapply _)
+    def autoInc =  quote ~ source ~ url returning id
 
   }
 

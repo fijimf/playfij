@@ -1,4 +1,4 @@
-@(teamForm: Form[models.Team], title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
+@(seasonForm: Form[Season], title:String, prevKey:Option[String], nextKey:Option[String])(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -33,7 +33,7 @@
     <div class="alert alert-error"><p>@flash.get("error").get</p></div>
     }
 
-    @if(teamForm.hasErrors && teamForm("id").value.isDefined) {
+    @if(seasonForm.hasErrors && seasonForm("id").value.isDefined) {
     <div class="alert alert-error">
         <p>Please correct errors in the form.</p>
     </div>
@@ -41,55 +41,31 @@
 
     <div class="row" style="margin-bottom:15px;">
         <div class="span2">
-            <a class="btn btn-block btn-primary" href="@routes.Team.edit(prevKey)">Previous</a>
+            <a class="btn btn-block btn-primary" href="@prevKey.map(routes.Season.edit(_)).getOrElse("#"))">Previous</a>
         </div>
         <div class="offset8 span2">
-            <a class="btn btn-block btn-primary" href="@routes.Team.edit(nextKey)">Next</a>
+            <a class="btn btn-block btn-primary" href="@nextKey.map(routes.Season.edit(_)).getOrElse("#")">Next</a>
         </div>
     </div>
 
-        @helper.form(action = routes.Team.submit, 'class->"form form-horizontal well") {
+        @helper.form(action = routes.Season.submit, 'class->"form form-horizontal well") {
     <div class="container" style="padding-top:5px;">
         <div  class="row">
         <div class="span9">
             <fieldset>
-                <input type="hidden" name="id" value='@teamForm("id").value.getOrElse(0)'>
-                @inputText( teamForm("key"), '_label -> "Key", '_showConstraints -> false, 'class->"input-large" )
-                @inputText( teamForm("name"), '_label -> "Name", '_showConstraints -> false )
-                @inputText( teamForm("longName"), '_label -> "Long Name", '_showConstraints -> false,
-                'class->"input-xxlarge" )
-                @inputText( teamForm("nickname"), '_label -> "Nickname", '_showConstraints -> false )
-                @inputText( teamForm("logoUrl"), '_label -> "Logo URL", 'class->"input-xxlarge", 'onchange->"updateLogos()" )
-                @inputText( teamForm("officialUrl"), '_label -> "URL", 'class->"input-xlarge" )
-                @inputText( teamForm("officialTwitter"), '_label -> "Twitter" )
-                @inputText( teamForm("primaryColor"), '_label -> "Primary Color",'onchange->"updatePrimaryColor()" )
-                @inputText( teamForm("secondaryColor"), '_label -> "Secondary Color",'onchange->"updateSecondaryColor()" )
+                <input type="hidden" name="id" value='@seasonForm("id").value.getOrElse(0)'>
+                @inputText( seasonForm("key"), '_label -> "Key", '_showConstraints -> false, 'class->"input-large" )
+                @inputText( seasonForm("season"), '_label -> "Season", '_showConstraints -> false )
+                @inputText( seasonForm("from"), '_label -> "From", '_showConstraints -> false )
+                @inputText( seasonForm("to"), '_label -> "To", '_showConstraints -> false )
             </fieldset>
-        </div>
-        <div class="span3">
-          <p>
-              <a class="btn btn-small btn-primary" href='@teamForm("officialUrl").value.getOrElse("#")' target="_blank">Check website</a>
-          </p>
-          <p>
-              <a class="btn btn-small btn-primary" href='@{"https://twitter.com/"+teamForm("officialTwitter").value.map(_.drop(1)).getOrElse("#")}' target="_blank">Check twitter</a>
-          </p>
-
-            <img id="logo-white-background"
-                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background-color: white"
-                 src="@teamForm("logoUrl").value.getOrElse("")" />
-            <img id="logo-primary-background"
-                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%, @teamForm("primaryColor").value.getOrElse("") 27%, @teamForm("primaryColor").value.getOrElse("") 73%, #eee 100%);"
-                 src="@teamForm("logoUrl").value.getOrElse("")" />
-            <img id="logo-secondary-background"
-                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%, @teamForm("secondaryColor").value.getOrElse("") 27%, @teamForm("secondaryColor").value.getOrElse("") 73%, #eee 100%);"
-                 src="@teamForm("logoUrl").value.getOrElse("")" />
         </div>
     </div>
     <div class="row">
         <div class="actions span12">
             <input type="submit" class="btn primary" value="Save">
             <input type="reset" class="btn primary" value="Reset">
-            <a href="@routes.Team.list" class="btn">Cancel</a>
+            <a href="@routes.Season.list" class="btn">Cancel</a>
         </div>
     </div>
         </div>

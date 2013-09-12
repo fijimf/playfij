@@ -1,0 +1,55 @@
+@(quotes: List[Quote])(implicit flash:Flash)
+
+@main("Quotes") {
+<script>
+    function deleteQuote(i,n){
+      var hiddenId =   '<input type="hidden" id="id"       name="id"       value="' + i + '"/>';
+      var hiddenName = '<input type="hidden" id="quoteName" name="quoteName" value="' + n + '"/>';
+      $('<form>', { "html":hiddenId+hiddenName, "method":'POST', "action":'/quotes/delete' } )
+        .appendTo(document.body).submit();
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        <h1 class="span1">Teams</h1>
+        <a href="/quotes/new" class="span2 offset9 btn btn-primary btn-block" style="margin-top:15px;">New Team</a>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
+
+        @if(flash.get("success").isDefined) {
+        <div class="alert alert-success"><p>@flash.get("success").get</p></div>
+        }
+        @if(flash.get("error").isDefined) {
+        <div class="alert alert-error"><p>@flash.get("error").get</p></div>
+        }
+
+        <table class="table table-condensed  table-bordered" style="table-layout:fixed;">
+            <thead>
+            <tr>
+                <th style="width:4em;"></th>
+                <th style="width:12em;">Quote</a></th>
+                <th style="width:18em;">Source</th>
+                <th style="width:14em;">URL</th>
+                <th style="width:4em;"></th>
+            </tr>
+            </thead>
+            <tbody>
+            @quotes.map { quote=>
+            <tr>
+                <td><a class="btn btn-primary btn-small" href="@controllers.routes.Quote.edit(quote.id)">Edit</a></td>
+                <td style="overflow-x:hidden;"><a href="@controllers.routes.Quote.view(quote.id)">@quote.quote</a></td>
+                <td style="overflow-x:hidden;">@quote.source.getOrElse("")</td>
+                <td style="overflow-x:hidden;">@quote.url.getOrElse("")</td>
+                <td>
+                    <button class="btn btn-danger btn-small" onclick="deleteQuote('@quote.id', '@quote.quote')">Delete</button>
+                </td>
+            </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+}

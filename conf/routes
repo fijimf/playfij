@@ -40,8 +40,8 @@ POST /games/delete                        controllers.Game.delete
 GET  /quotes                              controllers.Quote.list
 POST /quotes                              controllers.Quote.submit
 GET  /quotes/new                          controllers.Quote.create
-GET  /quotes/:id                          controllers.Quote.view(id)
-GET  /quotes/:id/edit                     controllers.Quote.edit(id)
+GET  /quotes/:id                          controllers.Quote.view(id:Long)
+GET  /quotes/:id/edit                     controllers.Quote.edit(id:Long)
 POST /quotes/delete                       controllers.Quote.delete
 
 GET  /users                               controllers.User.list

@@ -1,11 +1,9 @@
-@(season: Season, title:String, prevKey:Option[String], nextKey:Option[String])(implicit flash:Flash)
+@(quote: models.Quote, title:String, prevKey:Long, nextKey:Long)(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
 
-
 @main(title) {
-
 
 <div class="container">
     <h1>@title</h1>
@@ -18,10 +16,10 @@
 
     <div class="row" style="margin-bottom:15px;">
         <div class="span2">
-            <a class="btn btn-block btn-primary" href="@prevKey.map(routes.Season.edit(_)).getOrElse("#"))">Previous</a>
+            <a class="btn btn-block btn-primary" href="@routes.Quote.view(prevKey)">Previous</a>
         </div>
         <div class="offset8 span2">
-            <a class="btn btn-block btn-primary" href="@nextKey.map(routes.Season.edit(_)).getOrElse("#"))">Next</a>
+            <a class="btn btn-block btn-primary" href="@routes.Quote.view(nextKey)">Next</a>
         </div>
     </div>
 
@@ -29,14 +27,11 @@
     <div class="container" style="padding-top:5px;">
         <div class="row">
             <div class="span9">
-                <h1>@season.season</h1>
+                <h1>@quote.quote</h1>
             </div>
             <div class="span3">
             </div>
         </div>
-
     </div>
-
-</div>
 </div>
 }

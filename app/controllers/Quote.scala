@@ -11,15 +11,15 @@ object Quote extends Controller {
 
   import play.api.Play.current
 
-  private val logger = Logger("TeamController")
+  private val logger = Logger("QuoteController")
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
   val quoteForm: Form[models.Quote] = Form(
     mapping(
       "id" -> longNumber,
       "quote" -> nonEmptyText,
-      "source" -> nonEmptyText,
-      "url" -> nonEmptyText
+      "source" -> optional(text),
+      "url" -> optional(text)
     )(models.Quote.apply)(models.Quote.unapply)
   )
 
@@ -34,8 +34,8 @@ object Quote extends Controller {
     implicit request =>
       play.api.db.slick.DB.withSession {
         loadQuoteAndKeys(id) match {
-          case Some((quote, prevId, nextId)) => Ok(views.html.quoteForm(quoteForm.fill(quote), "season.season "Quote"", prevId, nextId))
-          case None => NotFound(views.html.resourceNotFound("quote", id))
+          case Some((quote, prevId, nextId)) => Ok(views.html.quoteForm(quoteForm.fill(quote), "Quote", prevId, nextId))
+          case None => NotFound(views.html.resourceNotFound("quote", id.toString))
         }
       }
   }
@@ -47,7 +47,7 @@ object Quote extends Controller {
         quoteForm.bindFromRequest.fold(
           errors => {
             logger.info("Problems saving " + errors)
-            BadRequest(views.html.quoteForm(errors, "Save failed","#","#"))
+            BadRequest(views.html.quoteForm(errors, "Save failed",0,0))  //FIXME......
           },
           quote => {
             if (quote.id == 0) {
@@ -65,7 +65,7 @@ object Quote extends Controller {
   def create = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val ids: List[String] = repo.quoteIds
+        val ids: List[Long] = repo.quoteKeys
         val prevId = ids.last
         val nextId = ids.head
 
@@ -88,21 +88,21 @@ object Quote extends Controller {
       }
   }
 
-  def view(key:String) = Action {
+  def view(id:Long) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        loadSeasonAndKeys(key) match {
-          case Some((quote, prevId, nextId) => Ok(views.html.quoteView(quote, "Quote", previd, nextid))
-          case None => NotFound(views.html.resourceNotFound("quote", id))
+        loadQuoteAndKeys(id) match {
+          case Some((quote, prevId, nextId)) => Ok(views.html.quoteView(quote, "Quote", prevId, nextId))
+          case None => NotFound(views.html.resourceNotFound("quote", id.toString))
         }
       }
   }
 
   def loadQuoteAndKeys(id: Long): Option[(models.Quote, Long, Long)] = {
-    val oQuote: Option[models.Quote] = repo.getQuote(key)
+    val oQuote: Option[models.Quote] = repo.getQuote(id)
     if (oQuote.isDefined) {
-      val keys: List[Long] = repo.seasonIds
-      val n = keys.indexOf(key)
+      val keys: List[Long] = repo.quoteKeys
+      val n = keys.indexOf(id)
       val prevKey = if (n == 0) {
         keys.last
       } else {
@@ -118,7 +118,4 @@ object Quote extends Controller {
       None
     }
   }
-
-
-}
 }

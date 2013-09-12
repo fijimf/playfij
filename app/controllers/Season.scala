@@ -11,7 +11,7 @@ object Season extends Controller {
 
   import play.api.Play.current
 
-  private val logger = Logger("TeamController")
+  private val logger = Logger("SeasonController")
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
   val seasonForm: Form[models.Season] = Form(
@@ -27,7 +27,7 @@ object Season extends Controller {
   def list = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        Ok(views.html.conferenceList(repo.getConferences))
+        Ok(views.html.seasonList(repo.getSeasons))
       }
   }
 
@@ -48,7 +48,7 @@ object Season extends Controller {
         seasonForm.bindFromRequest.fold(
           errors => {
             logger.info("Problems saving " + errors)
-            BadRequest(views.html.seasonForm(errors, "Save failed","#","#"))
+            BadRequest(views.html.seasonForm(errors, "Save failed",Some("#"),Some("#"))) //FIXME
           },
           season => {
             if (season.id == 0) {
@@ -67,8 +67,8 @@ object Season extends Controller {
     implicit request =>
       play.api.db.slick.DB.withSession {
         val keys: List[String] = repo.conferenceKeys
-        val prevKey =  keys.last
-        val nextKey =  keys.head
+        val prevKey =  keys.lastOption
+        val nextKey =  keys.headOption
 
         Ok(views.html.seasonForm(seasonForm.bind(Map.empty[String, String]), "New Season", prevKey, nextKey))
       }
@@ -84,7 +84,7 @@ object Season extends Controller {
             repo.deleteSeason(x)
             Redirect(routes.Season.list()).flashing("success" -> (season.getOrElse("Season #" + id.get) + " deleted."))
           }
-          case None => Redirect(routes.Conference.list()).flashing("error" -> "No id parameter passed to delete")
+          case None => Redirect(routes.Season.list()).flashing("error" -> "No id parameter passed to delete")
         }
       }
   }
@@ -99,7 +99,7 @@ object Season extends Controller {
       }
   }
 
-  def loadSeasonAndKeys(key: String): Option[(models.Season, String, String)] = {
+  def loadSeasonAndKeys(key: String): Option[(models.Season, Option[String], Option[String])] = {
     val oSeason: Option[models.Season] = repo.getSeason(key)
     if (oSeason.isDefined) {
       val keys: List[String] = repo.seasonKeys
@@ -114,7 +114,7 @@ object Season extends Controller {
       } else {
         keys(n + 1)
       }
-      Some(oSeason.get, prevKey, nextKey)
+      Some(oSeason.get, Some(prevKey), Some(nextKey))
     } else {
       None
     }

@@ -28,14 +28,8 @@ class Repository(p: ExtendedProfile)
 
   def teamKeys = Query(Teams).sortBy(_.name).map(_.key).to[List]
   def conferenceKeys = Query(Conferences).sortBy(_.name).map(_.key).to[List]
-
-  def createSeason(year: String): Long = {
-    Seasons.autoInc.insert(year)
-  }
-
-  def createConference(conference: Conference) {
-    Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.officialUrl, conference.officialTwitter, conference.logoUrl)
-  }
+  def seasonKeys = Query(Seasons).sortBy(_.season).map(_.key).to[List]
+  def quoteKeys = Query(Quotes).sortBy(_.id).map(_.id).to[List]
 
   def checkDatabase(): DatabaseStatus = {
     val tables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
@@ -78,6 +72,48 @@ class Repository(p: ExtendedProfile)
         case None => Conferences.autoInc.insert(c.key, c.name, c.shortName, c.officialUrl, c.officialTwitter, c.logoUrl)
       }
     })
+  }
+
+
+  def getQuotes: List[Quote] = {
+    Query(Quotes).sortBy(_.id).to[List]
+  }
+
+  def getQuote(id: Long): Option[Quote] = {
+    Query(Quotes).where(_.id === id).firstOption
+  }
+
+  def updateQuote(quote: Quote) {
+    Quotes.where(_.id === quote.id).update(quote)
+  }
+
+  def insertQuote(quote: Quote) {
+    Quotes.autoInc.insert(quote.quote, quote.source, quote.url)
+  }
+
+  def deleteQuote(id: String) {
+    Quotes.where(_.id === id.toLong).delete
+  }
+
+
+  def getSeasons: List[Season] = {
+    Query(Seasons).sortBy(_.key).to[List]
+  }
+
+  def getSeason(key: String): Option[Season] = {
+    Query(Seasons).where(_.key === key).firstOption
+  }
+
+  def updateSeason(season: Season) {
+    Seasons.where(_.id === season.id).update(season)
+  }
+
+  def insertSeason(season: Season) {
+    Seasons.autoInc.insert(season.key, season.season, season.from, season.to)
+  }
+
+  def deleteSeason(id: String) {
+    Seasons.where(_.id === id.toLong).delete
   }
 
 
