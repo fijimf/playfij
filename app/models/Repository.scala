@@ -1,7 +1,6 @@
 package models
 
 import scala.slick.driver.ExtendedProfile
-import scala.slick.lifted.DDL
 import scala.slick.session.Database._
 import play.api.db.slick.Profile
 import scala.slick.jdbc.meta.MTable
@@ -15,7 +14,6 @@ class Repository(p: ExtendedProfile)
   with GameDao
   with ResultDao
   with AliasDao
-  with QuoteDao
   with RoleDao
   with UserDao
   with PermissionDao
@@ -27,8 +25,11 @@ class Repository(p: ExtendedProfile)
   import profile.simple._
 
   def teamKeys = Query(Teams).sortBy(_.name).map(_.key).to[List]
+
   def conferenceKeys = Query(Conferences).sortBy(_.name).map(_.key).to[List]
+
   def seasonKeys = Query(Seasons).sortBy(_.season).map(_.key).to[List]
+
   def quoteKeys = Query(Quotes).sortBy(_.id).map(_.id).to[List]
 
   def checkDatabase(): DatabaseStatus = {
@@ -46,19 +47,20 @@ class Repository(p: ExtendedProfile)
   }
 
   def rebuildDatabase() {
-    val tables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
-    val drops: List[DDL] = List(Seasons, Conferences, Teams, Games, Results, Aliases, Quotes, Roles, Users, Permissions).filter(t => tables.contains(t.tableName)).map(_.ddl)
-    drops match {
+    val modelTables: List[Table[_]] = List(Seasons, Conferences, Teams, Games, Results, Aliases, Quotes, Roles, Users, Permissions)
+    val dbTables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
+    val toDrop = modelTables.filter(t => dbTables.contains(t.tableName)).map(_.ddl)
+    toDrop match {
       case Nil =>
       case d :: Nil => d.drop
       case d :: ds => ds.foldLeft(d)(_ ++ _).drop
     }
-    List(Seasons, Conferences, Teams, Games, Results, Roles, Users, Permissions).map(_.ddl).reduceLeft(_ ++ _).create
+    modelTables.map(_.ddl).reduceLeft(_ ++ _).create
   }
 
 
   def scrapeNcaaTeamsAndConferences() {
-    val conferences: List[Conference] = NcaaTeamScraper.conferenceMap.values.toSet.map((s:String) => Conference(0, ScrapingUtil.nameToKey(s), s, s, None, None, None)).toList
+    val conferences: List[Conference] = NcaaTeamScraper.conferenceMap.values.toSet.map((s: String) => Conference(0, ScrapingUtil.nameToKey(s), s, s, None, None, None)).toList
     val teams: List[Team] = NcaaTeamScraper.teamList
     logger.info("Loaded team data")
     upsertConferenceListByKey(conferences)
@@ -74,26 +76,6 @@ class Repository(p: ExtendedProfile)
     })
   }
 
-
-  def getQuotes: List[Quote] = {
-    Query(Quotes).sortBy(_.id).to[List]
-  }
-
-  def getQuote(id: Long): Option[Quote] = {
-    Query(Quotes).where(_.id === id).firstOption
-  }
-
-  def updateQuote(quote: Quote) {
-    Quotes.where(_.id === quote.id).update(quote)
-  }
-
-  def insertQuote(quote: Quote) {
-    Quotes.autoInc.insert(quote.quote, quote.source, quote.url)
-  }
-
-  def deleteQuote(id: String) {
-    Quotes.where(_.id === id.toLong).delete
-  }
 
 
   def getSeasons: List[Season] = {
@@ -136,7 +118,6 @@ class Repository(p: ExtendedProfile)
   def deleteConference(id: String) {
     Conferences.where(_.id === id.toLong).delete
   }
-
 
 
   def getTeams: List[Team] = {

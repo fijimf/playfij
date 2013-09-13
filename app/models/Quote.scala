@@ -31,4 +31,25 @@ trait QuoteDao {
 
   }
 
+  def list: List[Quote] = {
+    Query(Quotes).sortBy(_.id).to[List]
+  }
+
+  def find(id: Long): Option[Quote] = {
+    Query(Quotes).where(_.id === id).firstOption
+  }
+
+  def update(quote: Quote) {
+    Quotes.where(_.id === quote.id).update(quote)
+  }
+
+  def insert(quote: Quote) {
+    Quotes.autoInc.insert(quote.quote, quote.source, quote.url)
+  }
+
+  def delete(id: Long) {
+    Quotes.where(_.id === id).delete
+  }
+
+
 }

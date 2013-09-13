@@ -2,14 +2,20 @@ package controllers
 
 import play.api.mvc._
 import play.api.Logger
-import models.Repository
+import models.{QuoteDao, Repository}
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
+import play.api.db.slick.Profile
 
 object Quote extends Controller {
 
   import play.api.Play.current
+
+  val dao = new QuoteDao with Profile {
+    val profile = play.api.db.slick.DB.driver
+  }
+
 
   private val logger = Logger("QuoteController")
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
@@ -26,7 +32,7 @@ object Quote extends Controller {
   def list = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        Ok(views.html.quoteList(repo.getQuotes))
+        Ok(views.html.quoteList(dao.list))
       }
   }
 
@@ -51,10 +57,10 @@ object Quote extends Controller {
           },
           quote => {
             if (quote.id == 0) {
-              repo.insertQuote(quote)
+              dao.insert(quote)
               Redirect(routes.Quote.list()).flashing("success" -> ("Added " + quote.quote))
             } else {
-              repo.updateQuote(quote)
+              dao.update(quote)
               Redirect(routes.Quote.list()).flashing("success" -> ("Updated " + quote.quote))
             }
           }
@@ -80,7 +86,7 @@ object Quote extends Controller {
         val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
         id match {
           case Some(x) => {
-            repo.deleteQuote(x)
+            dao.delete(x)
             Redirect(routes.Quote.list()).flashing("success" -> (season.getOrElse("Quote #" + id.get) + " deleted."))
           }
           case None => Redirect(routes.Conference.list()).flashing("error" -> "No id parameter passed to delete")
@@ -99,9 +105,9 @@ object Quote extends Controller {
   }
 
   def loadQuoteAndKeys(id: Long): Option[(models.Quote, Long, Long)] = {
-    val oQuote: Option[models.Quote] = repo.getQuote(id)
+    val oQuote: Option[models.Quote] = dao.find(id)
     if (oQuote.isDefined) {
-      val keys: List[Long] = repo.quoteKeys
+      val keys: List[Long] = dao.list.map(_.id)
       val n = keys.indexOf(id)
       val prevKey = if (n == 0) {
         keys.last
