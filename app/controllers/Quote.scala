@@ -32,13 +32,15 @@ object Quote extends Controller {
   def list = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        Ok(views.html.quoteList(dao.list))
+        implicit s =>
+          Ok(views.html.quoteList(dao.list))
       }
   }
 
   def edit(id: Long) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
         loadQuoteAndKeys(id) match {
           case Some((quote, prevId, nextId)) => Ok(views.html.quoteForm(quoteForm.fill(quote), "Quote", prevId, nextId))
           case None => NotFound(views.html.resourceNotFound("quote", id.toString))
@@ -49,6 +51,7 @@ object Quote extends Controller {
   def submit = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
 
         quoteForm.bindFromRequest.fold(
           errors => {
@@ -71,7 +74,8 @@ object Quote extends Controller {
   def create = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val ids: List[Long] = repo.quoteKeys
+        implicit s =>
+        val ids: List[Long] = dao.list.map(_.id)
         val prevId = ids.last
         val nextId = ids.head
 
@@ -82,8 +86,9 @@ object Quote extends Controller {
   def delete = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
         val season: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("quote")).flatMap(_.headOption)
-        val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
+        val id: Option[Long] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption).map(_.toLong)
         id match {
           case Some(x) => {
             dao.delete(x)
@@ -97,6 +102,7 @@ object Quote extends Controller {
   def view(id:Long) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
         loadQuoteAndKeys(id) match {
           case Some((quote, prevId, nextId)) => Ok(views.html.quoteView(quote, "Quote", prevId, nextId))
           case None => NotFound(views.html.resourceNotFound("quote", id.toString))
@@ -104,7 +110,7 @@ object Quote extends Controller {
       }
   }
 
-  def loadQuoteAndKeys(id: Long): Option[(models.Quote, Long, Long)] = {
+  def loadQuoteAndKeys(id: Long)(implicit s:scala.slick.session.Session): Option[(models.Quote, Long, Long)] = {
     val oQuote: Option[models.Quote] = dao.find(id)
     if (oQuote.isDefined) {
       val keys: List[Long] = dao.list.map(_.id)

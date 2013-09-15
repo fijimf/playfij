@@ -31,23 +31,23 @@ trait QuoteDao {
 
   }
 
-  def list: List[Quote] = {
+  def list(implicit s:scala.slick.session.Session): List[Quote] = {
     Query(Quotes).sortBy(_.id).to[List]
   }
 
-  def find(id: Long): Option[Quote] = {
+  def find(id: Long)(implicit s:scala.slick.session.Session): Option[Quote] = {
     Query(Quotes).where(_.id === id).firstOption
   }
 
-  def update(quote: Quote) {
+  def update(quote: Quote)(implicit s:scala.slick.session.Session) {
     Quotes.where(_.id === quote.id).update(quote)
   }
 
-  def insert(quote: Quote) {
+  def insert(quote: Quote)(implicit s:scala.slick.session.Session) {
     Quotes.autoInc.insert(quote.quote, quote.source, quote.url)
   }
 
-  def delete(id: Long) {
+  def delete(id: Long)(implicit s:scala.slick.session.Session) {
     Quotes.where(_.id === id).delete
   }
 

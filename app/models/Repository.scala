@@ -30,8 +30,6 @@ class Repository(p: ExtendedProfile)
 
   def seasonKeys = Query(Seasons).sortBy(_.season).map(_.key).to[List]
 
-  def quoteKeys = Query(Quotes).sortBy(_.id).map(_.id).to[List]
-
   def checkDatabase(): DatabaseStatus = {
     val tables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
 
@@ -42,12 +40,11 @@ class Repository(p: ExtendedProfile)
       if (tables.contains("games")) Query(Games.length).firstOption else None,
       if (tables.contains("results")) Query(Results.length).firstOption else None,
       if (tables.contains("aliases")) Query(Aliases.length).firstOption else None,
-      if (tables.contains("quotes")) Query(Quotes.length).firstOption else None
-    )
+None    )
   }
 
   def rebuildDatabase() {
-    val modelTables: List[Table[_]] = List(Seasons, Conferences, Teams, Games, Results, Aliases, Quotes, Roles, Users, Permissions)
+    val modelTables: List[Table[_]] = List(Seasons, Conferences, Teams, Games, Results, Aliases, Roles, Users, Permissions)
     val dbTables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
     val toDrop = modelTables.filter(t => dbTables.contains(t.tableName)).map(_.ddl)
     toDrop match {
