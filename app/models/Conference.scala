@@ -3,6 +3,7 @@ package models
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
 import java.util.Date
+import scala.slick.driver.ExtendedProfile
 
 case class Conference(id: Long,
                       key: String,
@@ -53,4 +54,33 @@ trait ConferenceDao {
 
   }
 
+
+  def list(implicit s:scala.slick.session.Session): List[Conference] = {
+    Query(Conferences).sortBy(_.name).to[List]
+  }
+
+  def find(key: String)(implicit s:scala.slick.session.Session): Option[Conference] = {
+    Query(Conferences).where(_.key === key).firstOption
+  }
+
+  def update(conference: Conference)(implicit s:scala.slick.session.Session) {
+    Conferences.where(_.id === conference.id).update(conference)
+  }
+
+  def insert(conference: Conference)(implicit s:scala.slick.session.Session) {
+    Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.logoUrl, conference.officialUrl, conference.officialTwitter)
+  }
+
+  def delete(id: String)(implicit s:scala.slick.session.Session) {
+    Conferences.where(_.id === id.toLong).delete
+  }
+
+}
+
+object ConferenceDao {
+  def apply(p:ExtendedProfile): ConferenceDao = {
+    new ConferenceDao with Profile {
+      val profile = p
+    }
+  }
 }

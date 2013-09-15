@@ -2,16 +2,22 @@ package controllers
 
 import play.api.mvc._
 import play.api.Logger
-import models.{Repository}
+import models.ConferenceDao
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
+import play.api.db.slick.Profile
 
 object Conference extends Controller {
+
   import play.api.Play.current
 
+  val dao = new ConferenceDao with Profile {
+    val profile = play.api.db.slick.DB.driver
+  }
+
+
   private val logger = Logger("TeamController")
-  private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
   val conferenceForm: Form[models.Conference] = Form(
     mapping(
@@ -28,82 +34,88 @@ object Conference extends Controller {
   def list = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        Ok(views.html.conferenceList(repo.getConferences))
+        implicit s =>
+          Ok(views.html.conferenceList(dao.list))
       }
   }
 
   def edit(key: String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        loadConferenceAndKeys(key) match {
-          case Some((conf, prevKey, nextKey)) => Ok(views.html.conferenceForm(conferenceForm.fill(conf), conf.name , prevKey, nextKey))
-          case None => NotFound(views.html.resourceNotFound("team", key))
-        }
+        implicit s =>
+          loadConferenceAndKeys(key) match {
+            case Some((conf, prevKey, nextKey)) => Ok(views.html.conferenceForm(conferenceForm.fill(conf), conf.name, prevKey, nextKey))
+            case None => NotFound(views.html.resourceNotFound("team", key))
+          }
       }
   }
 
   def submit = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
 
-        conferenceForm.bindFromRequest.fold(
-          errors => {
-            logger.info("Problems saving " + errors)
-            BadRequest(views.html.conferenceForm(errors, "Save failed","#","#"))
-          },
-          conference => {
-            if (conference.id == 0) {
-              repo.insertConference(conference)
-              Redirect(routes.Conference.list()).flashing("success" -> ("Added " + conference.name))
-            } else {
-              repo.updateConference(conference)
-              Redirect(routes.Conference.list()).flashing("success" -> ("Updated " + conference.name))
+          conferenceForm.bindFromRequest.fold(
+            errors => {
+              logger.info("Problems saving " + errors)
+              BadRequest(views.html.conferenceForm(errors, "Save failed", "#", "#"))
+            },
+            conference => {
+              if (conference.id == 0) {
+                dao.insert(conference)
+                Redirect(routes.Conference.list()).flashing("success" -> ("Added " + conference.name))
+              } else {
+                dao.update(conference)
+                Redirect(routes.Conference.list()).flashing("success" -> ("Updated " + conference.name))
+              }
             }
-          }
-        )
+          )
       }
   }
 
   def create = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val keys: List[String] = repo.conferenceKeys
-        val prevKey =  keys.last
-        val nextKey =  keys.head
+        implicit s =>
+          val keys: List[String] = dao.list.map(_.key)
+          val prevKey = keys.last
+          val nextKey = keys.head
 
-        Ok(views.html.conferenceForm(conferenceForm.bind(Map.empty[String, String]), "New Conference", prevKey, nextKey))
+          Ok(views.html.conferenceForm(conferenceForm.bind(Map.empty[String, String]), "New Conference", prevKey, nextKey))
       }
   }
 
   def delete = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val confName: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("conferenceName")).flatMap(_.headOption)
-        val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
-        id match {
-          case Some(x) => {
-            repo.deleteConference(x)
-            Redirect(routes.Conference.list()).flashing("success" -> (confName.getOrElse("Conference #" + id.get) + " deleted."))
+        implicit s =>
+          val confName: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("conferenceName")).flatMap(_.headOption)
+          val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
+          id match {
+            case Some(x) => {
+              dao.delete(x)
+              Redirect(routes.Conference.list()).flashing("success" -> (confName.getOrElse("Conference #" + id.get) + " deleted."))
+            }
+            case None => Redirect(routes.Conference.list()).flashing("error" -> "No id parameter passed to delete")
           }
-          case None => Redirect(routes.Conference.list()).flashing("error" -> "No id parameter passed to delete")
-        }
       }
   }
 
-  def view(key:String) = Action {
+  def view(key: String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        loadConferenceAndKeys(key) match {
-          case Some((conf, prevKey, nextKey)) => Ok(views.html.conferenceView(conf, conf.name , prevKey, nextKey))
-          case None => NotFound(views.html.resourceNotFound("team", key))
-        }
+        implicit s =>
+          loadConferenceAndKeys(key) match {
+            case Some((conf, prevKey, nextKey)) => Ok(views.html.conferenceView(conf, conf.name, prevKey, nextKey))
+            case None => NotFound(views.html.resourceNotFound("team", key))
+          }
       }
   }
 
-  def loadConferenceAndKeys(key: String): Option[(models.Conference, String, String)] = {
-    val oConf: Option[models.Conference] = repo.getConference(key)
+  def loadConferenceAndKeys(key: String)(implicit s: scala.slick.session.Session): Option[(models.Conference, String, String)] = {
+    val oConf: Option[models.Conference] = dao.find(key)
     if (oConf.isDefined) {
-      val keys: List[String] = repo.conferenceKeys
+      val keys: List[String] = dao.list.map(_.key)
       val n = keys.indexOf(key)
       val prevKey = if (n == 0) {
         keys.last
@@ -120,7 +132,6 @@ object Conference extends Controller {
       None
     }
   }
-
 
 
 }

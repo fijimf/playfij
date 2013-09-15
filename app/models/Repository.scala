@@ -8,10 +8,7 @@ import scraping.{ScrapingUtil, NcaaTeamScraper}
 import play.api.Logger
 
 class Repository(p: ExtendedProfile)
-  extends SeasonDao
-  with ConferenceDao
-  with TeamDao
-  with GameDao
+  extends TeamDao
   with ResultDao
   with AliasDao
   with RoleDao
@@ -22,29 +19,27 @@ class Repository(p: ExtendedProfile)
 
   val profile = p
 
+  val conferenceDao = ConferenceDao(p)
+
   import profile.simple._
 
   def teamKeys = Query(Teams).sortBy(_.name).map(_.key).to[List]
-
-  def conferenceKeys = Query(Conferences).sortBy(_.name).map(_.key).to[List]
-
-  def seasonKeys = Query(Seasons).sortBy(_.season).map(_.key).to[List]
 
   def checkDatabase(): DatabaseStatus = {
     val tables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
 
     DatabaseStatus(
-      if (tables.contains("seasons")) Query(Seasons.length).firstOption else None,
+      None,
       if (tables.contains("teams")) Query(Teams.length).firstOption else None,
-      if (tables.contains("conferences")) Query(Conferences.length).firstOption else None,
+      None,
       if (tables.contains("games")) Query(Games.length).firstOption else None,
       if (tables.contains("results")) Query(Results.length).firstOption else None,
       if (tables.contains("aliases")) Query(Aliases.length).firstOption else None,
-None    )
+      None)
   }
 
   def rebuildDatabase() {
-    val modelTables: List[Table[_]] = List(Seasons, Conferences, Teams, Games, Results, Aliases, Roles, Users, Permissions)
+    val modelTables: List[Table[_]] = List( Teams, Games, Results, Aliases, Roles, Users, Permissions)
     val dbTables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
     val toDrop = modelTables.filter(t => dbTables.contains(t.tableName)).map(_.ddl)
     toDrop match {
@@ -66,34 +61,13 @@ None    )
 
   def upsertConferenceListByKey(conferences: List[Conference]) {
     conferences.foreach(c => {
-      Query(Conferences).filter(_.key === c.key).firstOption match {
-        case Some(d) => Conferences.where(_.key === c.key).update(c)
-        case None => Conferences.autoInc.insert(c.key, c.name, c.shortName, c.officialUrl, c.officialTwitter, c.logoUrl)
+      conferenceDao.find(c.key) match {
+        case Some(d) => conferenceDao.update(c)
+        case None => conferenceDao.insert(c)
       }
     })
   }
 
-
-
-  def getConferences: List[Conference] = {
-    Query(Conferences).sortBy(_.name).to[List]
-  }
-
-  def getConference(key: String): Option[Conference] = {
-    Query(Conferences).where(_.key === key).firstOption
-  }
-
-  def updateConference(conference: Conference) {
-    Conferences.where(_.id === conference.id).update(conference)
-  }
-
-  def insertConference(conference: Conference) {
-    Conferences.autoInc.insert(conference.key, conference.name, conference.shortName, conference.logoUrl, conference.officialUrl, conference.officialTwitter)
-  }
-
-  def deleteConference(id: String) {
-    Conferences.where(_.id === id.toLong).delete
-  }
 
 
   def getTeams: List[Team] = {
