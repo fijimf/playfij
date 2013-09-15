@@ -2,17 +2,21 @@ package controllers
 
 import play.api.mvc._
 import play.api.Logger
-import models.Repository
+import models.{SeasonDao, QuoteDao, Repository}
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
+import play.api.db.slick.Profile
 
 object Season extends Controller {
 
   import play.api.Play.current
 
+  val dao = new SeasonDao with Profile {
+    val profile = play.api.db.slick.DB.driver
+  }
+
   private val logger = Logger("SeasonController")
-  private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
   val seasonForm: Form[models.Season] = Form(
     mapping(
@@ -27,13 +31,16 @@ object Season extends Controller {
   def list = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        Ok(views.html.seasonList(repo.getSeasons))
+        implicit s =>
+
+        Ok(views.html.seasonList(dao.list))
       }
   }
 
   def edit(key: String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
         loadSeasonAndKeys(key) match {
           case Some((season, prevKey, nextKey)) => Ok(views.html.seasonForm(seasonForm.fill(season), season.season , prevKey, nextKey))
           case None => NotFound(views.html.resourceNotFound("season", key))
@@ -44,6 +51,7 @@ object Season extends Controller {
   def submit = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
 
         seasonForm.bindFromRequest.fold(
           errors => {
@@ -52,10 +60,10 @@ object Season extends Controller {
           },
           season => {
             if (season.id == 0) {
-              repo.insertSeason(season)
+              dao.insert(season)
               Redirect(routes.Season.list()).flashing("success" -> ("Added " + season.season))
             } else {
-              repo.updateSeason(season)
+              dao.update(season)
               Redirect(routes.Season.list()).flashing("success" -> ("Updated " + season.season))
             }
           }
@@ -66,7 +74,8 @@ object Season extends Controller {
   def create = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val keys: List[String] = repo.conferenceKeys
+        implicit s =>
+        val keys: List[String] = dao.list.map(_.key)
         val prevKey =  keys.lastOption
         val nextKey =  keys.headOption
 
@@ -77,11 +86,12 @@ object Season extends Controller {
   def delete = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
         val season: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("season")).flatMap(_.headOption)
         val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
         id match {
           case Some(x) => {
-            repo.deleteSeason(x)
+            dao.delete(x)
             Redirect(routes.Season.list()).flashing("success" -> (season.getOrElse("Season #" + id.get) + " deleted."))
           }
           case None => Redirect(routes.Season.list()).flashing("error" -> "No id parameter passed to delete")
@@ -92,6 +102,7 @@ object Season extends Controller {
   def view(key:String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
+        implicit s =>
         loadSeasonAndKeys(key) match {
           case Some((season, prevKey, nextKey)) => Ok(views.html.seasonView(season, season.season, prevKey, nextKey))
           case None => NotFound(views.html.resourceNotFound("team", key))
@@ -99,10 +110,10 @@ object Season extends Controller {
       }
   }
 
-  def loadSeasonAndKeys(key: String): Option[(models.Season, Option[String], Option[String])] = {
-    val oSeason: Option[models.Season] = repo.getSeason(key)
+  def loadSeasonAndKeys(key: String)(implicit s:scala.slick.session.Session): Option[(models.Season, Option[String], Option[String])] = {
+    val oSeason: Option[models.Season] = dao.find(key)
     if (oSeason.isDefined) {
-      val keys: List[String] = repo.seasonKeys
+      val keys: List[String] = dao.list.map(_.key)
       val n = keys.indexOf(key)
       val prevKey = if (n == 0) {
         keys.last

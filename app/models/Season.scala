@@ -26,4 +26,25 @@ trait SeasonDao {
     def seasonIndex = index("sea_seas", season, unique = true)
   }
 
+
+  def list(implicit s:scala.slick.session.Session): List[Season] = {
+    Query(Seasons).sortBy(_.key).to[List]
+  }
+
+  def find(key: String)(implicit s:scala.slick.session.Session): Option[Season] = {
+    Query(Seasons).where(_.key === key).firstOption
+  }
+
+  def update(season: Season)(implicit s:scala.slick.session.Session) {
+    Seasons.where(_.id === season.id).update(season)
+  }
+
+  def insert(season: Season)(implicit s:scala.slick.session.Session) {
+    Seasons.autoInc.insert(season.key, season.season, season.from, season.to)
+  }
+
+  def delete(id: String)(implicit s:scala.slick.session.Session) {
+    Seasons.where(_.id === id.toLong).delete
+  }
+
 }

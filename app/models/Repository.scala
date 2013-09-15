@@ -75,27 +75,6 @@ None    )
 
 
 
-  def getSeasons: List[Season] = {
-    Query(Seasons).sortBy(_.key).to[List]
-  }
-
-  def getSeason(key: String): Option[Season] = {
-    Query(Seasons).where(_.key === key).firstOption
-  }
-
-  def updateSeason(season: Season) {
-    Seasons.where(_.id === season.id).update(season)
-  }
-
-  def insertSeason(season: Season) {
-    Seasons.autoInc.insert(season.key, season.season, season.from, season.to)
-  }
-
-  def deleteSeason(id: String) {
-    Seasons.where(_.id === id.toLong).delete
-  }
-
-
   def getConferences: List[Conference] = {
     Query(Conferences).sortBy(_.name).to[List]
   }
