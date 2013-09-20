@@ -3,6 +3,7 @@ package models
 import play.api.db.slick.Profile
 import org.joda.time.LocalDate
 import models.util.LocalDateMapper._
+import scala.slick.driver.ExtendedProfile
 
 case class Season(id: Long, key:String, season: String, from:LocalDate, to:LocalDate)
 
@@ -47,4 +48,12 @@ trait SeasonDao {
     Seasons.where(_.id === id.toLong).delete
   }
 
+
+  object SeasonDao {
+    def apply(p:ExtendedProfile): SeasonDao = {
+      new SeasonDao with Profile {
+        val profile = p
+      }
+    }
+  }
 }

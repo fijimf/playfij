@@ -13,7 +13,7 @@ object DatabaseOperations extends Controller {
   def index = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val status: DatabaseStatus = repo.checkDatabase()
+        val status: List[(String,Option[Int])] = repo.checkDatabase()
         Ok(views.html.dataOperations(status))
       }
   }

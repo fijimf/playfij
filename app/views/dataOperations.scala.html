@@ -1,4 +1,4 @@
-@(status: DatabaseStatus)(implicit flash: Flash)
+@(status: List[(String,Option[Int])])(implicit flash: Flash)
 
 
 @main("Databse Ops") {
@@ -16,40 +16,17 @@
         <thead>
         <tr>
             <th></th>
-            <th>Seasons</th>
-            <th>Conferences</th>
-            <th>Teams</th>
-            <th>Games</th>
-            <th>Results</th>
+            @status.map{s=>
+            <th>@s._1</th>
+            }
         </tr>
         </thead>
         <tbody>
         <tr>
             <th>Row Count</th>
-            <td>@{status.seasonCount.map(_.toString ).getOrElse("N/A")}</td>
-            <td>@{status.conferenceCount.map(_.toString ).getOrElse("N/A")}</td>
-            <td>@{status.teamCount.map(_.toString ).getOrElse("N/A")}</td>
-            <td>@{status.gameCount.map(_.toString ).getOrElse("N/A")}</td>
-            <td>@{status.resultCount.map(_.toString ).getOrElse("N/A")}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <td>
-                <button class="btn btn-default">Edit</button>
-                <button class="btn btn-default">View</button>
-            </td>
-            <td>
-                <button class="btn btn-default">Edit</button>
-                <button class="btn btn-default">View</button> </td>
-            <td>
-                <button class="btn btn-default">Edit</button>
-                <button class="btn btn-default">View</button></td>
-            <td>
-                <button class="btn btn-default">Edit</button>
-                <button class="btn btn-default">View</button></td>
-            <td>
-                <button class="btn btn-default">Edit</button>
-                <button class="btn btn-default">View</button></td>
+            @status.map{s=>
+            <td>@{s._2.map(_.toString ).getOrElse("N/A")}</td>
+            }
         </tr>
         </tbody>
     </table>

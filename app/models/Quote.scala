@@ -2,6 +2,7 @@ package models
 
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
+import scala.slick.driver.ExtendedProfile
 
 case class Quote(id: Long,
                  quote: String,
@@ -51,5 +52,13 @@ trait QuoteDao {
     Quotes.where(_.id === id).delete
   }
 
+
+  object QuoteDao {
+    def apply(p:ExtendedProfile): QuoteDao = {
+      new QuoteDao with Profile {
+        val profile = p
+      }
+    }
+  }
 
 }

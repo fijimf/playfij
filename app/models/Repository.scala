@@ -10,36 +10,51 @@ import play.api.Logger
 class Repository(p: ExtendedProfile)
   extends Profile {
   val logger: Logger = Logger("Repository")
-
   val profile = p
+  import profile.simple._
+  val m = new Profile
+    with SeasonDao
+    with ConferenceDao
+    with TeamDao
+    with ConferencesAssociationDao
+    with AliasDao
+    with GameDao
+    with ResultDao
+    with UserDao
+    with QuoteDao {
+    val profile: ExtendedProfile = p
+
+    override def find(key:String)(implicit session:Session) = None
+    override def list(implicit session:Session) = List.empty
+    override def delete(key:String)(implicit session:Session) {}
+  }
 
   val conferenceDao = ConferenceDao(p)
   val teamDao = TeamDao(p)
-  import profile.simple._
 
-  def checkDatabase(): DatabaseStatus = {
-    val tables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
+  def checkDatabase(): List[(String, Option[Int])] = {
 
-    DatabaseStatus(
-      None,
-      None, //if (tables.contains("teams")) Query(Teams.length).firstOption else None,
-      None,
-      None, // if (tables.contains("games")) Query(Games.length).firstOption else None,
-      None, //  if (tables.contains("results")) Query(Results.length).firstOption else None,
-      None, // if (tables.contains("aliases")) Query(Aliases.length).firstOption else None,
-      None)
+    val mTables = List(m.Seasons, m.Conferences, m.Teams, m.ConferenceAssociations, m.Aliases, m.Games, m.Results, m.Users, m.Quotes)
+    val dTables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
+    mTables.map(t => {
+      if (dTables.contains(t.tableName)) {
+        t.tableName -> Query(t.length).firstOption
+      } else {
+        t.tableName -> None
+      }
+    })
   }
 
   def rebuildDatabase() {
-//    val modelTables: List[Table[_]] = List( Teams, Games, Results, Aliases, Roles, Users, Permissions)
-//    val dbTables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
-//    val toDrop = modelTables.filter(t => dbTables.contains(t.tableName)).map(_.ddl)
-//    toDrop match {
-//      case Nil =>
-//      case d :: Nil => d.drop
-//      case d :: ds => ds.foldLeft(d)(_ ++ _).drop
-//    }
-//    modelTables.map(_.ddl).reduceLeft(_ ++ _).create
+    val mTables = List(m.Seasons, m.Conferences, m.Teams, m.ConferenceAssociations, m.Aliases, m.Games, m.Results, m.Users, m.Quotes)
+    val dTables: Set[String] = MTable.getTables.mapResult(_.name.name).list.toSet
+    val toDrop = mTables.filter(t => dTables.contains(t.tableName)).map(_.ddl)
+    toDrop match {
+      case Nil =>
+      case d :: Nil => d.drop
+      case d :: ds => ds.foldLeft(d)(_ ++ _).drop
+    }
+    mTables.map(_.ddl).reduceLeft(_ ++ _).create
   }
 
 
