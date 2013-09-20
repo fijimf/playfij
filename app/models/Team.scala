@@ -2,6 +2,7 @@ package models
 
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
+import scala.slick.driver.ExtendedProfile
 
 
 case class Team(id: Long, key: String, name: String, longName: String, nickname: String, primaryColor: Option[String], secondaryColor: Option[String], logoUrl: Option[String], officialUrl: Option[String], officialTwitter: Option[String]) {
@@ -53,5 +54,32 @@ trait TeamDao {
 
     def longNameIndex = index("tea_long_name", longName, unique = true)
   }
+  def list(implicit s:scala.slick.session.Session): List[Team] = {
+    Query(Teams).sortBy(_.name).to[List]
+  }
 
+  def find(key: String)(implicit s:scala.slick.session.Session): Option[Team] = {
+    Query(Teams).where(_.key === key).firstOption
+  }
+
+  def update(team: Team)(implicit s:scala.slick.session.Session) {
+    Teams.where(_.id === team.id).update(team)
+  }
+
+  def insert(team: Team)(implicit s:scala.slick.session.Session) {
+    Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl, team.officialUrl, team.officialTwitter)
+  }
+
+  def delete(id: String)(implicit s:scala.slick.session.Session) {
+    Teams.where(_.id === id.toLong).delete
+  }
+
+}
+
+object TeamDao {
+  def apply(p:ExtendedProfile): TeamDao = {
+    new TeamDao with Profile {
+      val profile = p
+    }
+  }
 }
