@@ -2,32 +2,23 @@ package scraping
 
 import play.api.libs.ws.{WS}
 import scala.concurrent.Future
-import scala.xml.{NodeSeq, Node}
+import scala.xml.{Elem, NodeSeq, Node}
 import models.Team
+import play.api.libs.concurrent.Execution.Implicits._
+import scala.collection.immutable.Iterable
 
-class PlayScraper {
+object PlayScraper {
 
   lazy val teamRawData: List[(String, Team)] = {
-    val teamsRaw = for (mtn <- loadTeamNames();
-                        sn <- loadShortNames;) {
-      mtn.map {
-        case (k: String, n: String) => {
-          val k1 = k.replaceAll("--", "-")
-          teamDetail(k1, sn.getOrElse(k1, n), n)
-        }
-      }
-    }
+    val teamNames: Map[String, String] = loadTeamNames().value.get.get
+    val shortName: Map[String, String] = loadShortNames().value.get.get
 
-    teamsRaw.map( {
-      case (conf: String, team: Team) => {
-        if (team.name.toLowerCase.replaceAll("\\W", "").take(12) == conf.toLowerCase.replaceAll("\\W", "").take(12)) {
-          ("Independent", team)
-        } else {
-          (conf, team)
-        }
+    Future.sequence(for (k <- teamNames.keys) yield {
+      val k1 = k.replaceAll("--", "-")
+      teamDetail(k1, shortName(k), teamNames(k))
 
-      }
-    }.toList)
+    }).value.get.get.flatten.toList
+
   }
 
   lazy val teamList: List[Team] = {
@@ -48,7 +39,7 @@ class PlayScraper {
     pageData
   }
 
-  def loadShortNames: Future[Map[String, String]] = {
+  def loadShortNames(): Future[Map[String, String]] = {
     Future.sequence(List("p1", "p2", "p3", "p4", "p5", "p6", "p7").map(t => {
       WS.url("http://www.ncaa.com/stats/basketball-men/d1/current/team/145/" + t).get().map(r => {
         (r.xml \\ "a").filter((node: Node) => (node \ "@href").text.startsWith("/schools/")).map((node: Node) => {
@@ -58,18 +49,21 @@ class PlayScraper {
     })).map(_.flatten).map(_.toMap)
   }
 
-  def teamDetail(key: String, name: String, longName: String): Option[(String, Team)] = {
-    val page: Node = loadURL("http://www.ncaa.com/schools/" + key)
-    val conference: Option[String] = parseConference(page)
-    if (conference.isDefined) {
-      logger.info("Found " + key)
-      Some(
-        (conference.get,
-          parseDetails(page, Team(0, key, name, longName, "Missing", None, None, None, None, None)).copy(logoUrl = parseLogoUrl(page)))
-      )
-    } else {
-      None
-    }
+  def teamDetail(key: String, name: String, longName: String): Future[Option[(String, Team)]] = {
+    val map: Future[Elem] = WS.url("http://www.ncaa.com/schools/" + key).get().map(_.xml)
+    map.map(p => {
+      val conference: Option[String] = parseConference(p)
+
+      if (conference.isDefined) {
+
+        Some(
+          (conference.get,
+            parseDetails(p, Team(0, key, name, longName, "Missing", None, None, None, None, None)).copy(logoUrl = parseLogoUrl(p)))
+        )
+      } else {
+        None
+      }
+    })
   }
 
   def parseConference(page: Node): Option[String] = {
@@ -97,10 +91,25 @@ class PlayScraper {
     val colorsKey = "Colors"
     val urlKey = "Url"
     val detailMap: Map[String, String] = (page \\ "td").map((node: Node) => node match {
-      case <td><h6>Nickname</h6><p>{nickname}</p></td> => Some(nicknameKey -> nickname.text)
-      case <td><h6>Athletics Website</h6><p><a>{url}</a></p></td> => Some(urlKey -> url.text)
-      case <td><h6>Colors</h6><p>{colors}</p></td> => Some(colorsKey -> colors.text)
-      case _ => None }).flatten.toMap
+      case <td>
+        <h6>Nickname</h6> <p>
+        {nickname}
+        </p>
+        </td> => Some(nicknameKey -> nickname.text)
+      case <td>
+        <h6>Athletics Website</h6> <p>
+        <a>
+          {url}
+          </a>
+        </p>
+        </td> => Some(urlKey -> url.text)
+      case <td>
+        <h6>Colors</h6> <p>
+        {colors}
+        </p>
+        </td> => Some(colorsKey -> colors.text)
+      case _ => None
+    }).flatten.toMap
     val optColors = detailMap.get(colorsKey)
     if (optColors.isDefined) {
       val carr: Array[String] = optColors.get.trim.split('&')
