@@ -1,23 +1,28 @@
 package scraping
 
-import play.api.libs.ws.{WS}
-import scala.concurrent.Future
+import play.api.libs.ws.{Response, WS}
+import scala.concurrent.{Await, Future}
 import scala.xml.{Elem, NodeSeq, Node}
 import models.Team
 import play.api.libs.concurrent.Execution.Implicits._
-import scala.collection.immutable.Iterable
+import HtmlHelper.loadHtmlFromString
+import scala.concurrent.duration._
+import play.api.Logger
+import akka.actor.Status.Success
+import scala.util.Failure
 
 object PlayScraper {
 
-  lazy val teamRawData: List[(String, Team)] = {
-    val teamNames: Map[String, String] = loadTeamNames().value.get.get
-    val shortName: Map[String, String] = loadShortNames().value.get.get
+  def teamRawData(): List[(String, Team)] = {
+    val teamNames: Map[String, String] = Await.result(loadTeamNames(), 2.minutes)
+    Logger("Yuck").info("Loaded team names")
+    val shortName: Map[String, String] = Await.result(loadShortNames(), 2.minutes);
+    Logger("Yuck").info("Loaded short names")
 
-    Future.sequence(for (k <- teamNames.keys) yield {
+    for (k <- teamNames.keys) yield {
       val k1 = k.replaceAll("--", "-")
-      teamDetail(k1, shortName(k), teamNames(k))
-
-    }).value.get.get.flatten.toList
+      teamDetail(k1, shortName.get(k).getOrElse(teamNames(k)), teamNames(k))
+    }.flatten.toList
 
   }
 
@@ -27,7 +32,7 @@ object PlayScraper {
 
   def loadTeamNames(): Future[Map[String, String]] = {
     Future.sequence("abcdefghijklmnopqrstuvwxyz".map((c: Char) => {
-      WS.url("http://www.ncaa.com/schools/" + c + "/").get().map(r => scrapeAlphaTeams(r.xml))
+      WS.url("http://www.ncaa.com/schools/" + c + "/").get().map(r => scrapeAlphaTeams(loadHtmlFromString(r.body).get))
     })).map(_.flatten).map(_.toMap)
   }
 
@@ -42,28 +47,31 @@ object PlayScraper {
   def loadShortNames(): Future[Map[String, String]] = {
     Future.sequence(List("p1", "p2", "p3", "p4", "p5", "p6", "p7").map(t => {
       WS.url("http://www.ncaa.com/stats/basketball-men/d1/current/team/145/" + t).get().map(r => {
-        (r.xml \\ "a").filter((node: Node) => (node \ "@href").text.startsWith("/schools/")).map((node: Node) => {
+        (loadHtmlFromString(r.body).get \\ "a").filter((node: Node) => (node \ "@href").text.startsWith("/schools/")).map((node: Node) => {
           (node \ "@href").text.replace("/schools/", "") -> node.text
         })
       })
     })).map(_.flatten).map(_.toMap)
   }
 
-  def teamDetail(key: String, name: String, longName: String): Future[Option[(String, Team)]] = {
-    val map: Future[Elem] = WS.url("http://www.ncaa.com/schools/" + key).get().map(_.xml)
-    map.map(p => {
-      val conference: Option[String] = parseConference(p)
+  def teamDetail(key: String, name: String, longName: String): Option[(String, Team)] = {
+    WS.url("http://www.ncaa.com/schools/" + key).withTimeout(300000).get().onComplete {
+      case Success(resp) => {
+        val node = loadHtmlFromString(resp.asInstanceOf[Response].body).get
 
-      if (conference.isDefined) {
-
-        Some(
-          (conference.get,
-            parseDetails(p, Team(0, key, name, longName, "Missing", None, None, None, None, None)).copy(logoUrl = parseLogoUrl(p)))
-        )
-      } else {
+        parseConference(node) match {
+          case Some(conference) => {
+            val team = parseDetails(node, Team(0, key, name, longName, "Missing", None, None, None, None, None)).copy(logoUrl = parseLogoUrl(node))
+            Some(conference, team)
+          }
+        }
+      }
+      case Failure(ex) => {
+        Logger("Yuck").warn("Failed on " + key)
         None
       }
-    })
+    }
+
   }
 
   def parseConference(page: Node): Option[String] = {
