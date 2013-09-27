@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Action, Controller}
-import models.{DatabaseStatus, Repository}
+import models.{Repository}
 
 object DatabaseOperations extends Controller {
 
@@ -13,7 +13,7 @@ object DatabaseOperations extends Controller {
   def index = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val status: List[(String,Option[Int])] = repo.checkDatabase()
+        val status: List[(String, Option[Int])] = repo.checkDatabase()
         Ok(views.html.dataOperations(status))
       }
   }
@@ -31,12 +31,15 @@ object DatabaseOperations extends Controller {
   }
 
   def scrapeNcaaTeams = Action {
+    val data: List[(String, models.Team)] = scraping.PlayScraper.teamRawData()
     play.api.db.slick.DB.withSession {
-
-      repo.scrapeNcaaTeamsAndConferences()
-
-      Redirect(routes.DatabaseOperations.index()).flashing("success" -> "Database rebuilt")
-
+      try {
+        repo.scrapeNcaaTeamsAndConferences(data)
+      }
+      catch {
+        case e: Exception => Redirect(routes.DatabaseOperations.index()).flashing("error" -> "Problem rebuilding the database")
+      }
+      Redirect("/app/database").flashing("success" -> "Scraped!")
     }
   }
 }

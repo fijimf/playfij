@@ -58,9 +58,9 @@ class Repository(p: ExtendedProfile)
   }
 
 
-  def scrapeNcaaTeamsAndConferences() {
-    val conferences: List[Conference] = NcaaTeamScraper.conferenceMap.values.toSet.map((s: String) => Conference(0, ScrapingUtil.nameToKey(s), s, s, None, None, None)).toList
-    val teams: List[Team] = NcaaTeamScraper.teamList
+  def scrapeNcaaTeamsAndConferences(data:List[(String, Team)]) = {
+    val conferences: List[Conference] = data.map(_._1).toSet.map((c:String) => Conference(0, ScrapingUtil.nameToKey(c), c, c, None, None, None)).toList
+    val teams: List[Team] = data.map(_._2)
     logger.info("Loaded team data")
     upsertConferenceListByKey(conferences)
     upsertTeamListByKey(teams)

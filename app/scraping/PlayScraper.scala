@@ -8,22 +8,46 @@ import play.api.libs.concurrent.Execution.Implicits._
 import HtmlHelper.loadHtmlFromString
 import scala.concurrent.duration._
 import play.api.Logger
-import akka.actor.Status.Success
-import scala.util.Failure
 
 object PlayScraper {
+  val logger = Logger(this.getClass.getName)
 
   def teamRawData(): List[(String, Team)] = {
     val teamNames: Map[String, String] = Await.result(loadTeamNames(), 2.minutes)
-    Logger("Yuck").info("Loaded team names")
+    logger.info("Loaded team names")
     val shortName: Map[String, String] = Await.result(loadShortNames(), 2.minutes);
-    Logger("Yuck").info("Loaded short names")
+    logger.info("Loaded short names")
 
-    for (k <- teamNames.keys) yield {
+    val teamDetailBatchSize: Int = 50
+    val result = teamNames.grouped(teamDetailBatchSize).map(m => {
+      logger.info("Processing 30 teams...")
+      processBatch(m, shortName)
+    }).flatten.toList
+    logger.info("Loaded %d teams from the NCAA website".format(result.size))
+    result.map{case (conf: String, team: Team) => {
+      if (team.name.toLowerCase.replaceAll("\\W", "").take(12) == conf.toLowerCase.replaceAll("\\W", "").take(12)) {
+        ( "Independent", team)
+      } else {
+        (conf, team)
+      }
+    }}.toList
+  }
+
+
+  def processBatch(teamNames: Map[String, String], shortNames: Map[String, String]): List[(String, Team)] = {
+    logger.info("Batching team details (batch size=%d ".format(shortNames.size));
+    val iterable: Iterable[Future[Option[(String, Team)]]] = for (k <- teamNames.keys) yield {
       val k1 = k.replaceAll("--", "-")
-      teamDetail(k1, shortName.get(k).getOrElse(teamNames(k)), teamNames(k))
-    }.flatten.toList
-
+      teamDetail(k1, shortNames.get(k).getOrElse(teamNames(k)), teamNames(k)).recover {
+        case thr: Throwable => {
+          logger.error("Failed loading %s".format(k))
+          None
+        }
+      }
+    }
+    val result: List[(String, Team)] = Await.result(Future.sequence(iterable).map(_.flatten.toList), 7.minutes)
+    logger.info("Here returning result " + result.size);
+    result
   }
 
   lazy val teamList: List[Team] = {
@@ -54,24 +78,18 @@ object PlayScraper {
     })).map(_.flatten).map(_.toMap)
   }
 
-  def teamDetail(key: String, name: String, longName: String): Option[(String, Team)] = {
-    WS.url("http://www.ncaa.com/schools/" + key).withTimeout(300000).get().onComplete {
-      case Success(resp) => {
-        val node = loadHtmlFromString(resp.asInstanceOf[Response].body).get
+  def teamDetail(key: String, name: String, longName: String): Future[Option[(String, Team)]] = {
+    loadUrl("http://www.ncaa.com/schools/" + key).map(resp => {
+      val node = loadHtmlFromString(resp.body).get
 
-        parseConference(node) match {
-          case Some(conference) => {
-            val team = parseDetails(node, Team(0, key, name, longName, "Missing", None, None, None, None, None)).copy(logoUrl = parseLogoUrl(node))
-            Some(conference, team)
-          }
+      parseConference(node) match {
+        case Some(conference) => {
+          val team = parseDetails(node, Team(0, key, name, longName, "Missing", None, None, None, None, None)).copy(logoUrl = parseLogoUrl(node))
+          Some(conference, team)
         }
+        case None => None
       }
-      case Failure(ex) => {
-        Logger("Yuck").warn("Failed on " + key)
-        None
-      }
-    }
-
+    })
   }
 
   def parseConference(page: Node): Option[String] = {
@@ -99,24 +117,9 @@ object PlayScraper {
     val colorsKey = "Colors"
     val urlKey = "Url"
     val detailMap: Map[String, String] = (page \\ "td").map((node: Node) => node match {
-      case <td>
-        <h6>Nickname</h6> <p>
-        {nickname}
-        </p>
-        </td> => Some(nicknameKey -> nickname.text)
-      case <td>
-        <h6>Athletics Website</h6> <p>
-        <a>
-          {url}
-          </a>
-        </p>
-        </td> => Some(urlKey -> url.text)
-      case <td>
-        <h6>Colors</h6> <p>
-        {colors}
-        </p>
-        </td> => Some(colorsKey -> colors.text)
-      case _ => None
+      case <td><h6>Nickname</h6><p>{nickname}</p></td> => Some(nicknameKey -> nickname.text)
+      case <td><h6>Athletics Website</h6><p><a>{url}</a></p></td> => Some(urlKey -> url.text)
+      case <td><h6>Colors</h6><p>{colors}</p></td> => Some(colorsKey -> colors.text) case _ => None
     }).flatten.toMap
     val optColors = detailMap.get(colorsKey)
     if (optColors.isDefined) {
@@ -139,6 +142,25 @@ object PlayScraper {
         secondaryColor = None,
         officialUrl = detailMap.get(urlKey))
     }
+  }
+
+  def loadUrl(url: String): Future[Response] = {
+    withLogging(WS.url(url).get, None, Some("Retrieved " + url + " in %d ms."))
+  }
+
+  def withLogging[T](f: Future[T], beginMsg: Option[String], endMsg: Option[String]): Future[T] = {
+    beginMsg.foreach(m => logger.info(m))
+    withLatency(f).map {
+      case (millis: Long, value: T) => {
+        endMsg.foreach(m => logger.info(m.format(millis, value)))
+        value
+      }
+    }
+  }
+
+  def withLatency[T](f: Future[T]): Future[(Long, T)] = {
+    val startTime = System.currentTimeMillis()
+    f.map((System.currentTimeMillis() - startTime, _))
   }
 
 }
