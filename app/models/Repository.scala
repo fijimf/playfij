@@ -16,7 +16,7 @@ class Repository(p: ExtendedProfile)
     with SeasonDao
     with ConferenceDao
     with TeamDao
-    with ConferencesAssociationDao
+    with ConferenceAssociationDao
     with GameDao
     with ResultDao
     with UserDao
@@ -63,6 +63,8 @@ class Repository(p: ExtendedProfile)
     logger.info("Loaded team data")
     upsertConferenceListByKey(conferences)
     upsertTeamListByKey(teams)
+    val keyList: List[(String, String)] = data.map(tup=>(tup._2.key, ScrapingUtil.nameToKey(tup._1)))
+    updateAllSeasonConferences(keyList)
   }
 
   def upsertConferenceListByKey(conferences: List[Conference]) {
