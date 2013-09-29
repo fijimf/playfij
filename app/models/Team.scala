@@ -17,6 +17,11 @@ case class Team(id: Long, key: String, name: String, longName: String, nickname:
   require(logoUrl.map(StringUtils.isNotBlank).getOrElse(true), "Logo URL cannot be blank")
 }
 
+case class Alias(id: Long, teamId: Long, alias: String) {
+  require(StringUtils.isNotBlank(alias))
+}
+
+
 trait TeamDao {
 
   this: Profile =>
@@ -54,32 +59,73 @@ trait TeamDao {
 
     def longNameIndex = index("tea_long_name", longName, unique = true)
   }
-  def list(implicit s:scala.slick.session.Session): List[Team] = {
+
+  object Aliases extends Table[Alias]("aliases") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def teamId = column[Long]("team_id")
+
+    def alias = column[String]("alias")
+
+    def * = id ~ teamId ~ alias <>(Alias.apply _, Alias.unapply _)
+
+    def autoInc = teamId ~ alias returning id
+
+    def teamFk = foreignKey("als_team_fk", teamId, Teams)(_.id)
+
+    def aliasIndex = index("als_alias", alias, unique = true)
+  }
+
+
+  def listWithAliases(implicit s: scala.slick.session.Session): Map[Team, List[String]] = {
+    (for {
+      (t, a) <- Teams leftJoin Aliases on (_.id === _.teamId)
+    } yield (t, a.alias.?)).list.groupBy(_._1).mapValues(_.map(_._2).flatten)
+  }
+
+  def list(implicit s: scala.slick.session.Session): List[Team] = {
     Query(Teams).sortBy(_.name).to[List]
   }
 
-  def find(key: String)(implicit s:scala.slick.session.Session): Option[Team] = {
+  def findWithAliases(key: String)(implicit s: scala.slick.session.Session): Option[(Team, List[String])] = {
+    (for {
+      (t, a) <- Teams leftJoin Aliases on (_.id === _.teamId); if (t.key === key)
+    } yield (t, a.alias.?)).list.groupBy(_._1).mapValues(_.map(_._2).flatten).headOption
+  }
+
+  def find(key: String)(implicit s: scala.slick.session.Session): Option[Team] = {
     Query(Teams).where(_.key === key).firstOption
   }
 
-  def update(team: Team)(implicit s:scala.slick.session.Session) {
+  def update(team: Team)(implicit s: scala.slick.session.Session) {
     Teams.where(_.id === team.id).update(team)
   }
 
-  def insert(team: Team)(implicit s:scala.slick.session.Session) {
+  def insert(team: Team)(implicit s: scala.slick.session.Session) {
     Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl, team.officialUrl, team.officialTwitter)
   }
 
-  def delete(id: String)(implicit s:scala.slick.session.Session) {
+  def updateAliases(team: Team, aliases: List[String])(implicit s: scala.slick.session.Session) {
+    Aliases.where(_.teamId === team.id).delete
+    aliases.foreach(a => Aliases.autoInc.insert(team.id, a))
+  }
+
+  def insertAliases(team: Team, aliases: List[String])(implicit s: scala.slick.session.Session) {
+    Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl, team.officialUrl, team.officialTwitter)
+    aliases.foreach(a => Aliases.autoInc.insert(team.id, a))
+  }
+
+  def delete(id: String)(implicit s: scala.slick.session.Session) {
+    Aliases.where(_.teamId === id.toLong).delete
     Teams.where(_.id === id.toLong).delete
   }
 
 }
 
 object TeamDao {
-  def apply(p:ExtendedProfile): TeamDao = {
-    new TeamDao with Profile {
-      val profile = p
+    def apply(p: ExtendedProfile): TeamDao = {
+      new TeamDao with Profile {
+        val profile = p
+      }
     }
   }
-}

@@ -17,7 +17,6 @@ class Repository(p: ExtendedProfile)
     with ConferenceDao
     with TeamDao
     with ConferencesAssociationDao
-    with AliasDao
     with GameDao
     with ResultDao
     with UserDao

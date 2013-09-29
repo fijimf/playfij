@@ -1,4 +1,4 @@
-@(teamForm: Form[models.Team], title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
+@(teamForm: Form[(models.Team,List[String])], title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -51,7 +51,7 @@
         @helper.form(action = routes.Team.submit, 'class->"form form-horizontal well") {
     <div class="container" style="padding-top:5px;">
         <div  class="row">
-        <div class="span9">
+        <div class="span8">
             <fieldset>
                 <input type="hidden" name="id" value='@teamForm("id").value.getOrElse(0)'>
                 @inputText( teamForm("key"), '_label -> "Key", '_showConstraints -> false, 'class->"input-large" )
@@ -66,24 +66,29 @@
                 @inputText( teamForm("secondaryColor"), '_label -> "Secondary Color",'onchange->"updateSecondaryColor()" )
             </fieldset>
         </div>
-        <div class="span3">
+        <div class="span4">
           <p>
               <a class="btn btn-small btn-primary" href='@teamForm("officialUrl").value.getOrElse("#")' target="_blank">Check website</a>
-          </p>
-          <p>
               <a class="btn btn-small btn-primary" href='@{"https://twitter.com/"+teamForm("officialTwitter").value.map(_.drop(1)).getOrElse("#")}' target="_blank">Check twitter</a>
           </p>
 
             <img id="logo-white-background"
-                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background-color: white"
+                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: white;"
                  src="@teamForm("logoUrl").value.getOrElse("")" />
             <img id="logo-primary-background"
-                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%, @teamForm("primaryColor").value.getOrElse("") 27%, @teamForm("primaryColor").value.getOrElse("") 73%, #eee 100%);"
+                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: @teamForm("primaryColor").value.getOrElse("");"
                  src="@teamForm("logoUrl").value.getOrElse("")" />
             <img id="logo-secondary-background"
-                 style="border-radius: 4px; margin:5px; padding:50px; box-shadow:3px 3px 4px #999; background: linear-gradient(to bottom, #eee 0%, @teamForm("secondaryColor").value.getOrElse("") 27%, @teamForm("secondaryColor").value.getOrElse("") 73%, #eee 100%);"
+                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: @teamForm("secondaryColor").value.getOrElse("");"
                  src="@teamForm("logoUrl").value.getOrElse("")" />
+            <img id="logo-black-background"
+                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: black;"
+                 src="@teamForm("logoUrl").value.getOrElse("")" />
+            <h4>Aliases</h4>
+            @textarea(field = teamForm("aliases"), args = 'rows -> 4, 'cols -> 20)
+
         </div>
+
     </div>
     <div class="row">
         <div class="actions span12">

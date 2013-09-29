@@ -1,4 +1,4 @@
-@(teams: List[Team])(implicit flash:Flash)
+@(teams: Map[Team,List[String]])(implicit flash:Flash)
 
 @main("Teams") {
 <script>
@@ -34,13 +34,14 @@
                 <th style="width:12em;">Team</a></th>
                 <th style="width:8em;">Nickname</th>
                 <th style="width:18em;">Long Name</th>
+                <th style="width:12em;">Aliases</th>
                 <th style="width:14em;">Official URL</th>
                 <th style="width:10em;">Official Twitter</th>
                 <th style="width:4em;"></th>
             </tr>
             </thead>
             <tbody>
-            @teams.map { team=>
+            @teams.keys.toList.sortBy(_.name).map { team=>
             <tr>
                 <td><img src="@team.logoUrl.getOrElse("")"/></td>
                 <td style="overflow-x:hidden; background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
@@ -49,6 +50,7 @@
                 <td style="overflow-x:hidden;"><a href="@controllers.routes.Team.view(team.key)">@team.name</a></td>
                 <td style="overflow-x:hidden;">@team.nickname</td>
                 <td style="overflow-x:hidden;">@team.longName</td>
+                <td style="overflow-x:hidden;">@teams(team).mkString(", ")</td>
                 <td style="overflow-x:hidden;">@team.officialUrl.getOrElse("")</td>
                 <td style="overflow-x:hidden;">@team.officialTwitter.getOrElse("")</td>
                 <td>
