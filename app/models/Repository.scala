@@ -28,7 +28,9 @@ class Repository(p: ExtendedProfile)
     override def delete(key:String)(implicit session:Session) {}
   }
 
+  val conferenceAssociationDao = ConferenceAssociationDao(p)
   val conferenceDao = ConferenceDao(p)
+  val seasonDao = SeasonDao(p)
   val teamDao = TeamDao(p)
 
   def checkDatabase(): List[(String, Option[Int])] = {
@@ -65,6 +67,21 @@ class Repository(p: ExtendedProfile)
     upsertTeamListByKey(teams)
     val keyList: List[(String, String)] = data.map(tup=>(tup._2.key, ScrapingUtil.nameToKey(tup._1)))
     updateAllSeasonConferences(keyList)
+  }
+
+  def updateAllSeasonConferences(keyList: List[(String, String)]) {
+    val seasons: List[Season] = seasonDao.list
+    keyList.foreach {
+      case (teamKey: String, confKey: String) =>
+        (for (t <- teamDao.Teams; if (t.key === teamKey);
+              c <- conferenceDao.Conferences; if (c.key === confKey)) yield (t.id, c.id)).foreach {
+          case (teamId: Long, confId: Long) => {
+            seasons.foreach(s => {
+              conferenceAssociationDao.ConferenceAssociations.autoInc.insert(s.id, confId, teamId)
+            })
+          }
+        }
+    }
   }
 
   def upsertConferenceListByKey(conferences: List[Conference]) {
