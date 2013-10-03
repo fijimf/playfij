@@ -19,6 +19,7 @@ object DatabaseOperations extends Controller {
   }
 
   def rebuildDatabase = Action {
+    implicit request =>
     play.api.db.slick.DB.withSession {
       try {
         repo.rebuildDatabase()

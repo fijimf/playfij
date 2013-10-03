@@ -22,59 +22,10 @@ case class Alias(id: Long, teamId: Long, alias: String) {
 }
 
 
-trait TeamDao {
+case class TeamDao(model: Model) {
 
-  this: Profile =>
-
-  import profile.simple._
-
-  object Teams extends Table[Team]("teams") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def key = column[String]("team_key")
-
-    def name = column[String]("name")
-
-    def longName = column[String]("long_name")
-
-    def nickname = column[String]("nickname")
-
-    def primaryColor = column[Option[String]]("primary_color")
-
-    def secondaryColor = column[Option[String]]("secondary_color")
-
-    def logoUrl = column[Option[String]]("logo_url")
-
-    def officialUrl = column[Option[String]]("official_url")
-
-    def officialTwitter = column[Option[String]]("official_twitter")
-
-    def * = id ~ key ~ name ~ longName ~ nickname ~ primaryColor ~ secondaryColor ~ logoUrl ~ officialUrl ~ officialTwitter <>(Team.apply _, Team.unapply _)
-
-    def autoInc = key ~ name ~ longName ~ nickname ~ primaryColor ~ secondaryColor ~ logoUrl ~ officialUrl ~ officialTwitter returning id
-
-    def keyIndex = index("tea_key", key, unique = true)
-
-    def nameIndex = index("tea_name", name, unique = true)
-
-    def longNameIndex = index("tea_long_name", longName, unique = true)
-  }
-
-  object Aliases extends Table[Alias]("aliases") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def teamId = column[Long]("team_id")
-
-    def alias = column[String]("alias")
-
-    def * = id ~ teamId ~ alias <>(Alias.apply _, Alias.unapply _)
-
-    def autoInc = teamId ~ alias returning id
-
-    def teamFk = foreignKey("als_team_fk", teamId, Teams)(_.id)
-
-    def aliasIndex = index("als_alias", alias, unique = true)
-  }
+  import model._
+  import model.profile.simple._
 
 
   def listWithAliases(implicit s: scala.slick.session.Session): Map[Team, List[String]] = {
@@ -121,11 +72,3 @@ trait TeamDao {
   }
 
 }
-
-object TeamDao {
-    def apply(p: ExtendedProfile): TeamDao = {
-      new TeamDao with Profile {
-        val profile = p
-      }
-    }
-  }

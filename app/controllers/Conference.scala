@@ -2,7 +2,7 @@ package controllers
 
 import play.api.mvc._
 import play.api.Logger
-import models.ConferenceDao
+import models.{TeamDao, Model, ConferenceDao}
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
@@ -12,10 +12,11 @@ object Conference extends Controller {
 
   import play.api.Play.current
 
-  val dao = new ConferenceDao with Profile {
+  private val model = new Model(){
     val profile = play.api.db.slick.DB.driver
   }
 
+  private val dao: ConferenceDao = ConferenceDao(model)
 
   private val logger = Logger("TeamController")
 

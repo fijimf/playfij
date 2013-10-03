@@ -1,7 +1,7 @@
 package controllers
 
 import play.api.mvc.{Controller, Action}
-import models.{ TeamDao}
+import models.{Model, TeamDao}
 import play.api.data._
 import play.api.data.Forms._
 import play.api.Logger
@@ -11,7 +11,11 @@ object Team extends Controller {
   import play.api.Play.current
 
   private val logger = Logger("TeamController")
-  private val teamDao = TeamDao(play.api.db.slick.DB.driver)
+  private val model = new Model(){
+    val profile = play.api.db.slick.DB.driver
+  }
+
+  private val teamDao: TeamDao = TeamDao(model)
 
   val teamForm: Form[(models.Team, List[String])] = Form(
     mapping(

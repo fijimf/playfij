@@ -2,6 +2,7 @@ package models
 
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
+import scala.slick.driver.ExtendedProfile
 
 case class User(id: Long,
                 name: String,
@@ -12,28 +13,9 @@ case class User(id: Long,
   require(StringUtils.isNotBlank(email))
 }
 
-trait UserDao {
+case class UserDao(model: Model) {
 
-  self: Profile =>
-
-  import profile.simple._
-
-  object Users extends Table[User]("users") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def name = column[String]("name")
-
-    def password = column[String]("password")
-
-    def email = column[String]("email")
-
-    def * = id ~ name ~ password ~ email <>(User.apply _, User.unapply _)
-
-    def autoInc = id ~ name ~ password ~ email <>(User.apply _, User.unapply _)
-
-    def nameIndex = index("usr_name", name, unique = true)
-
-    def emailIndex = index("usr_email", email, unique = true)
-  }
+  import model._
+  import model.profile.simple._
 
 }

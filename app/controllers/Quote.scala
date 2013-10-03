@@ -2,20 +2,22 @@ package controllers
 
 import play.api.mvc._
 import play.api.Logger
-import models.{QuoteDao, Repository}
+import models._
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
 import play.api.db.slick.Profile
+import scala.Some
+import models.QuoteDao
 
 object Quote extends Controller {
 
   import play.api.Play.current
-
-  val dao = new QuoteDao with Profile {
+  private val model = new Model(){
     val profile = play.api.db.slick.DB.driver
   }
 
+  private val dao: QuoteDao = QuoteDao(model)
 
   private val logger = Logger("QuoteController")
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)

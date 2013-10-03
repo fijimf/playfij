@@ -40,7 +40,7 @@
         <appender-ref ref="PERF"/>
     </logger>
 
-    <root level="INFO">
+    <root level="TRACE">
         <appender-ref ref="S"/>
     </root>
 </configuration>
