@@ -1,21 +1,29 @@
 package controllers
 
 import play.api.mvc.{Controller, Action}
-import models.{Model, TeamDao}
+import models._
 import play.api.data._
 import play.api.data.Forms._
 import play.api.Logger
+import scala.Some
+import models.ConferenceAssociationDao
+import models.TeamDao
 
 object Team extends Controller {
 
   import play.api.Play.current
 
   private val logger = Logger("TeamController")
-  private val model = new Model(){
+  private val model = new Model() {
     val profile = play.api.db.slick.DB.driver
   }
 
   private val teamDao: TeamDao = TeamDao(model)
+  private val conferenceAssociationDao = new ConferenceAssociationDao(model)
+
+  val keys: List[String] = play.api.db.slick.DB.withSession {
+    implicit s => teamDao.list.map(_.key) //TODO snmart cache me!!
+  }
 
   val teamForm: Form[(models.Team, List[String])] = Form(
     mapping(
@@ -42,24 +50,11 @@ object Team extends Controller {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val oTeam: Option[models.Team] = teamDao.find(key)
-          if (oTeam.isDefined) {
-            val keys: List[String] = teamDao.list.map(_.key)
-            val n = keys.indexOf(key)
-            val prevKey = if (n == 0) {
-              keys.last
-            } else {
-              keys(n - 1)
-            }
-            val nextKey = if (n == (keys.size - 1)) {
-              keys.head
-            } else {
-              keys(n + 1)
-            }
-            Ok(views.html.teamView(oTeam.get, oTeam.get.name + " " + oTeam.get.nickname, prevKey, nextKey))
-          } else {
-            NotFound(views.html.resourceNotFound("team", key))
-          }
+          teamDao.find(key).map(t => {
+            val (prevKey, nextKey) = nextKeys(key)
+            conferenceAssociationDao.queryByTeam(t)
+            Ok(views.html.teamView(t, t.name + " " + t.nickname, prevKey, nextKey))
+          }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
 
@@ -76,24 +71,15 @@ object Team extends Controller {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val oTeam: Option[(models.Team, List[String])] = teamDao.findWithAliases(key)
-          if (oTeam.isDefined) {
-            val keys: List[String] = teamDao.list.map(_.key)
-            val n = keys.indexOf(key)
-            val prevKey = if (n == 0) {
-              keys.last
-            } else {
-              keys(n - 1)
+          teamDao.findWithAliases(key).map {
+            case (t: Team, as: List[String]) => {
+              val (prevKey, nextKey) = nextKeys(key)
+              val cmap: Map[Season, Conference] = conferenceAssociationDao.queryByTeam(t)
+              Ok(views.html.teamForm(teamForm.fill((t, as)),cmap, t.name + " " + t.nickname, prevKey, nextKey))
             }
-            val nextKey = if (n == (keys.size - 1)) {
-              keys.head
-            } else {
-              keys(n + 1)
-            }
-            Ok(views.html.teamForm(teamForm.fill((oTeam.get._1, oTeam.get._2)), oTeam.get._1.name + " " + oTeam.get._1.nickname, prevKey, nextKey))
-          } else {
+          }.getOrElse({
             NotFound(views.html.resourceNotFound("team", key))
-          }
+          })
       }
   }
 
@@ -105,7 +91,7 @@ object Team extends Controller {
           teamForm.bindFromRequest.fold(
           errors => {
             logger.info("Problems saving " + errors)
-            BadRequest(views.html.teamForm(errors, "Save failed", "#", "#"))
+            BadRequest(views.html.teamForm(errors,Map.empty[Season,Conference], "Save failed", "#", "#"))
           }, {
             case (team: models.Team, aliases: List[String]) =>
               if (team.id == 0) {
@@ -128,8 +114,7 @@ object Team extends Controller {
           val keys: List[String] = teamDao.list.map(_.key)
           val prevKey = keys.last
           val nextKey = keys.head
-
-          Ok(views.html.teamForm(teamForm.bind(Map.empty[String, String]), "New Team", prevKey, nextKey))
+          Ok(views.html.teamForm(teamForm.bind(Map.empty[String, String]),Map.empty[Season, Conference] ,"New Team", prevKey, nextKey))
       }
   }
 
@@ -147,6 +132,21 @@ object Team extends Controller {
             case None => Redirect(routes.Team.list()).flashing("error" -> "No id parameter passed to delete")
           }
       }
+  }
+
+  def nextKeys(key: String): (String, String) = {
+    val n = keys.indexOf(key)
+    val prevKey = if (n == 0) {
+      keys.last
+    } else {
+      keys(n - 1)
+    }
+    val nextKey = if (n == (keys.size - 1)) {
+      keys.head
+    } else {
+      keys(n + 1)
+    }
+    (prevKey, nextKey)
   }
 
 }

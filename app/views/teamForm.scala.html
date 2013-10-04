@@ -1,4 +1,4 @@
-@(teamForm: Form[(models.Team,List[String])], title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
+@(teamForm: Form[(models.Team,List[String])], cmap:Map[Season,Conference], title:String, prevKey:String, nextKey:String)(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -86,6 +86,12 @@
                  src="@teamForm("logoUrl").value.getOrElse("")" />
             <h4>Aliases</h4>
             @textarea(field = teamForm("aliases"), args = 'rows -> 4, 'cols -> 20)
+            <h4>Conference</h4>
+            <table>
+            @cmap.keys.toList.sortBy(_.key).map { s=>
+                <tr><td>@s.key</td><td>@cmap(s).name</td></tr>
+            }
+            </table>
 
         </div>
 
