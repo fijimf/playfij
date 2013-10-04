@@ -1,5 +1,6 @@
 import sbt._
 import play.Project._
+import Keys._
 
 object ApplicationBuild extends Build {
 
@@ -15,14 +16,15 @@ object ApplicationBuild extends Build {
     "com.h2database" % "h2" % "1.3.166",
     "mysql" % "mysql-connector-java" % "5.1.5",
     "org.ccil.cowan.tagsoup" % "tagsoup" % "1.2",
-    "com.typesafe.play" %% "play-slick" % "0.4.0"
+    "com.typesafe.play" %% "play-slick" % "0.4.0"   ,
+    "securesocial" %% "securesocial" % "2.1.0"
 
 
   )
 
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
-    // Add your own project settings here      
+    resolvers += Resolver.url("sbt-plugin-snapshots", url("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
   )
 
 }
