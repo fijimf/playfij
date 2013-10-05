@@ -2,7 +2,7 @@ package models
 
 import play.api.db.slick.Profile
 import org.joda.time.LocalDate
-import models.util.LocalDateMapper._
+import models.util.Mappers._
 import scala.slick.driver.ExtendedProfile
 
 case class Season(id: Long, key: String, season: String, from: LocalDate, to: LocalDate)

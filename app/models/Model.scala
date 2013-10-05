@@ -3,7 +3,8 @@ package models
 import play.api.db.slick.Profile
 import org.joda.time.LocalDate
 import org.joda.time.LocalDate
-import models.util.LocalDateMapper._
+import models.util.Mappers._
+import securesocial.core.AuthenticationMethod
 
 trait Model extends Profile{
 
@@ -191,21 +192,65 @@ trait Model extends Profile{
   }
 
   object Users extends Table[User]("users") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def name = column[String]("name")
+    def uid = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def userId = column[String]("userId")
+
+    def providerId = column[String]("providerId")
+
+    def email = column[Option[String]]("email")
+
+    def firstName = column[String]("firstName")
+
+    def lastName = column[String]("lastName")
+
+    def fullName = column[String]("fullName")
+
+    def avatarUrl = column[Option[String]]("avatarUrl")
+
+    def authMethod = column[AuthenticationMethod]("authMethod")
+
+    // oAuth 1
+    def token = column[Option[String]]("token")
+
+    def secret = column[Option[String]]("secret")
+
+    // oAuth 2
+    def accessToken = column[Option[String]]("accessToken")
+
+    def tokenType = column[Option[String]]("tokenType")
+
+    def expiresIn = column[Option[Int]]("expiresIn")
+
+    def refreshToken = column[Option[String]]("refreshToken")
+
+    // passwordInfo
+    def hasher = column[String]("hasher")
 
     def password = column[String]("password")
 
-    def email = column[String]("email")
+    def salt = column[String]("salt")
 
-    def * = id ~ name ~ password ~ email <>(User.apply _, User.unapply _)
 
-    def autoInc = id ~ name ~ password ~ email <>(User.apply _, User.unapply _)
+    def * =
+      uid ~ userId ~ providerId ~ firstName ~ lastName ~ fullName ~ email ~ avatarUrl ~ authMethod ~ token ~ secret ~ accessToken ~ tokenType ~ expiresIn ~ refreshToken ~ hasher ~ password ~ salt <>
+        (t => User(Option(t._1), (t._2, t._3), t._4, t._5, t._6, t._7, t._8, t._9, (t._10, t._11), (t._12, t._13, t._14, t._15)),
+          (u: User) =>
+            Some(
+              (u.uid.getOrElse(0L), u.id.id, u.id.providerId, u.firstName, u.lastName, u.fullName, u.email, u.avatarUrl, u.authMethod,
+                u.oAuth1Info.map(_.token), u.oAuth1Info.map(_.secret), u.oAuth2Info.map(_.accessToken),
+                u.oAuth2Info.flatMap(_.tokenType), u.oAuth2Info.flatMap(_.expiresIn),
+                u.oAuth2Info.flatMap(_.refreshToken), u.passwordInfo.map(_.hasher).getOrElse(""),
+                u.passwordInfo.map(_.password).getOrElse(""), u.passwordInfo.flatMap(_.salt).getOrElse(""))
+            )
+          )
+    def autoInc = * returning uid
 
-    def nameIndex = index("usr_name", name, unique = true)
+    def userIndex = index("usr_name", userId, unique = true)
 
     def emailIndex = index("usr_email", email, unique = true)
+
   }
 
 }

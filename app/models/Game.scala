@@ -1,7 +1,7 @@
 package models
 
 import org.joda.time.{LocalDate, DateMidnight}
-import util.LocalDateMapper._
+import util.Mappers._
 import play.api.db.slick.Profile
 import scala.slick.driver.ExtendedProfile
 

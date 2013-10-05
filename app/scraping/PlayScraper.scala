@@ -24,13 +24,15 @@ object PlayScraper {
       processBatch(m, shortName)
     }).flatten.toList
     logger.info("Loaded %d teams from the NCAA website".format(result.size))
-    result.map{case (conf: String, team: Team) => {
-      if (team.name.toLowerCase.replaceAll("\\W", "").take(12) == conf.toLowerCase.replaceAll("\\W", "").take(12)) {
-        ( "Independent", team)
-      } else {
-        (conf, team)
+    result.map {
+      case (conf: String, team: Team) => {
+        if (team.name.toLowerCase.replaceAll("\\W", "").take(12) == conf.toLowerCase.replaceAll("\\W", "").take(12)) {
+          ("Independent", team)
+        } else {
+          (conf, team)
+        }
       }
-    }}.toList
+    }.toList
   }
 
 
@@ -117,9 +119,24 @@ object PlayScraper {
     val colorsKey = "Colors"
     val urlKey = "Url"
     val detailMap: Map[String, String] = (page \\ "td").map((node: Node) => node match {
-      case <td><h6>Nickname</h6><p>{nickname}</p></td> => Some(nicknameKey -> nickname.text)
-      case <td><h6>Athletics Website</h6><p><a>{url}</a></p></td> => Some(urlKey -> url.text)
-      case <td><h6>Colors</h6><p>{colors}</p></td> => Some(colorsKey -> colors.text) case _ => None
+      case <td>
+        <h6>Nickname</h6> <p>
+        {nickname}
+        </p>
+        </td> => Some(nicknameKey -> nickname.text)
+      case <td>
+        <h6>Athletics Website</h6> <p>
+        <a>
+          {url}
+          </a>
+        </p>
+        </td> => Some(urlKey -> url.text)
+      case <td>
+        <h6>Colors</h6> <p>
+        {colors}
+        </p>
+        </td> => Some(colorsKey -> colors.text)
+      case _ => None
     }).flatten.toMap
     val optColors = detailMap.get(colorsKey)
     if (optColors.isDefined) {
@@ -150,12 +167,12 @@ object PlayScraper {
 
   def withLogging[T](f: Future[T], beginMsg: Option[String], endMsg: Option[String]): Future[T] = {
     beginMsg.foreach(m => logger.info(m))
-    withLatency(f).map {
-      case (millis: Long, value: T) => {
-        endMsg.foreach(m => logger.info(m.format(millis, value)))
-        value
-      }
+    val latency: Future[(Long, T)] = withLatency(f)
+    latency.map((tuple: (Long, T)) => {
+      endMsg.foreach(m => logger.info(m.format(tuple._1, tuple._2)))
+      tuple._2
     }
+    )
   }
 
   def withLatency[T](f: Future[T]): Future[(Long, T)] = {
