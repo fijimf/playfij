@@ -53,7 +53,7 @@ object PlayTeamScraper extends PlayScraper{
   }
 
   lazy val teamList: List[Team] = {
-    teamRawData.map(_._2)
+    teamRawData().map(_._2)
   }
 
   def loadTeamNames(): Future[Map[String, String]] = {

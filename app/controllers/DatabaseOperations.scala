@@ -32,7 +32,7 @@ object DatabaseOperations extends Controller {
   }
 
   def scrapeNcaaTeams = Action {
-    val data: List[(String, models.Team)] = scraping.PlayScraper.teamRawData()
+    val data: List[(String, models.Team)] = scraping.PlayTeamScraper.teamRawData()
     play.api.db.slick.DB.withSession {
       try {
         repo.scrapeNcaaTeamsAndConferences(data)

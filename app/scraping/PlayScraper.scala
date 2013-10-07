@@ -1,12 +1,11 @@
 package scraping
 
-/**
- * Created with IntelliJ IDEA.
- * User: Jim
- * Date: 10/6/13
- * Time: 10:41 PM
- * To change this template use File | Settings | File Templates.
- */
+import play.api.Logger
+import scala.concurrent.Future
+import play.api.libs.ws.Response
+import play.api.libs.ws.WS
+import play.api.libs.concurrent.Execution.Implicits._
+
 trait PlayScraper {
   def logger: Logger
 
