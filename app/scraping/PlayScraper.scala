@@ -20,4 +20,9 @@ trait PlayScraper {
     val startTime = System.currentTimeMillis()
     f.map((System.currentTimeMillis() - startTime, _))
   }
+  
+  //TODO add withCache
+  
+  //TODO ddd withRetry
+  
 }
