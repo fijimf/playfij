@@ -24,4 +24,58 @@ object PlayGameScraper extends PlayScraper {
     }.toList)
   }
 
+  def loadGames(d: Date): Future[List[(String, String, String, String, String)]] = {
+    val year = new SimpleDateFormat("yyyy").format(d)
+    val month = new SimpleDateFormat("MM").format(d)
+    val day = new SimpleDateFormat("dd").format(d)
+
+    val url = "http://data.ncaa.com/jsonp/scoreboard/basketball-men/d1/" + year + "/" + month + "/" + day + "/scoreboard.html"
+
+    loadUrl(url).map((response: Response) => {
+      response.body
+    def parseGameResponse(s: String): Option[GameResponse] = {
+      val j = s.replaceFirst( """^callbackWrapper\(\{""", "{").replaceFirst( """\}\)$""", "}").replaceAll( """,[\s+,]+""", ",").replaceAll( """,\s*\]""", "]")
+      try {
+        Some(parse[GameResponse](j))
+      } catch {
+        case e: Exception => {
+          println(d + " " + e.getMessage)
+          e.printStackTrace()
+          println(j)
+          None
+        }
+      }
+    }
+    try {
+      h(url(req) >- parseGameResponse _)
+    } catch {
+      case e: Exception => {
+        println(d + ": Caught " + e.getMessage)
+        None
+      }
+    } finally {
+      h.shutdown()
+    }
+  }
+
+
+  def gameList(date: Date): List[(String, Option[Int], String, Option[Int])] = {
+    (for (gr <- loadDateGames(date).toList;
+          sb <- gr.scoreboard;
+          g <- sb.games) yield {
+      val (homeTeam, homeScore) = teamData(g.home)
+      val (awayTeam, awayScore) = teamData(g.away)
+      (homeTeam, homeScore, awayTeam, awayScore)
+    }).toList
+  }
+
+  def teamData(t: Team): (String, Option[Int]) = {
+    val name = teams.getOrElse(t.key, t.name)
+    val score = t.scoreBreakdown match {
+      case Nil => None
+      case xs => Some(xs.map(_.toInt).sum)
+    }
+    (name, score)
+  }
+}
 }
