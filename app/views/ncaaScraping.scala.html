@@ -1,0 +1,23 @@
+@(status: List[(String,Option[Int])])(implicit flash: Flash)
+
+
+@main("Databse Ops") {
+
+<div class="container">
+    <h1>Database Operations</h1>
+    @if(flash.get("success").isDefined) {
+            <div class="alert alert-success"><p>@flash.get("success").get</p></div>
+    }
+    @if(flash.get("error").isDefined) {
+            <div class="alert alert-error"><p>@flash.get("error").get</p></div>
+    }
+    <form class="form well" method="post"  action="database/scrape-ncaa-teams">
+        <legend>Scrape teams and conferences from <i>ncaa.com</i></legend>
+        <input type="submit" class="btn btn-primary span2" value="Scrape"/>
+    </form>
+    <form class="form well" method="post">
+        <legend>Scrape current games from <i>ncaa.com</i></legend>
+        <input type="submit" class="btn btn-primary span2" value="Scrape"/>
+    </form>
+ </div>
+}

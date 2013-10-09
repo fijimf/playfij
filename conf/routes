@@ -44,30 +44,16 @@ GET  /quotes/:id                          controllers.Quote.view(id:Long)
 GET  /quotes/:id/edit                     controllers.Quote.edit(id:Long)
 POST /quotes/delete                       controllers.Quote.delete
 
-GET  /users                               controllers.User.list
-POST /users                               controllers.User.submit  
-GET  /users/new                           controllers.User.create
-GET  /users/:id                           controllers.User.view(id)
-GET  /users/:id/edit                      controllers.User.edit(id)
-POST /users/delete                        controllers.User.delete
+GET     /admin/database                   controllers.admin.Database.index
+POST    /admin/database/rebuild           controllers.admin.Database.rebuildDatabase
 
-GET  /roles                               controllers.Role.list
-POST /roles                               controllers.Role.submit  
-GET  /roles/new                           controllers.Role.create
-GET  /roles/:id                           controllers.Role.view(id)
-GET  /roles/:id/edit                      controllers.Role.edit(id)
-POST /roles/delete                        controllers.Role.delete
+GET     /admin/ncaa/                      controllers.admin.Ncaa.index
+POST    /admin/ncaa/scrape-teams          controllers.admin.Ncaa.scrapeTeams
+POST    /admin/ncaa/scrape-games          controllers.admin.Ncaa.scrapeGames
+POST    /admin/ncaa/scrape-games-etc      controllers.admin.Ncaa.scrapeGamesEtc
 
-GET  /permissions                         controllers.Permission.list
-POST /permissions                         controllers.Permission.submit  
-GET  /permissions/new                     controllers.Permission.create
-GET  /permissions/:id                     controllers.Permission.view(id)
-GET  /permissions/:id/edit                controllers.Permission.edit(id)
-POST /permissions/delete                  controllers.Permission.delete
-
-GET     /app/database                     controllers.DatabaseOperations.index
-POST    /app/database/rebuild             controllers.DatabaseOperations.rebuildDatabase
-POST    /app/database/scrape-ncaa-teams   controllers.DatabaseOperations.scrapeNcaaTeams
+GET     /admin/kenpom/                    controllers.admin.KenPom.index
+POST    /admin/kenpom/scrape-games        controllers.admin.KenPom.scrapeGames
 
 # Login page
 GET     /login                      securesocial.controllers.LoginPage.login
