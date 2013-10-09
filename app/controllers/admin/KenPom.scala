@@ -12,17 +12,60 @@ object KenPom extends Controller {
 
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
-  val kenPomLoadForm: Form[(String, Boolean)] = Form(
+  case class KenPomUpdateRequest(
+      url:String, 
+      doWrite:boolean,
+	  doGameInserts:boolean,
+	  doGameUpdates:boolean,
+	  doGameDeletes:boolean,
+	  doResultInserts:boolean,
+	  doResultUpdates:boolean,
+	  doResultDeletes:boolean,
+	  fromDate:Option[LocalDate],
+	  toDate:Option[LocalDate]
+  )  
+  
+  val form: Form[KenPomUpdateRequest] = Form(
     mapping(
       "url" -> nonEmptyText,
-      "writeToDb" -> boolean
+      "doWrite" -> boolean,
+	  "doGameInserts" -> boolean,
+	  "doGameUpdates" -> boolean,
+	  "doGameDeletes" -> boolean,
+	  "doResultInserts" -> boolean,
+	  "doResultUpdates" -> boolean,
+	  "doResultDeletes" -> boolean,
+	  "fromDate" -> optionalText,
+	  "toDate" -> optionaText,
     )((url, writeToDb) => (url, writeToDb))
       (tup => Some(tup))
   )
+  
+  case class KenPomUpdateResult(
+    badFormat:List[String] = List.empty(),
+	unknownTeam:List[String] = List.empty(),
+	noSeason:List[String] = List.empty(),
+	outsideRange:List[String] = List.empty(),
+	gamesInserted:List[(LocalDate,String, String)] = List.empty(),
+	gamesUpdated:List[(LocalDate,String, String)] = List.empty(),
+	gamesDeleted:List[(LocalDate,String, String)] = List.empty(),
+	resultsInserted:List[(LocalDate,String, String, Int, Int)] = List.empty(),
+	resultsUpdated:List[(LocalDate,String, String, Int, Int)] = List.empty(),
+	resultsDeleted:List[(LocalDate,String, String, Int, Int)] = List.empty()
+  )
+  
+  def index = Action {
+    implicit request =>
+        Ok(views.html.kenpom(form.blank))
+      }
+  }
 
-  def scrapeGames = TODO
+  def scrapeGames = Action {
+      
+  
+  
+  }
 
-  def index = TODO
 
 
 
