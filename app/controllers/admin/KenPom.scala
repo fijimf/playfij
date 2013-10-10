@@ -4,9 +4,16 @@ import play.api.mvc.{Action, Controller}
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
-import models.Repository
+import models._
 import org.joda.time.LocalDate
 import play.api.Logger
+import scraping.PlayGameScraper
+import controllers.admin.KenPomUpdateRequest
+import scala.Some
+import controllers.admin.KenPomUpdateResult
+import models.ConferenceAssociationDao
+import models.TeamDao
+import models.Model.Teams
 
 case class KenPomUpdateRequest(url: String = "",
                                doWrite: Boolean = false,
@@ -78,10 +85,31 @@ object KenPom extends Controller {
 }
 
 object KenPomScraper {
-  def scrape(repo: Repository, req: KenPomUpdateRequest): KenPomUpdateResult = {
-    KenPomUpdateResult()
 
+  private val model = new Model() {
+    val profile = play.api.db.slick.DB.driver
+  }
+  import model.profile.simple._
 
+  private val teamDao: TeamDao = TeamDao(model)
+  private val seasonDao = new ConferenceAssociationDao(model)
+  private val gameDao = new ConferenceAssociationDao(model)
+  private val resultDao = new ConferenceAssociationDao(model)
+
+  def scrape(repo: Repository, req: KenPomUpdateRequest)(implicit s: scala.slick.session.Session): KenPomUpdateResult = {
+    val teamsWithAliases: Map[Team, List[String]] = teamDao.listWithAliases
+    val teamMap = teamsWithAliases.keys.map(t=>t.name->t).toMap
+    val aliasMap = teamsWithAliases.keys.foldLeft(Map.empty[String, Team])((map: Map[String, Team], team: Team) => teamsWithAliases(team).foldLeft(map)((m2: Map[String, Team], alias: String) => m2+(alias->team)))
+    val dbData: List[(LocalDate, String, String, Option[Int], Option[Int])] = (for (
+      (g, r) <- model.Games leftJoin model.Results on (_.id === _.gameId);
+      ht <- model.Teams if g.homeTeamId === ht.id;
+      at <- model.Teams if g.awayTeamId === at.id
+    ) yield (g.date, ht.key, at.key, Option(r.homeScore), Option(r.awayScore))).list()
+    val seasons = (for (s<-model.Seasons) yield s).list
+
+    PlayGameScraper.scrapeKenPom(req.url)
+
+      KenPomUpdateResult()
   }
 
 
