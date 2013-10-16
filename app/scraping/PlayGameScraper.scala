@@ -12,7 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 object PlayGameScraper extends PlayScraper {
   def logger = Logger("GameScraper")
 
-  def scrapeKenPom(url: String): Future[List[(LocalDate, String, String, Option[(Int, Int)])]] = {
+  def scrapeKenPom(url: String): Future[List[ResultData]] = {
     val inFormat = new SimpleDateFormat("MM/dd/yyyy")
     loadUrl(url).map((response: Response) => {
       response.body.split("\n").filter(_.length > 63).map(s => {
@@ -22,8 +22,8 @@ object PlayGameScraper extends PlayScraper {
         val ht = s.substring(38, 60).trim()
         val hs = catching(classOf[NumberFormatException]) opt s.substring(61, 64).trim().toInt
         (hs, as) match {
-          case (Some(h), Some(a)) => (d, ht, at, Some((h, a)))
-          case _ => (d, ht, at, None)
+          case (Some(h), Some(a)) => ResultData(GameData(d, ht, at), Some((h, a)))
+          case _ => ResultData(GameData(d, ht, at), None)
         }
       })
         .toList

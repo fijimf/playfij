@@ -4,8 +4,11 @@ import play.api.db.slick.Profile
 import org.joda.time.LocalDate
 import models.util.Mappers._
 import scala.slick.driver.ExtendedProfile
+import scraping.DateRange
 
-case class Season(id: Long, key: String, season: String, from: LocalDate, to: LocalDate)
+case class Season(id: Long, key: String, season: String, from: LocalDate, to: LocalDate) {
+  val range = DateRange(from,to)
+}
 
 case class SeasonDao(model: Model) {
 
