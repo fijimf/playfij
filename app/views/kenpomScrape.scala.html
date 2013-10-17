@@ -1,14 +1,77 @@
 @(req: Form[scraping.GameUpdateRequest], res:Option[scraping.GameUpdateResult])
 
 
-@main("Databse Ops") {
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@main("Scrape KenPom") {
 
 <div class="container">
-    <h1>Database Operations</h1>
-    <form class="form well" method="post">
-        <legend>Scrape games and results from <i>kenpom.com</i></legend>
-        <label for="url">URL</label> <input id="url" type="text"/>
-        <input type="submit" class="btn btn-primary span2" value="Scrape"/>
-    </form>
+    <h1>Scrape KenPom</h1>
+
+    @if(res.isDefined) {
+    <div class="container" style="padding-top:5px;">
+        <div class="row">
+            <div class="span12">
+                <h3>Results</h3>
+                <div class="well"><p><strong>The following games were skipped because one or both of the teams was unknown</strong></p></div>
+               @res.get.unknownTeam.map(gd=>
+                <p>{gd.date} {gd.home} v. {gd.away}</p>
+                )
+            </div>
+        </div>
+    </div>
+    }
+
+    @helper.form(action = admin.routes.KenPom.scrapeGames, 'class->"form form-horizontal well") {
+    <div class="container" style="padding-top:5px;">
+        <div class="row">
+            <div class="span12">
+                <fieldset>
+                    <div class="row">
+                        <div class="span6">
+                            @inputText( req("url"), '_label -> "URL", '_showConstraints -> false, 'class->"input-xlarge"
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="span3"> @inputText( req("fromDate"), '_label -> "From", '_showConstraints -> false,
+                            'class->"input-medium" )
+                        </div>
+                        <div class="span3">@inputText( req("toDate"), '_label -> "To", '_showConstraints -> false,
+                            'class->"input-medium" )
+                        </div>
+                    </div>
+                    <div class="row" style="padding-bottom:20px;">
+                        <div class="span12"> @checkbox( req("doWrite"), '_label -> "Update Database?", '_showConstraints
+                            -> false )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="span4">
+                            <h4>Games</h4>
+                            @checkbox( req("doGameInserts"), '_label -> "Apply Inserts?", '_showConstraints -> false )
+                            @checkbox( req("doGameUpdates"), '_label -> "Apply Updates?", '_showConstraints -> false )
+                            @checkbox( req("doGameDeletes"), '_label -> "Apply Deletes?", '_showConstraints -> false )
+                        </div>
+                        <div class="span4 offset2">
+                            <h4>Results</h4>
+                            @checkbox( req("doResultInserts"), '_label -> "Apply Inserts?", '_showConstraints -> false )
+                            @checkbox( req("doResultUpdates"), '_label -> "Apply Updates?", '_showConstraints -> false )
+                            @checkbox( req("doResultDeletes"), '_label -> "Apply Deletes?", '_showConstraints -> false )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="span1"><input type="submit" class="btn primary" value="Save">
+                        </div>
+                        <div class="span1 offset1"><input type="reset" class="btn primary" value="Reset"></div>
+                    </div>
+                </fieldset>
+            </div>
+
+            </div>
+      </div>
+    }
 </div>
 }

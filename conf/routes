@@ -47,12 +47,12 @@ POST /quotes/delete                       controllers.Quote.delete
 GET     /admin/database                   controllers.admin.Database.index
 POST    /admin/database/rebuild           controllers.admin.Database.rebuildDatabase
 
-GET     /admin/ncaa/                      controllers.admin.Ncaa.index
+GET     /admin/ncaa                       controllers.admin.Ncaa.index
 POST    /admin/ncaa/scrape-teams          controllers.admin.Ncaa.scrapeTeams
 POST    /admin/ncaa/scrape-games          controllers.admin.Ncaa.scrapeGames
 POST    /admin/ncaa/scrape-games-etc      controllers.admin.Ncaa.scrapeGamesEtc
 
-GET     /admin/kenpom/                    controllers.admin.KenPom.index
+GET     /admin/kenpom                     controllers.admin.KenPom.index
 POST    /admin/kenpom/scrape-games        controllers.admin.KenPom.scrapeGames
 
 # Login page

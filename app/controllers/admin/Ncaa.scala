@@ -9,7 +9,9 @@ object Ncaa extends Controller {
 
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
-  def index = TODO
+  def index = Action {
+    Ok(views.html.ncaaIndex(""))
+  }
 
   def scrapeTeams = Action {
     val data: List[(String, models.Team)] = scraping.PlayTeamScraper.teamRawData()

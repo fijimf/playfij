@@ -10,4 +10,3 @@ case class GameUpdateResult(
                              resultsUpdated: List[ResultData] = List.empty[ResultData],
                              resultsDeleted: List[ResultData] = List.empty[ResultData])
 
-
