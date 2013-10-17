@@ -119,11 +119,7 @@ object PlayTeamScraper extends PlayScraper{
     val colorsKey = "Colors"
     val urlKey = "Url"
     val detailMap: Map[String, String] = (page \\ "td").map((node: Node) => node match {
-      case <td>
-        <h6>Nickname</h6> <p>
-        {nickname}
-        </p>
-        </td> => Some(nicknameKey -> nickname.text)
+      case <td> <h6>Nickname</h6> <p> {nickname} </p> </td> => Some(nicknameKey -> nickname.text)
       case <td>
         <h6>Athletics Website</h6> <p>
         <a>
