@@ -9,7 +9,7 @@ case class GameUpdateResult(
                              gamesUpdated: List[GameData] = List.empty[GameData],
                              gamesDeleted: List[GameData] = List.empty[GameData],
                              resultsInserted: List[ResultData] = List.empty[ResultData],
-                             resultsUpdated: List[ResultData] = List.empty[ResultData],
+                              resultsUpdated: List[ResultData] = List.empty[ResultData],
                              resultsDeleted: List[ResultData] = List.empty[ResultData]) {
   def unmappedTeams():Map[String, Int] = {
     val names: List[String] = (unknownTeam.map(_.home) ++ unknownTeam.map(_.away)).filter(t => StringUtils.isNotBlank(t))
