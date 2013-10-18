@@ -1,39 +1,63 @@
 @(status: List[(String,Option[Int])])(implicit flash: Flash)
 
+@main("Database") {
 
-@main("Databse Ops") {
-
-<div class="container">
-    <h1>Database Operations</h1>
-    @if(flash.get("success").isDefined) {
-            <div class="alert alert-success"><p>@flash.get("success").get</p></div>
-    }
-    @if(flash.get("error").isDefined) {
-            <div class="alert alert-error"><p>@flash.get("error").get</p></div>
-    }
-    <table class="table table-condensed  table-bordered">
-        <h3>Database Status</h3>
-        <thead>
-        <tr>
-            <th></th>
-            @status.map{s=>
-            <th>@s._1</th>
-            }
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <th>Row Count</th>
-            @status.map{s=>
-            <td>@{s._2.map(_.toString ).getOrElse("N/A")}</td>
-            }
-        </tr>
-        </tbody>
-    </table>
-    <form class="form well" method="post" action="database/rebuild">
-        <legend>Rebuild database</legend>
-        <input type="submit" class="btn btn-danger span2" value="Rebuild"/>
-        <span class="help-inline">Warning: Rebuilding the database will drop ALL data.</span>
-    </form>
+<div class="row-fluid">
+    <div class="span12">
+        @if(flash.get("success").isDefined) {
+        <div class="alert alert-success"><p>@flash.get("success").get</p></div>
+        }
+        @if(flash.get("error").isDefined) {
+        <div class="alert alert-error"><p>@flash.get("error").get</p></div>
+        }
+    </div>
 </div>
+<div class="row-fluid">
+    <div class="span12">
+        <table class="table table-condensed  table-bordered">
+            <h3>Database Status</h3>
+            <thead>
+            <tr>
+                <th></th>
+                @status.map{s=>
+                <th>@s._1</th>
+                }
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th>Row Count</th>
+                @status.map{s=>
+                <td>@{s._2.map(_.toString ).getOrElse("N/A")}</td>
+                }
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
+        <h1>Database Operations</h1>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
+        <form class="form well" method="post" action="database/rebuild">
+            <legend>Rebuild database</legend>
+            <input type="submit" class="btn btn-danger span2" value="Rebuild"/>
+            <span class="help-inline">Warning: Rebuilding the database will drop ALL data.</span>
+        </form>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
+        <div class="well">
+            <legend>Show DDL</legend>
+            <div>
+                <a class="btn btn-primary span2" style="float:none; display:inline-block" href="#">Show DDL</a>
+            </div>
+        </div>
+    </div>
+</div>
+
 }
