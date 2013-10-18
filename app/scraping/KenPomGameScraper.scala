@@ -45,21 +45,21 @@ import scala.concurrent.duration._
     def mapTeams(data: List[ResultData], teamsWithAliases: Map[Team, List[String]]): (List[ResultData], List[ResultData]) = {
       val teamMap = teamsWithAliases.keys.map(t => t.name.toLowerCase -> t).toMap
       val aliasMap = teamsWithAliases.keys.foldLeft(Map.empty[String, Team])((map: Map[String, Team], team: Team) => teamsWithAliases(team).foldLeft(map)((m2: Map[String, Team], alias: String) => m2 + (alias.toLowerCase -> team)))
-      def lookup(t: String): Option[String] = teamMap.get(t).orElse(aliasMap.get(t)).map(_.key)
+      def lookup(t: String): Option[String] = teamMap.get(t.toLowerCase).orElse(aliasMap.get(t.toLowerCase)).map(_.key)
       val mapped: List[Either[ResultData, ResultData]] = data.map(_.mapTeams(lookup))
       (mapped.filter(_.isRight).map(_.merge), mapped.filter(_.isLeft).map(_.merge))
     }
 
     def loadCurrentData(req: GameUpdateRequest, seasons: List[Season])(implicit s: scala.slick.session.Session): List[ResultData] = {
-      (for (
+      val rows: List[(Game, Team, Team, Option[Int], Option[Int])] = (for (
         (g, r) <- model.Games leftJoin model.Results on (_.id === _.gameId);
         ht <- model.Teams if g.homeTeamId === ht.id;
         at <- model.Teams if g.awayTeamId === at.id
-      ) yield (g, r, ht, at)).list().map {
-        case (game: Game, result: Result, home: Team, away: Team) => {
-          ResultData(GameData(game.date, home.key, away.key), Option(result).map(r => (r.homeScore, r.awayScore)))
-        }
-      }.filter(rd => dateOk(rd.gameData.date, req, seasons))
+      ) yield (g, ht, at, r.homeScore.?, r.awayScore.?)).list()
+      rows.map(_ match {
+        case (game, home, away, Some(hs), Some(as)) => { ResultData(GameData(game.date, home.key, away.key), Some((hs, as)))}
+        case (game, home, away, _,_) => { ResultData(GameData(game.date, home.key, away.key),None)}
+      }).filter(rd => dateOk(rd.gameData.date, req, seasons))
     }
 
     def handleGames(req: GameUpdateRequest, candidateData: List[GameData], teams:List[Team], seasons:List[Season], res: GameUpdateResult)(implicit s: scala.slick.session.Session): GameUpdateResult = {

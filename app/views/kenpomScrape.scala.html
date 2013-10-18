@@ -19,6 +19,14 @@
                @res.get.unknownTeam.map(gd=>
                 <p>{gd.date} {gd.home} v. {gd.away}</p>
                 )
+                <div class="well"><p><strong>The following GAME inserts were generated</strong></p></div>
+               @res.get.gamesInserted.map(gd=>
+                <p>{gd.date} {gd.home} v. {gd.away}</p>
+                )
+                <div class="well"><p><strong>The following GAME deletes were generated</strong></p></div>
+               @res.get.gamesDeleted.map(gd=>
+                <p>{gd.date} {gd.home} v. {gd.away}</p>
+                )
             </div>
         </div>
     </div>
