@@ -41,7 +41,7 @@ object KenPom extends Controller {
 
   def index = Action {
     implicit request =>
-      Ok(views.html.kenpomScrape(form.fill(GameUpdateRequest()), None))
+      Ok(views.html.kenpomScrape(form.fill(GameUpdateRequest())))
   }
 
   def scrapeGames = Action {
@@ -51,7 +51,7 @@ object KenPom extends Controller {
           form.bindFromRequest.fold(
             errors => {
               logger.info("Problems saving " + errors)
-              BadRequest(views.html.kenpomScrape(errors, None))
+              BadRequest(views.html.kenpomScrape(errors))
             },
             req => {
               val result = KenPomGameScraper.scrape(repo, req)

@@ -76,16 +76,15 @@ object KenPomGameScraper {
       val inserts = candidateSet.diff(currentSet).toList
       val deletes = currentSet.diff(candidateSet).toList
       val updates = List.empty
-      if (req.doGameInserts) {
+      if (req.doGameInserts && req.doWrite) {
         inserts.foreach {
           gd:GameData => {
-logger.info("Trying to map "+gd)
             val season: Option[Season] = seasons.find(_.range.contains(gd.date))
             model.Games.autoInc.insert(season.get.id, teamKeyMap(gd.home).id, teamKeyMap(gd.away).id, gd.date, None, false)
           }
         }
       }
-      if (req.doGameDeletes) {
+      if (req.doGameDeletes && req.doWrite) {
         deletes.foreach {
           gd:GameData => {
             val season: Option[Season] = seasons.find(_.range.contains(gd.date))
