@@ -61,6 +61,11 @@ case class TeamDao(model: Model) {
     aliases.foreach(a => Aliases.autoInc.insert(team.id, a))
   }
 
+  def addAlias(alias: String, teamKey: String)(implicit s: scala.slick.session.Session) {
+    val team = Query(Teams).where(_.key === teamKey).firstOption
+    team.foreach(t=>Aliases.autoInc.insert((t.id, alias)))
+  }
+
   def insertAliases(team: Team, aliases: List[String])(implicit s: scala.slick.session.Session) {
     Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl, team.officialUrl, team.officialTwitter)
     aliases.foreach(a => Aliases.autoInc.insert(team.id, a))

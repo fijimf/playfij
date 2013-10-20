@@ -25,6 +25,7 @@ GET  /teams/new                           controllers.Team.create
 GET  /teams/:key                          controllers.Team.view(key)
 GET  /teams/:key/edit                     controllers.Team.edit(key)
 POST /teams/delete                        controllers.Team.delete
+POST /teams/add-alias                     controllers.Team.addAlias
 
 #Note that aliases do not need their own page, as they are associated with at most one team
 

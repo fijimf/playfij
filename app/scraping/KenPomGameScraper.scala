@@ -9,8 +9,10 @@ import models.Game
 import models.TeamDao
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import play.api.Logger
 
-  object KenPomGameScraper {
+object KenPomGameScraper {
+  val logger = Logger(this.getClass.getName)
 
     import play.api.Play.current
 
@@ -68,6 +70,8 @@ import scala.concurrent.duration._
 
       val candidateSet = candidateData.toSet
       val currentSet = currentData.toSet
+      logger.info("# Current Games:"+currentSet.size)
+      logger.info("# Candidate Games:"+candidateSet.size)
 
       val inserts = candidateSet.diff(currentSet).toList
       val deletes = currentSet.diff(candidateSet).toList
@@ -75,6 +79,7 @@ import scala.concurrent.duration._
       if (req.doGameInserts) {
         inserts.foreach {
           gd:GameData => {
+logger.info("Trying to map "+gd)
             val season: Option[Season] = seasons.find(_.range.contains(gd.date))
             model.Games.autoInc.insert(season.get.id, teamKeyMap(gd.home).id, teamKeyMap(gd.away).id, gd.date, None, false)
           }

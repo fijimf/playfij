@@ -46,6 +46,11 @@ object Team extends Controller {
       )
   )
 
+  val aliasForm: Form[(String, Seq[String])] = Form(
+    mapping("alias" -> nonEmptyText,
+      "teamKey" -> seq(nonEmptyText))((alias, teamKey) => (alias, teamKey))((tup: (String, Seq[String])) => Some(tup))
+  )
+
   def view(key: String) = Action {
     implicit request =>
       play.api.db.slick.DB.withSession {
@@ -75,7 +80,7 @@ object Team extends Controller {
             case (t: Team, as: List[String]) => {
               val (prevKey, nextKey) = nextKeys(key)
               val cmap: Map[Season, Conference] = conferenceAssociationDao.queryByTeam(t)
-              Ok(views.html.teamForm(teamForm.fill((t, as)),cmap, t.name + " " + t.nickname, prevKey, nextKey))
+              Ok(views.html.teamForm(teamForm.fill((t, as)), cmap, t.name + " " + t.nickname, prevKey, nextKey))
             }
           }.getOrElse({
             NotFound(views.html.resourceNotFound("team", key))
@@ -91,7 +96,7 @@ object Team extends Controller {
           teamForm.bindFromRequest.fold(
           errors => {
             logger.info("Problems saving " + errors)
-            BadRequest(views.html.teamForm(errors,Map.empty[Season,Conference], "Save failed", "#", "#"))
+            BadRequest(views.html.teamForm(errors, Map.empty[Season, Conference], "Save failed", "#", "#"))
           }, {
             case (team: models.Team, aliases: List[String]) =>
               if (team.id == 0) {
@@ -114,7 +119,7 @@ object Team extends Controller {
           val keys: List[String] = teamDao.list.map(_.key)
           val prevKey = keys.last
           val nextKey = keys.head
-          Ok(views.html.teamForm(teamForm.bind(Map.empty[String, String]),Map.empty[Season, Conference] ,"New Team", prevKey, nextKey))
+          Ok(views.html.teamForm(teamForm.bind(Map.empty[String, String]), Map.empty[Season, Conference], "New Team", prevKey, nextKey))
       }
   }
 
@@ -131,6 +136,23 @@ object Team extends Controller {
             }
             case None => Redirect(routes.Team.list()).flashing("error" -> "No id parameter passed to delete")
           }
+      }
+  }
+
+  def addAlias = Action {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          aliasForm.bindFromRequest.fold(
+          errors => {
+            logger.info("Can't happen")
+            logger.info(errors.toString)
+            Redirect(routes.Team.list())
+          }, {
+            case (alias: String, teamKey: Seq[String]) =>
+              teamDao.addAlias(alias, teamKey(0))
+              Redirect(routes.Team.list()).flashing("success" -> ("Added " + alias))
+          })
       }
   }
 

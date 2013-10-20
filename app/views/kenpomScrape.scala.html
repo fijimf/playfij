@@ -15,10 +15,23 @@
         <div class="row">
             <div class="span12">
                 <h3>Results</h3>
-                <div class="well"><p><strong>The following games were skipped because one or both of the teams was unknown</strong></p></div>
-               @res.get.unknownTeam.map(gd=>
-                <p>{gd.date} {gd.home} v. {gd.away}</p>
-                )
+                <div class="well"><p><strong>The following names could not be mapped to a team</strong></p></div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Count</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @res.get.unmappedTeams(3).map(tc=>
+                    <tr>
+                        <td>{tc._1}</td>
+                        <td>{tc._2}</td>
+                    </tr>
+                    )
+                    </tbody>
+                </table>
                 <div class="well"><p><strong>The following GAME inserts were generated</strong></p></div>
                @res.get.gamesInserted.map(gd=>
                 <p>{gd.date} {gd.home} v. {gd.away}</p>

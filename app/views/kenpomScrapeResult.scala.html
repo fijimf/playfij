@@ -1,0 +1,83 @@
+@(res:scraping.GameUpdateResult, teams:List[models.Team])
+@import helper._
+@import helper.twitterBootstrap._
+
+@main("KenPom Scrape Results") {
+
+<div class="container">
+    <h1>KenPom Scrape Results</h1>
+    <div class="container" style="padding-top:5px;">
+        <div class="row">
+            <div class="span12">
+                <h3>Results</h3>
+                <div class="well"><p><strong>The following names could not be mapped to a team</strong></p></div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Count</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @for(tc <- res.unmappedTeams(3)) {
+                    <tr>
+                        <td>@tc._1</td>
+                        <td>@tc._2</td>
+                        <td>
+                            <form action=@routes.Team.addAlias method="POST">
+                                <input type="hidden" name="alias" id="alias" value="@tc._1">
+                                <select name="teamKey[]" id="teamKey[]" size="1" >
+                                    @for(t <- teams){
+                                        <option value="@t.key">@t.name</option>
+                                    }
+                                </select>
+                                <input type="submit"/>
+                            </form>
+                        </td>
+                    </tr>
+                    }
+                    </tbody>
+                </table>
+                <div class="well"><p><strong>The following GAME inserts were generated</strong></p></div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Home Key</th>
+                        <th>Away Key</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @res.gamesInserted.map(gd=>
+                    <tr>
+                        <td>{gd.date}</td>
+                        <td>{gd.home}</td>
+                        <td>{gd.away}</td>
+                    </tr>
+                    )
+                    </tbody>
+                </table>
+                <div class="well"><p><strong>The following GAME deletes were generated</strong></p></div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Home Key</th>
+                        <th>Away Key</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @res.gamesDeleted.map(gd=>
+                    <tr>
+                        <td>{gd.date}</td>
+                        <td>{gd.home}</td>
+                        <td>{gd.away}</td>
+                    </tr>
+                    )
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+}

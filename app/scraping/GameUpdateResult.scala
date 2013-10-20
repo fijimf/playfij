@@ -11,9 +11,10 @@ case class GameUpdateResult(
                              resultsInserted: List[ResultData] = List.empty[ResultData],
                               resultsUpdated: List[ResultData] = List.empty[ResultData],
                              resultsDeleted: List[ResultData] = List.empty[ResultData]) {
-  def unmappedTeams():Map[String, Int] = {
+  def unmappedTeams(filter:Int=3):List[(String, Int)] = {
     val names: List[String] = (unknownTeam.map(_.home) ++ unknownTeam.map(_.away)).filter(t => StringUtils.isNotBlank(t))
-    names.foldLeft(Map.empty[String, Int])((map: Map[String, Int], s: String) =>map+(s->(map.getOrElse(s,0)+1)))
+    val count=names.foldLeft(Map.empty[String, Int])((map: Map[String, Int], s: String) =>map+(s->(map.getOrElse(s,0)+1)))
+    count.toList.sortBy(_._2).reverse.filter(_._2>filter)
   }
 }
 
