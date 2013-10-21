@@ -96,7 +96,8 @@ object KenPomGameScraper {
       res.copy( gamesInserted = inserts, gamesUpdated = updates, gamesDeleted = deletes)
     }
 
-    def handleResults(req: GameUpdateRequest, candidateData: List[ResultData],  seasons:List[Season], res: GameUpdateResult)(implicit s: scala.slick.session.Session): GameUpdateResult = {
+    def handleResults(req: GameUpdateRequest, candidateData: List[ResultData], teams:List[Team], seasons:List[Season], res: GameUpdateResult)(implicit s: scala.slick.session.Session): GameUpdateResult = {
+      val teamKeyMap: Map[String, Team] = teams.map(t=>t.key->t).toMap
       val currentData: List[ResultData] = loadCurrentData(req, seasons)
 
       val candidateMap = candidateData.map(y => y.gameData -> y.scores).toMap
@@ -110,6 +111,12 @@ object KenPomGameScraper {
       if (req.doResultInserts) {
         inserts.foreach {
           rd => {
+            for(g <- model.Games if (g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id)) {
+              model.Results.where(_.gameId === g.id).delete
+              model.Results.autoInc.insert(g.id, rd.)
+            }
+
+            model.Games
           }
         }
       }
