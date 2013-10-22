@@ -40,7 +40,7 @@ object KenPomGameScraper {
       val (teamOkData, teamBadData) = mapTeams(dateOkData, teamsWithAliases)
       val res = GameUpdateResult(dateOutsideRange = dateBadData.map(_.gameData), unknownTeam = teamBadData.map(_.gameData))
       val hg = handleGames(req, teamOkData.map(_.gameData), teamsWithAliases.keys.toList, seasons, _:GameUpdateResult)
-      val hr = handleResults(req, teamOkData, seasons, _:GameUpdateResult)
+      val hr = handleResults(req, teamOkData, teamsWithAliases.keys.toList, seasons, _:GameUpdateResult)
       hg.andThen(hr).apply(res)
     }
 
@@ -111,18 +111,19 @@ object KenPomGameScraper {
       if (req.doResultInserts) {
         inserts.foreach {
           rd => {
-            for(g <- model.Games if (g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id)) {
-              model.Results.where(_.gameId === g.id).delete
-              model.Results.autoInc.insert(g.id, rd.)
+            for(g <- model.Games if g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id) {
+              model.Results.autoInc.insert((g.id, rd.scores.get._1, rd.scores.get._2))
             }
-
-            model.Games
           }
         }
       }
       if (req.doResultUpdates) {
         deletes.foreach {
           rd => {
+            for(g <- model.Games if g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id;
+                r <- model.Results if r.gameId === g.id) {
+              model.Results.where(_.gameId === g.id).update(r.copy(homsScore=rd.get._1, awayScore=rd._2))
+            }
           }
         }
       }
@@ -130,6 +131,9 @@ object KenPomGameScraper {
       if (req.doResultDeletes) {
         deletes.foreach {
           rd => {
+            for(g <- model.Games if g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id) {
+              model.Results.where(_.gameId === g.id).delete
+            }
           }
         }
       }
