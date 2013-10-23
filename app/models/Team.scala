@@ -3,6 +3,7 @@ package models
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
 import scala.slick.driver.ExtendedProfile
+import scala.slick.lifted
 
 
 case class Team(id: Long, key: String, name: String, longName: String, nickname: String, primaryColor: Option[String], secondaryColor: Option[String], logoUrl: Option[String], officialUrl: Option[String], officialTwitter: Option[String]) {
@@ -27,30 +28,21 @@ case class TeamDao(model: Model) {
   import model._
   import model.profile.simple._
 
+  val team = for {t <- Teams} yield t
+  val teamAndAlias = for {(t, a) <- Teams leftJoin Aliases on (_.id === _.teamId)} yield (t, a.alias.?)
 
-  def listWithAliases(implicit s: scala.slick.session.Session): Map[Team, List[String]] = {
-    (for {
-      (t, a) <- Teams leftJoin Aliases on (_.id === _.teamId)
-    } yield (t, a.alias.?)).list.groupBy(_._1).mapValues(_.map(_._2).flatten)
-  }
+  def pairsToMap(lst: List[(Team, Option[String])]): Map[Team, List[String]] = lst.groupBy(_._1).mapValues(_.map(_._2).flatten)
 
-  def list(implicit s: scala.slick.session.Session): List[Team] = {
-    Query(Teams).sortBy(_.name).to[List]
-  }
+  def list(implicit s: scala.slick.session.Session): List[Team] = team.sortBy(_.name).list
 
-  def findWithAliases(key: String)(implicit s: scala.slick.session.Session): Option[(Team, List[String])] = {
-    (for {
-      (t, a) <- Teams leftJoin Aliases on (_.id === _.teamId); if (t.key === key)
-    } yield (t, a.alias.?)).list.groupBy(_._1).mapValues(_.map(_._2).flatten).headOption
-  }
+  def listWithAliases(implicit s: scala.slick.session.Session): Map[Team, List[String]] = pairsToMap(teamAndAlias.list)
 
-  def find(key: String)(implicit s: scala.slick.session.Session): Option[Team] = {
-    Query(Teams).where(_.key === key).firstOption
-  }
+  def findWithAliases(key: String)(implicit s: scala.slick.session.Session): Option[(Team, List[String])] =
+    pairsToMap(teamAndAlias.where(_._1.key === key).list).headOption
 
-  def update(team: Team)(implicit s: scala.slick.session.Session) {
-    Teams.where(_.id === team.id).update(team)
-  }
+  def find(key: String)(implicit s: scala.slick.session.Session): Option[Team] = team.where(_.key === key).firstOption
+
+  def update(team: Team)(implicit s: scala.slick.session.Session) = Teams.where(_.id === team.id).update(team)
 
   def insert(team: Team)(implicit s: scala.slick.session.Session) {
     Teams.autoInc.insert(team.key, team.name, team.longName, team.nickname, team.primaryColor, team.secondaryColor, team.logoUrl, team.officialUrl, team.officialTwitter)
@@ -63,7 +55,7 @@ case class TeamDao(model: Model) {
 
   def addAlias(alias: String, teamKey: String)(implicit s: scala.slick.session.Session) {
     val team = Query(Teams).where(_.key === teamKey).firstOption
-    team.foreach(t=>Aliases.autoInc.insert((t.id, alias)))
+    team.foreach(t => Aliases.autoInc.insert((t.id, alias)))
   }
 
   def insertAliases(team: Team, aliases: List[String])(implicit s: scala.slick.session.Session) {

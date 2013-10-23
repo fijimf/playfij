@@ -138,8 +138,6 @@ trait Model extends Profile{
 
     def date = column[LocalDate]("date")
 
-    def resultId = column[Long]("result_id")
-
     def location = column[Option[String]]("location")
 
     def isNeutralSite = column[Boolean]("is_neutral_site")
@@ -150,15 +148,16 @@ trait Model extends Profile{
 
     def homeTeamFk = foreignKey("gam_home_team_fk", homeTeamId, Teams)(_.id)
 
-    def awayTeamFk = foreignKey("gam_away_team_fk", homeTeamId, Teams)(_.id)
+    def awayTeamFk = foreignKey("gam_away_team_fk", awayTeamId, Teams)(_.id)
 
     def seasonFk = foreignKey("gam_season_fk", seasonId, Seasons)(_.id)
+
   }
 
   object Results extends Table[Result]("results") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def gameId = column[Long]("season_id")
+    def gameId = column[Long]("game_id")
 
     def homeScore = column[Int]("home_score")
 
@@ -168,7 +167,7 @@ trait Model extends Profile{
 
     def * = id ~ gameId ~ homeScore ~ awayScore ~ numOts <>(Result.apply _, Result.unapply _)
 
-    def autoInc = homeScore ~ awayScore ~ numOts returning id
+    def autoInc = gameId ~ homeScore ~ awayScore ~ numOts returning id
 
     def gameFk = foreignKey("res_game_fk", gameId, Games)(_.id)
 

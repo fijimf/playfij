@@ -23,6 +23,7 @@ object KenPomGameScraper {
     import model.profile.simple._
 
     private val teamDao: TeamDao = TeamDao(model)
+    private val gameDao: GameDao = GameDao(model)
 
     def dateOk(d: LocalDate, req: GameUpdateRequest, seasons:List[Season]): Boolean = {
       val seasonOk = seasons.foldLeft(false)((b: Boolean, season: Season) => b || season.range.contains(d))
@@ -111,19 +112,20 @@ object KenPomGameScraper {
       if (req.doResultInserts) {
         inserts.foreach {
           rd => {
-            for(g <- model.Games if g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id) {
-              model.Results.autoInc.insert((g.id, rd.scores.get._1, rd.scores.get._2))
-            }
+            val g: Option[Game] = gameDao.findGameBySchedule(rd.gameData.home, rd.gameData.away, rd.gameData.date)
+            g.foreach(game => {
+              model.Results.autoInc.insert(game.id, rd.scores.get._1, rd.scores.get._2, 0)
+            })
           }
         }
       }
       if (req.doResultUpdates) {
         deletes.foreach {
           rd => {
-            for(g <- model.Games if g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id;
-                r <- model.Results if r.gameId === g.id) {
-              model.Results.where(_.gameId === g.id).update(r.copy(homsScore=rd.get._1, awayScore=rd._2))
-            }
+            val g: Option[Game] = gameDao.findGameBySchedule(rd.gameData.home, rd.gameData.away, rd.gameData.date)
+            g.foreach(game => {
+              model.Results.where(_.gameId === game.id).update(Result(0,game.id, rd.scores.get._1, rd.scores.get._2, 0))
+            })
           }
         }
       }
@@ -131,9 +133,10 @@ object KenPomGameScraper {
       if (req.doResultDeletes) {
         deletes.foreach {
           rd => {
-            for(g <- model.Games if g.homeTeamId === teamKeyMap(rd.gameData.home).id && g.awayTeamId === teamKeyMap(rd.gameData.home).id) {
-              model.Results.where(_.gameId === g.id).delete
-            }
+            val g: Option[Game] = gameDao.findGameBySchedule(rd.gameData.home, rd.gameData.away, rd.gameData.date)
+            g.foreach(game => {
+              model.Results.where(_.gameId === game.id).delete
+            })
           }
         }
       }
