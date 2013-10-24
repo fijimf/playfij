@@ -99,7 +99,7 @@ object KenPomGameScraper {
 
     def handleResults(req: GameUpdateRequest, candidateData: List[ResultData], teams:List[Team], seasons:List[Season], res: GameUpdateResult)(implicit s: scala.slick.session.Session): GameUpdateResult = {
       val teamKeyMap: Map[String, Team] = teams.map(t=>t.key->t).toMap
-      val currentData: List[ResultData] = loadCurrentData(req, seasons)
+      val currentData: List[ResultData] = loadCurrentData(req, seasons).filter(_.scores.isDefined)
 
       val candidateMap = candidateData.map(y => y.gameData -> y.scores).toMap
       val currentMap = currentData.map(y => y.gameData -> y.scores).toMap
@@ -110,7 +110,7 @@ object KenPomGameScraper {
       val inserts = candidateMap.keySet.diff(currentMap.keySet).filter(k=>candidateMap(k).isDefined).map(k=>ResultData(k, candidateMap(k)))
       val deletes = currentMap.keySet.diff(candidateMap.keySet).filter(k=>currentMap(k).isDefined).map(k=>ResultData(k, currentMap(k)))
       val updates = currentMap.keySet.intersect(candidateMap.keySet).filter(k=>candidateMap(k).isDefined && currentMap(k).isDefined && candidateMap(k) != currentMap(k)).map(k=>ResultData(k, candidateMap(k)))
-      if (req.doResultInserts) {
+      if (req.doResultInserts && req.doWrite) {
         inserts.foreach {
           rd => {
             val g: Option[Game] = gameDao.findGameBySchedule(rd.gameData.home, rd.gameData.away, rd.gameData.date)
@@ -120,7 +120,7 @@ object KenPomGameScraper {
           }
         }
       }
-      if (req.doResultUpdates) {
+      if (req.doResultUpdates && req.doWrite) {
         deletes.foreach {
           rd => {
             val g: Option[Game] = gameDao.findGameBySchedule(rd.gameData.home, rd.gameData.away, rd.gameData.date)
@@ -131,7 +131,7 @@ object KenPomGameScraper {
         }
       }
 
-      if (req.doResultDeletes) {
+      if (req.doResultDeletes && req.doWrite) {
         deletes.foreach {
           rd => {
             val g: Option[Game] = gameDao.findGameBySchedule(rd.gameData.home, rd.gameData.away, rd.gameData.date)
