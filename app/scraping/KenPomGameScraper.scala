@@ -103,12 +103,13 @@ object KenPomGameScraper {
 
       val candidateMap = candidateData.map(y => y.gameData -> y.scores).toMap
       val currentMap = currentData.map(y => y.gameData -> y.scores).toMap
+      logger.info("# Current Results:"+currentMap.size)
+      logger.info("# Candidate Results:"+candidateMap.size)
 
-      val keys = currentMap.keySet.intersect(candidateMap.keySet)
 
-      val inserts = keys.filter(k=>candidateMap(k).isDefined && currentMap(k).isEmpty).map(k=>ResultData(k, candidateMap(k)))
-      val deletes = keys.filter(k=>candidateMap(k).isEmpty && currentMap(k).isDefined).map(k=>ResultData(k, currentMap(k)))
-      val updates = keys.filter(k=>candidateMap(k).isDefined && currentMap(k).isDefined && candidateMap(k) != currentMap(k)).map(k=>ResultData(k, candidateMap(k)))
+      val inserts = candidateMap.keySet.diff(currentMap.keySet).filter(k=>candidateMap(k).isDefined).map(k=>ResultData(k, candidateMap(k)))
+      val deletes = currentMap.keySet.diff(candidateMap.keySet).filter(k=>currentMap(k).isDefined).map(k=>ResultData(k, currentMap(k)))
+      val updates = currentMap.keySet.intersect(candidateMap.keySet).filter(k=>candidateMap(k).isDefined && currentMap(k).isDefined && candidateMap(k) != currentMap(k)).map(k=>ResultData(k, candidateMap(k)))
       if (req.doResultInserts) {
         inserts.foreach {
           rd => {

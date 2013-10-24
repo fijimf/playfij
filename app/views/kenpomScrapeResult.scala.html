@@ -76,6 +76,48 @@
                     )
                     </tbody>
                 </table>
+                <div class="well"><p><strong>The following RESULT inserts were generated</strong></p></div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Home Key</th>
+                        <th>Away Key</th>
+                        <th>Home Score</th>
+                        <th>Away Score</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @res.resultsInserted.map(rd=>
+                    <tr>
+                        <td>{rd.gameData.date}</td>
+                        <td>{rd.gameData.home}</td>
+                        <td>{rd.gameData.away}</td>
+                        <td>{rd.scores.get._1}</td>
+                        <td>{rd.scores.get._2}</td>
+                    </tr>
+                    )
+                    </tbody>
+                </table>
+                <div class="well"><p><strong>The following RESULT deletes were generated</strong></p></div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Home Key</th>
+                        <th>Away Key</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @res.resultsDeleted.map(rd=>
+                    <tr>
+                        <td>{rd.gameData.date}</td>
+                        <td>{rd.gameData.home}</td>
+                        <td>{rd.gameData.away}</td>
+                    </tr>
+                    )
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

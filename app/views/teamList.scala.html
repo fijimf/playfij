@@ -1,6 +1,6 @@
 @(teams: Map[Team,List[String]])(implicit flash:Flash)
 
-@main("Teams") {
+@mainNoAds("Teams") {
 <script>
     function deleteTeam(i,n){
       var hiddenId =   '<input type="hidden" id="id"       name="id"       value="' + i + '"/>';
