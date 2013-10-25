@@ -1,0 +1,45 @@
+@(status: List[(String,Option[Int])])(implicit flash: Flash)
+
+@main("Admin Menu") {
+<div class="row-fluid">
+    <div class="span12">
+        <h3>Admin Menu</h3>
+    </div>
+</div>
+@if(flash.get("success").isDefined || flash.get("error").isDefined) {
+<div class="row-fluid">
+    <div class="span12">
+        @if(flash.get("success").isDefined) {
+        <div class="alert alert-success"><p>@flash.get("success").get</p></div>
+        }
+        @if(flash.get("error").isDefined) {
+        <div class="alert alert-error"><p>@flash.get("error").get</p></div>
+        }
+    </div>
+</div>
+}
+<div class="row-fluid">
+    <div class="span6">
+    <h4>Data Tasks</h4>
+        <div class="well">
+        <h4>Database</h4>
+        <a href="@admin.routes.Database.index">Database operations</a>
+        <h4>Data Scraping</h4>
+        <p><a href="@admin.routes.Ncaa.index">ncaa.com</a></p>
+        <p><a href="@admin.routes.KenPom.index">kenpom.com</a></p>
+        <h4>Data Editing</h4>
+        <p><a href="@routes.Season.list">Seasons</a></p>
+        <p><a href="@routes.Team.list">Teams</a></p>
+        <p><a href="@routes.Conference.list">Conferences</a></p>
+        <p><a href="@routes.Quote.list">Quotes</a></p>
+        </div>
+        <h4>Model Runs</h4>
+        <h4>Performance Info</h4>
+
+    </div>
+    <div class="span6">
+        @dbStatus(status)
+    </div>
+</div>
+
+}

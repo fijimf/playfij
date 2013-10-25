@@ -3,79 +3,83 @@
 # ~~~~
 
 # Home page
-GET  /                                    controllers.Application.index
+GET  /                                          controllers.Application.index
+GET  /teams/:key                                controllers.Application.team(key:String)
+GET  /conferences/:key                          controllers.Application.conference(key:String)
+GET  /statistic/:key                            controllers.Application.statistic(key:String)
+GET  /statistic/:key/:date                      controllers.Application.histStatistic(key:String, date:String)
 
-GET  /seasons                             controllers.Season.list
-POST /seasons                             controllers.Season.submit  
-GET  /seasons/new                         controllers.Season.create
-GET  /seasons/:key                        controllers.Season.view(key)
-GET  /seasons/:key/edit                   controllers.Season.edit(key)
-POST /seasons/delete                      controllers.Season.delete
+### SECURED PAGES ###
+GET  /admin                                     controllers.admin.Admin.index
+GET  /admin/seasons                             controllers.Season.list
+POST /admin/seasons                             controllers.Season.submit
+GET  /admin/seasons/new                         controllers.Season.create
+GET  /admin/seasons/:key                        controllers.Season.view(key)
+GET  /admin/seasons/:key/edit                   controllers.Season.edit(key)
+POST /admin/seasons/delete                      controllers.Season.delete
 
-GET  /conferences                         controllers.Conference.list
-POST /conferences                         controllers.Conference.submit  
-GET  /conferences/new                     controllers.Conference.create
-GET  /conferences/:key                    controllers.Conference.view(key)
-GET  /conferences/:key/edit               controllers.Conference.edit(key)
-POST /conferences/delete                  controllers.Conference.delete
+GET  /admin/conferences                         controllers.Conference.list
+POST /admin/conferences                         controllers.Conference.submit
+GET  /admin/conferences/new                     controllers.Conference.create
+GET  /admin/conferences/:key                    controllers.Conference.view(key)
+GET  /admin/conferences/:key/edit               controllers.Conference.edit(key)
+POST /admin/conferences/delete                  controllers.Conference.delete
 
-GET  /teams                               controllers.Team.list
-POST /teams                               controllers.Team.submit  
-GET  /teams/new                           controllers.Team.create
-GET  /teams/:key                          controllers.Team.view(key)
-GET  /teams/:key/edit                     controllers.Team.edit(key)
-POST /teams/delete                        controllers.Team.delete
-POST /teams/add-alias                     controllers.Team.addAlias
+GET  /admin/teams                               controllers.Team.list
+POST /admin/teams                               controllers.Team.submit
+GET  /admin/teams/new                           controllers.Team.create
+GET  /admin/teams/:key                          controllers.Team.view(key)
+GET  /admin/teams/:key/edit                     controllers.Team.edit(key)
+POST /admin/teams/delete                        controllers.Team.delete
+POST /admin/teams/add-alias                     controllers.Team.addAlias
 
-#Note that aliases do not need their own page, as they are associated with at most one team
+GET  /admin/games                               controllers.Game.list
+POST /admin/games                               controllers.Game.submit
+GET  /admin/games/new                           controllers.Game.create
+GET  /admin/games/:id                           controllers.Game.view(id)
+GET  /admin/games/:id/edit                      controllers.Game.edit(id)
+POST /admin/games/delete                        controllers.Game.delete
 
-GET  /games                               controllers.Game.list
-POST /games                               controllers.Game.submit  
-GET  /games/new                           controllers.Game.create
-GET  /games/:id                           controllers.Game.view(id)
-GET  /games/:id/edit                      controllers.Game.edit(id)
-POST /games/delete                        controllers.Game.delete
+GET  /admin/quotes                              controllers.Quote.list
+POST /admin/quotes                              controllers.Quote.submit
+GET  /admin/quotes/new                          controllers.Quote.create
+GET  /admin/quotes/:id                          controllers.Quote.view(id:Long)
+GET  /admin/quotes/:id/edit                     controllers.Quote.edit(id:Long)
+POST /admin/quotes/delete                       controllers.Quote.delete
 
-#Note that results do not need their own page as they are associated with at most one game
+GET  /admin/database                            controllers.admin.Database.index
+POST /admin/database/rebuild                    controllers.admin.Database.rebuildDatabase
+GET  /admin/database/show-ddl                   controllers.admin.Database.rebuildDatabase
 
-GET  /quotes                              controllers.Quote.list
-POST /quotes                              controllers.Quote.submit
-GET  /quotes/new                          controllers.Quote.create
-GET  /quotes/:id                          controllers.Quote.view(id:Long)
-GET  /quotes/:id/edit                     controllers.Quote.edit(id:Long)
-POST /quotes/delete                       controllers.Quote.delete
+GET  /admin/ncaa                                controllers.admin.Ncaa.index
+POST /admin/ncaa/scrape-teams                   controllers.admin.Ncaa.scrapeTeams
+POST /admin/ncaa/scrape-games                   controllers.admin.Ncaa.scrapeGames
+POST /admin/ncaa/scrape-games-etc               controllers.admin.Ncaa.scrapeGamesEtc
 
-GET     /admin/database                   controllers.admin.Database.index
-POST    /admin/database/rebuild           controllers.admin.Database.rebuildDatabase
+GET  /admin/kenpom                              controllers.admin.KenPom.index
+POST /admin/kenpom/scrape-games                 controllers.admin.KenPom.scrapeGames
 
-GET     /admin/ncaa                       controllers.admin.Ncaa.index
-POST    /admin/ncaa/scrape-teams          controllers.admin.Ncaa.scrapeTeams
-POST    /admin/ncaa/scrape-games          controllers.admin.Ncaa.scrapeGames
-POST    /admin/ncaa/scrape-games-etc      controllers.admin.Ncaa.scrapeGamesEtc
-
-GET     /admin/kenpom                     controllers.admin.KenPom.index
-POST    /admin/kenpom/scrape-games        controllers.admin.KenPom.scrapeGames
-
+### SECURE SOCIAL ###
 # Login page
-GET     /login                      securesocial.controllers.LoginPage.login
-GET     /logout                     securesocial.controllers.LoginPage.logout
+GET  /login                                     securesocial.controllers.LoginPage.login
+GET  /logout                                    securesocial.controllers.LoginPage.logout
 
 # User Registration and password handling
-GET     /signup                     securesocial.controllers.Registration.startSignUp
-POST    /signup                     securesocial.controllers.Registration.handleStartSignUp
-GET     /signup/:token              securesocial.controllers.Registration.signUp(token)
-POST    /signup/:token              securesocial.controllers.Registration.handleSignUp(token)
-GET     /reset                      securesocial.controllers.Registration.startResetPassword
-POST    /reset                      securesocial.controllers.Registration.handleStartResetPassword
-GET     /reset/:token               securesocial.controllers.Registration.resetPassword(token)
-POST    /reset/:token               securesocial.controllers.Registration.handleResetPassword(token)
-GET     /password                   securesocial.controllers.PasswordChange.page
-POST    /password                   securesocial.controllers.PasswordChange.handlePasswordChange
+GET  /signup                                    securesocial.controllers.Registration.startSignUp
+POST /signup                                    securesocial.controllers.Registration.handleStartSignUp
+GET  /signup/:token                             securesocial.controllers.Registration.signUp(token)
+POST /signup/:token                             securesocial.controllers.Registration.handleSignUp(token)
+GET  /reset                                     securesocial.controllers.Registration.startResetPassword
+POST /reset                                     securesocial.controllers.Registration.handleStartResetPassword
+GET  /reset/:token                              securesocial.controllers.Registration.resetPassword(token)
+POST /reset/:token                              securesocial.controllers.Registration.handleResetPassword(token)
+GET  /password                                  securesocial.controllers.PasswordChange.page
+POST /password                                  securesocial.controllers.PasswordChange.handlePasswordChange
 
 # Providers entry points
-GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
-POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
-GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
+GET  /authenticate/:provider                    securesocial.controllers.ProviderController.authenticate(provider)
+POST /authenticate/:provider                    securesocial.controllers.ProviderController.authenticateByPost(provider)
+GET  /not-authorized                            securesocial.controllers.ProviderController.notAuthorized
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file                     controllers.Assets.at(path="/public", file)
+GET  /assets/*file                              controllers.Assets.at(path="/public", file)

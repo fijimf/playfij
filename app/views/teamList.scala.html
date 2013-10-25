@@ -26,16 +26,16 @@
         <div class="alert alert-error"><p>@flash.get("error").get</p></div>
         }
 
-        <table class="table table-condensed  table-bordered" style="table-layout:fixed;">
+        <table class="table table-condensed table-bordered table-admin" style="table-layout:fixed;">
             <thead>
             <tr>
-                <th style="width:8em;" colspan="3"></th>
+                <th style="width:3em;"></th>
                 <th style="width:4em;"></th>
-                <th style="width:12em;">Team</a></th>
-                <th style="width:8em;">Nickname</th>
-                <th style="width:18em;">Long Name</th>
+                <th style="width:11em;">Team</a></th>
+                <th style="width:7em;">Nickname</th>
+                <th style="width:3em;">Long Name</th>
                 <th style="width:12em;">Aliases</th>
-                <th style="width:14em;">Official URL</th>
+                <th style="width:12em;">Official URL</th>
                 <th style="width:10em;">Official Twitter</th>
                 <th style="width:4em;"></th>
             </tr>
@@ -43,13 +43,11 @@
             <tbody>
             @teams.keys.toList.sortBy(_.name).map { team=>
             <tr>
-                <td><img src="@team.logoUrl.getOrElse("")"/></td>
                 <td style="overflow-x:hidden; background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
-                <td style="overflow-x:hidden; background-color:@team.secondaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
                 <td><a class="btn btn-primary btn-small" href="@controllers.routes.Team.edit(team.key)">Edit</a></td>
                 <td style="overflow-x:hidden;"><a href="@controllers.routes.Team.view(team.key)">@team.name</a></td>
                 <td style="overflow-x:hidden;">@team.nickname</td>
-                <td style="overflow-x:hidden;">@team.longName</td>
+                <td style="overflow:hidden;">@team.longName</td>
                 <td style="overflow-x:hidden;">@teams(team).mkString(", ")</td>
                 <td style="overflow-x:hidden;">@team.officialUrl.getOrElse("")</td>
                 <td style="overflow-x:hidden;">@team.officialTwitter.getOrElse("")</td>

@@ -1,0 +1,18 @@
+@(status: List[(String,Option[Int])])
+<h4>Database Status</h4>
+<table class="table table-compact table-subcompact table-bordered">
+    <thead>
+    <tr>
+        <th>Table</th>
+        <th>Row Count</th>
+    </tr>
+    </thead>
+    <tbody>
+    @status.map{tup=>
+    <tr>
+        <td>@tup._1</td>
+        <td>@{tup._2.map(_.toString ).getOrElse("N/A")}</td>
+    </tr>
+    }
+    </tbody>
+</table>

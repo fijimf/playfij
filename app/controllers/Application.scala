@@ -10,17 +10,12 @@ object Application extends Controller {
     Ok(views.html.index("Your new application is ready."))
   }
 
-  def gameList = Action {
-    Ok(views.html.gameList("Your new application is ready."))
-  }
+  def team(key: String) = TODO
 
-  def conferenceList = Action {
-    Ok(views.html.notImplemented("Your new application is ready."))
-  }
+  def conference(key: String) = TODO
 
-  def teamList = Action {
-    Ok(views.html.notImplemented("Teamlist not implemented."))
-  }
+  def statistic(key: String) = TODO
 
+  def histStatistic(key: String, date: String) = TODO
 
 }

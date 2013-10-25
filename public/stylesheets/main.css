@@ -1,3 +1,23 @@
 form .row {
    padding-bottom:30px;
 }
+
+.table-subcompact td,.table-subcompact th {
+   padding:1px 3px 1px 3px;
+}
+
+.table-admin {
+   width:auto;
+   table-layout:fixed;
+   overflow-x:hidden;
+   white-space: nowrap;
+}
+
+.table-admin td {
+   vertical-align:middle;
+}
+
+td a.btn {
+   width:60%;
+   align: center;
+}
