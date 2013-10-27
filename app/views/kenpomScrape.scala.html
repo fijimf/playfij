@@ -8,56 +8,34 @@
 <div class="row-fluid">
     <div class="span12">
         <div class="row-fluid">
-            <h1>Scrape KenPom</h1>
+            <h3>Scrape KenPom</h3>
         </div>
-        @helper.form(action = admin.routes.KenPom.scrapeGames, 'class->"form form-horizontal") {
+        @helper.form(action = admin.routes.KenPom.scrapeGames, 'class->"form well") {
         <fieldset>
             <div class="row-fluid">
-                <div class="span6">
+                <div class="span4">
                     @inputText( req("url"), '_label -> "URL", '_showConstraints -> false, 'class->"input-xlarge" )
+                    @inputText( req("fromDate"), '_label -> "From", '_showConstraints -> false, 'class->"input-medium" )
+                    @inputText( req("toDate"), '_label -> "To", '_showConstraints -> false, 'class->"input-medium" )
                 </div>
-                <div class="span3"> @inputText( req("fromDate"), '_label -> "From", '_showConstraints -> false,
-                    'class->"input-medium" )
-                </div>
-                <div class="span3">@inputText( req("toDate"), '_label -> "To", '_showConstraints -> false,
-                    'class->"input-medium" )
-                </div>
-            </div>
-            <div class="row-fluid" style="padding-bottom:20px;">
-                <div class="span12"> @checkbox( req("doWrite"), '_label -> "Update Database?", '_showConstraints
-                    -> false )
-                </div>
-            </div>
-            <div class="row-fluid">
-                <div class="span6">
+                <div class="span4">
                     <h4>Games</h4>
-                </div>
-                <div class="span6">
-                    <h4>Results</h4>
-                </div>
-            </div>
-            <div class="row-fluid">
-                <div class="span2">
                     @checkbox( req("doGameInserts"), '_label -> "Apply Inserts?", '_showConstraints -> false )
-                </div>
-                <div class="span2">
                     @checkbox( req("doGameUpdates"), '_label -> "Apply Updates?", '_showConstraints -> false )
-                </div>
-                <div class="span2">
                     @checkbox( req("doGameDeletes"), '_label -> "Apply Deletes?", '_showConstraints -> false )
                 </div>
-                <div class="span2">
+                <div class="span4">
+                    <h4>Results</h4>
                     @checkbox( req("doResultInserts"), '_label -> "Apply Inserts?", '_showConstraints -> false )
-                </div>
-                <div class="span2">
                     @checkbox( req("doResultUpdates"), '_label -> "Apply Updates?", '_showConstraints -> false )
-                </div>
-                <div class="span2">
                     @checkbox( req("doResultDeletes"), '_label -> "Apply Deletes?", '_showConstraints -> false )
                 </div>
             </div>
             <div class="row-fluid">
-                <div class="span1">
+                <div class="span3">
+                    @checkbox( req("doWrite"), '_label -> "Update Database?", '_showConstraints -> false )
+                </div>
+                <div class="span3">
                     <input type="submit" class="btn btn-primary" value="Scrape">
                 </div>
             </div>
