@@ -7,17 +7,20 @@ form .row {
 }
 
 .table-admin {
-   width:auto;
+#   width:auto;
    table-layout:fixed;
-   overflow-x:hidden;
+     overflow: hidden;
+      white-space: nowrap;
+}
+
+.table-admin td, .table-admin th {
+   vertical-align:middle;
+   overflow: hidden;
    white-space: nowrap;
 }
 
-.table-admin td {
-   vertical-align:middle;
-}
-
-td a.btn {
+td a.btn, th a.btn {
+   font-weight: normal;
    width:60%;
    align: center;
 }

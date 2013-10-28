@@ -1,5 +1,7 @@
 @(conferences: List[Conference])(implicit flash:Flash)
 
+@import tags._
+
 @main("Conferences") {
 <script>
     function deleteConference(i,n){
@@ -18,14 +20,7 @@
 </div>
 <div class="row-fluid">
     <div class="span12">
-
-        @if(flash.get("success").isDefined) {
-        <div class="alert alert-success"><p>@flash.get("success").get</p></div>
-        }
-        @if(flash.get("error").isDefined) {
-        <div class="alert alert-error"><p>@flash.get("error").get</p></div>
-        }
-
+@flashBox(flash)
         <table class="table table-condensed  table-bordered" style="table-layout:fixed;">
             <thead>
             <tr>

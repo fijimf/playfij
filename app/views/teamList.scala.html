@@ -1,58 +1,55 @@
 @(teams: Map[Team,List[String]])(implicit flash:Flash)
 
+@import tags._
+
 @mainNoAds("Teams") {
 <script>
     function deleteTeam(i,n){
-      var hiddenId =   '<input type="hidden" id="id"       name="id"       value="' + i + '"/>';
-      var hiddenName = '<input type="hidden" id="teamName" name="teamName" value="' + n + '"/>';
-      $('<form>', { "html":hiddenId+hiddenName, "method":'POST', "action":'/teams/delete' } )
+    var hiddenId = '<input type="hidden" id="id" name="id" value="' + i + '"/>';
+    var hiddenName = '<input type="hidden" id="teamName" name="teamName" value="' + n + '"/>';
+    $('
+    <form>', { "html":hiddenId+hiddenName, "method":'POST', "action":'/teams/delete' } )
         .appendTo(document.body).submit();
-    }
+        }
 </script>
 
 <div class="row-fluid">
     <div class="span12">
-        <h1 class="span1">Teams</h1>
-        <a href="/teams/new" class="span2 offset9 btn btn-primary btn-block" style="margin-top:15px;">New Team</a>
+        <h3>Teams</h3>
     </div>
 </div>
+@flashBox(flash)
 <div class="row-fluid">
     <div class="span12">
-
-        @if(flash.get("success").isDefined) {
-        <div class="alert alert-success"><p>@flash.get("success").get</p></div>
-        }
-        @if(flash.get("error").isDefined) {
-        <div class="alert alert-error"><p>@flash.get("error").get</p></div>
-        }
-
-        <table class="table table-condensed table-bordered table-admin" style="table-layout:fixed;">
+        <table class="table table-condensed table-bordered table-admin" style="width:78em; max-width:78em;">
             <thead>
             <tr>
-                <th style="width:3em;"></th>
-                <th style="width:4em;"></th>
-                <th style="width:11em;">Team</a></th>
-                <th style="width:7em;">Nickname</th>
-                <th style="width:3em;">Long Name</th>
-                <th style="width:12em;">Aliases</th>
+                <th style="width:1.5em;"></th>
+                <th style="width:4em;"><a href="/teams/new" class="btn btn-primary btn-small" style="margin-top:15px;">New</a>
+                </th>
+                <th style="width:9em;">Team</a></th>
+                <th style="width:8em;">Nickname</th>
+                <th style="width:14em;">Long Name</th>
+                <th style="width:14em;">Aliases</th>
                 <th style="width:12em;">Official URL</th>
-                <th style="width:10em;">Official Twitter</th>
+                <th style="width:12em;">Official Twitter</th>
                 <th style="width:4em;"></th>
             </tr>
             </thead>
             <tbody>
             @teams.keys.toList.sortBy(_.name).map { team=>
             <tr>
-                <td style="overflow-x:hidden; background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
+                <td style="background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
                 <td><a class="btn btn-primary btn-small" href="@controllers.routes.Team.edit(team.key)">Edit</a></td>
-                <td style="overflow-x:hidden;"><a href="@controllers.routes.Team.view(team.key)">@team.name</a></td>
-                <td style="overflow-x:hidden;">@team.nickname</td>
-                <td style="overflow:hidden;">@team.longName</td>
-                <td style="overflow-x:hidden;">@teams(team).mkString(", ")</td>
-                <td style="overflow-x:hidden;">@team.officialUrl.getOrElse("")</td>
-                <td style="overflow-x:hidden;">@team.officialTwitter.getOrElse("")</td>
+                <td><a href="@controllers.routes.Team.view(team.key)">@team.name</a></td>
+                <td>@team.nickname</td>
+                <td>@team.longName</td>
+                <td>@teams(team).mkString(", ")</td>
+                <td>@team.officialUrl.getOrElse("")</td>
+                <td>@team.officialTwitter.getOrElse("")</td>
                 <td>
-                    <button class="btn btn-danger btn-small" onclick="deleteTeam('@team.id', '@team.name')">Delete</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteTeam('@team.id', '@team.name')">Delete
+                    </button>
                 </td>
             </tr>
             }

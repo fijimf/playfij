@@ -1,5 +1,7 @@
 @(seasons: List[Season])(implicit flash:Flash)
 
+@import tags._
+
 @main("Seasons") {
 <script>
     function deleteSeason(i,n){
@@ -13,24 +15,18 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <h1 class="span1">Seasons</h1>
-        <a href="/seasons/new" class="span2 offset9 btn btn-primary btn-block" style="margin-top:15px;">New Season</a>
+        <h3 class="span1">Seasons</h3>
     </div>
 </div>
+@flashBox(flash)
 <div class="row-fluid">
     <div class="span12">
-
-        @if(flash.get("success").isDefined) {
-        <div class="alert alert-success"><p>@flash.get("success").get</p></div>
-        }
-        @if(flash.get("error").isDefined) {
-        <div class="alert alert-error"><p>@flash.get("error").get</p></div>
-        }
-
         <table class="table table-condensed table-bordered table-admin" style="table-layout:fixed; width:auto;">
             <thead>
             <tr>
-                <th style="width:4em;"></th>
+                <th style="width:4em;">
+                    <a href="/seasons/new" class="btn btn-primary btn-small">New</a>
+                </th>
                 <th style="width:12em;">Season</a></th>
                 <th style="width:6em;">From</th>
                 <th style="width:6em;">To</th>
