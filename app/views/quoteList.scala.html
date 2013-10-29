@@ -1,6 +1,8 @@
 @(quotes: List[Quote])(implicit flash:Flash)
 
-@main("Quotes") {
+@import tags._
+
+@mainNoAds("Quotes") {
 <script>
     function deleteQuote(i,n){
       var hiddenId =   '<input type="hidden" id="id"       name="id"       value="' + i + '"/>';
@@ -12,27 +14,21 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <h1 class="span1">Quotes</h1>
-        <a href="/quotes/new" class="span2 offset9 btn btn-primary btn-block" style="margin-top:15px;">New Quote</a>
+        <h3>Quotes</h3>
     </div>
 </div>
+@flashBox(flash)
 <div class="row-fluid">
     <div class="span12">
-
-        @if(flash.get("success").isDefined) {
-        <div class="alert alert-success"><p>@flash.get("success").get</p></div>
-        }
-        @if(flash.get("error").isDefined) {
-        <div class="alert alert-error"><p>@flash.get("error").get</p></div>
-        }
-
-        <table class="table table-condensed  table-bordered" style="table-layout:fixed;">
+        <table class="table table-condensed table-bordered table-admin">
             <thead>
             <tr>
-                <th style="width:4em;"></th>
-                <th style="width:12em;">Quote</a></th>
-                <th style="width:18em;">Source</th>
-                <th style="width:14em;">URL</th>
+                <th style="width:4em;">
+                    <a href="/quotes/new" class="btn btn-primary btn-small" style="margin-top:15px;">New</a>
+                </th>
+                <th style="width:18em;">Quote</a></th>
+                <th style="width:10em;">Source</th>
+                <th style="width:10em;">URL</th>
                 <th style="width:4em;"></th>
             </tr>
             </thead>

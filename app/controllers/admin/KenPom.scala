@@ -55,7 +55,7 @@ object KenPom extends Controller {
             },
             req => {
               val result = KenPomGameScraper.scrape(repo, req)
-              Ok(views.html.kenpomScrapeResult(result, TeamDao(repo.m).list))
+              Ok(views.html.kenpomScrapeResult(result, req, TeamDao(repo.m).list))
             }
           )
       }

@@ -10,7 +10,7 @@ case class GameUpdateRequest(url: String = "",
                              doResultInserts: Boolean = true,
                              doResultUpdates: Boolean = true,
                              doResultDeletes: Boolean = false,
-                             fromDate: Option[LocalDate] = Some(new LocalDate()),
+                             fromDate: Option[LocalDate] = None,
                              toDate: Option[LocalDate] = None)
 
 

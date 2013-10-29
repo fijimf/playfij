@@ -7,10 +7,10 @@ form .row {
 }
 
 .table-admin {
-#   width:auto;
+   width:auto;
    table-layout:fixed;
-     overflow: hidden;
-      white-space: nowrap;
+   overflow: hidden;
+   white-space: nowrap;
 }
 
 .table-admin td, .table-admin th {
@@ -23,4 +23,12 @@ td a.btn, th a.btn {
    font-weight: normal;
    width:60%;
    align: center;
+}
+
+td select {
+   margin-bottom: 0;
+}
+
+td form {
+   margin-bottom:0;
 }

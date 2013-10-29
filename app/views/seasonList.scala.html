@@ -2,7 +2,7 @@
 
 @import tags._
 
-@main("Seasons") {
+@mainNoAds("Seasons") {
 <script>
     function deleteSeason(i,n){
     var hiddenId = '<input type="hidden" id="id" name="id" value="' + i + '"/>';
@@ -21,7 +21,7 @@
 @flashBox(flash)
 <div class="row-fluid">
     <div class="span12">
-        <table class="table table-condensed table-bordered table-admin" style="table-layout:fixed; width:auto;">
+        <table class="table table-condensed table-bordered table-admin">
             <thead>
             <tr>
                 <th style="width:4em;">

@@ -2,7 +2,7 @@
 
 @import tags._
 
-@main("Conferences") {
+@mainNoAds("Conferences") {
 <script>
     function deleteConference(i,n){
       var hiddenId =   '<input type="hidden" id="id"       name="id"       value="' + i + '"/>';
@@ -14,22 +14,22 @@
 
 <div class="row-fluid">
     <div class="span12">
-        <h1 class="span1">Teams</h1>
-        <a href="/conferences/new" class="span2 offset9 btn btn-primary btn-block" style="margin-top:15px;">New Team</a>
+        <h3>Conferences</h3>
     </div>
 </div>
 <div class="row-fluid">
     <div class="span12">
 @flashBox(flash)
-        <table class="table table-condensed  table-bordered" style="table-layout:fixed;">
+        <table class="table table-condensed table-bordered table-admin">
             <thead>
             <tr>
-                <th style="width:8em;"></th>
-                <th style="width:4em;"></th>
-                <th style="width:12em;">Conference</a></th>
-                <th style="width:18em;">Long Name</th>
-                <th style="width:14em;">Official URL</th>
-                <th style="width:10em;">Official Twitter</th>
+                <th style="width:1.5em;"></th>
+                <th style="width:4em;"><a href="/conferences/new" class="btn btn-primary btn-small">New</a>
+                </th>
+                <th style="width:10em;">Conference</a></th>
+                <th style="width:14em;">Long Name</th>
+                <th style="width:12em;">Official URL</th>
+                <th style="width:12em;">Official Twitter</th>
                 <th style="width:4em;"></th>
             </tr>
             </thead>
