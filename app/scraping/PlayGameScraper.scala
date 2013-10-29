@@ -8,6 +8,7 @@ import play.api.libs.ws.Response
 import scala.concurrent.Future
 import org.joda.time.LocalDate
 import play.api.libs.concurrent.Execution.Implicits._
+import scala.annotation.tailrec
 
 object PlayGameScraper extends PlayScraper {
   def logger = Logger("GameScraper")
@@ -30,7 +31,22 @@ object PlayGameScraper extends PlayScraper {
     })
   }
 
-  def loadGames(d: LocalDate): Future[List[(LocalDate, String, String, Option[(Int, Int)])]] = {
+  def loadGames(from:LocalDate, to:LocalDate, accum:Future[List[ResultData]]): Future[List[ResultData]] = {
+    val gf: Future[List[ResultData]] = loadGames(from).flatMap(gs=>accum.map(_ ::: gs))
+    if (from == to) {
+      gf
+    }else {
+      loadGames(from.plusDays(1), to, gf)
+    }
+  }
+
+
+  def loadGames(from:LocalDate, to:LocalDate): Future[List[ResultData]] = {
+    val zero: Future[List[ResultData]] = Future(List.empty[ResultData])
+    loadGames(from, to, zero)
+  }
+
+  def loadGames(d: LocalDate): Future[List[ResultData]] = {
     val year = new SimpleDateFormat("yyyy").format(d)
     val month = new SimpleDateFormat("MM").format(d)
     val day = new SimpleDateFormat("dd").format(d)
@@ -55,8 +71,8 @@ object PlayGameScraper extends PlayScraper {
 
   }
 
-  def ripGames(json: String, date: LocalDate): List[(LocalDate, String, String, Option[(Int, Int)])] = {
-    ripJson(json, ripGameResult).flatten.map(tup => (date, tup._1, tup._2, tup._3))
+  def ripGames(json: String, date: LocalDate): List[ResultData] = {
+    ripJson(json, ripGameResult).flatten.map(tup => ResultData(GameData(date, tup._1, tup._2), tup._3))
   }
 
   val ripTwitters: ((String, JsValue) => Option[(String, String)]) = {
