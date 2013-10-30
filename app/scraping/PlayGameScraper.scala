@@ -9,6 +9,8 @@ import scala.concurrent.Future
 import org.joda.time.LocalDate
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.annotation.tailrec
+import org.apache.commons.lang3.StringUtils
+import scala.io.Codec
 
 object PlayGameScraper extends PlayScraper {
   def logger = Logger("GameScraper")
@@ -31,25 +33,25 @@ object PlayGameScraper extends PlayScraper {
     })
   }
 
-  def loadGames(from:LocalDate, to:LocalDate, accum:Future[List[ResultData]]): Future[List[ResultData]] = {
-    val gf: Future[List[ResultData]] = loadGames(from).flatMap(gs=>accum.map(_ ::: gs))
+  def loadGames(from: LocalDate, to: LocalDate, accum: Future[List[ResultData]]): Future[List[ResultData]] = {
+    val gf: Future[List[ResultData]] = loadGames(from).flatMap(gs => accum.map(_ ::: gs))
     if (from == to) {
       gf
-    }else {
+    } else {
+      Thread.sleep(1000)
       loadGames(from.plusDays(1), to, gf)
     }
   }
 
-
-  def loadGames(from:LocalDate, to:LocalDate): Future[List[ResultData]] = {
+  def loadGames(from: LocalDate, to: LocalDate): Future[List[ResultData]] = {
     val zero: Future[List[ResultData]] = Future(List.empty[ResultData])
     loadGames(from, to, zero)
   }
 
   def loadGames(d: LocalDate): Future[List[ResultData]] = {
-    val year = new SimpleDateFormat("yyyy").format(d)
-    val month = new SimpleDateFormat("MM").format(d)
-    val day = new SimpleDateFormat("dd").format(d)
+    val year = new SimpleDateFormat("yyyy").format(d.toDate)
+    val month = new SimpleDateFormat("MM").format(d.toDate)
+    val day = new SimpleDateFormat("dd").format(d.toDate)
 
     val url = "http://data.ncaa.com/jsonp/scoreboard/basketball-men/d1/" + year + "/" + month + "/" + day + "/scoreboard.html"
 
@@ -59,16 +61,30 @@ object PlayGameScraper extends PlayScraper {
   }
 
 
-  def ripJson[T](json: String, f: (JsValue => T)): List[T] = {
-    val games = ((Json.parse(stripCallbackWrapper(json)) \ "scoreboard")(0) \ "games").validate[JsArray] match {
-      case JsSuccess(g, _) => g.asInstanceOf[JsArray].value.toList
-      case _ => {
-        println("Error")
-        List.empty
+  def ripJson[T](zzzzzzzzzzzzz: String, f: (JsValue => T)): List[T] = {
+    logger.warn(zzzzzzzzzzzzz)
+    if (StringUtils.isBlank(zzzzzzzzzzzzz)) {
+      List.empty
+    } else {
+      try {
+        val parse: JsValue = Json.parse(stripCallbackWrapper(zzzzzzzzzzzzz))
+        val games = ((parse \ "scoreboard")(0) \ "games").validate[JsArray] match {
+          case JsSuccess(g, _) => g.asInstanceOf[JsArray].value.toList
+          case _ => {
+            println("Error")
+            List.empty
+          }
+        }
+        games.map(f)
+      } catch {
+        case t: Throwable => {
+          logger.error("FUCK YOU YOU FUCKING FUCK")
+          logger.info(zzzzzzzzzzzzz)
+          logger.info("--------\n" + stripCallbackWrapper(zzzzzzzzzzzzz) + "\n----------------")
+          throw t
+        }
       }
     }
-    games.map(f)
-
   }
 
   def ripGames(json: String, date: LocalDate): List[ResultData] = {
@@ -118,7 +134,8 @@ object PlayGameScraper extends PlayScraper {
 
   def stripCallbackWrapper(json: String): String = {
     json
-      .replaceFirst("""^callbackWrapper({""", """{""")
-      .replaceFirst("""});$""", """}""")
+      .replaceFirst( """^callbackWrapper\(\{""", """{""")
+      .replaceFirst( """}\);$""", """}""")
+
   }
 }

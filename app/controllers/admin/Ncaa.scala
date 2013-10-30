@@ -1,14 +1,15 @@
 package controllers.admin
 
 import play.api.mvc.{Controller, Action}
-import models.Repository
-import scraping.GameUpdateRequest
+import models.{TeamDao, Repository}
+import scraping.{NcaaGameScraper, PlayGameScraper, KenPomGameScraper, GameUpdateRequest}
 import play.api.data.Form
 import play.api.data.Forms._
-import scraping.GameUpdateRequest
 import scala.Some
+import play.api.Logger
 
 object Ncaa extends Controller {
+  val logger = Logger("Ncaa")
 
   import play.api.Play.current
 
@@ -52,7 +53,23 @@ object Ncaa extends Controller {
     }
   }
 
-  def scrapeGames = TODO
+    def scrapeGames = Action {
+      implicit request =>
+        play.api.db.slick.DB.withSession {
+          implicit s =>
+            gameForm.bindFromRequest.fold(
+              errors => {
+                logger.info("Problems saving " + errors)
+                BadRequest(views.html.ncaaIndex(errors))
+              },
+              req => {
+                val result = NcaaGameScraper.scrape(repo, req)
+                Ok(views.html.ncaaScrapeResult(result, req, TeamDao(repo.m).list))
+              }
+            )
+        }
+
+  }
   def scrapeGamesEtc = TODO
 
 
