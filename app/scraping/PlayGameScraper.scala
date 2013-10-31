@@ -38,7 +38,6 @@ object PlayGameScraper extends PlayScraper {
     if (from == to) {
       gf
     } else {
-      Thread.sleep(1000)
       loadGames(from.plusDays(1), to, gf)
     }
   }
@@ -61,27 +60,25 @@ object PlayGameScraper extends PlayScraper {
   }
 
 
-  def ripJson[T](zzzzzzzzzzzzz: String, f: (JsValue => T)): List[T] = {
-    logger.warn(zzzzzzzzzzzzz)
-    if (StringUtils.isBlank(zzzzzzzzzzzzz)) {
+  def ripJson[T](json: String, f: (JsValue => T)): List[T] = {
+    if (StringUtils.isBlank(json)) {
       List.empty
     } else {
       try {
-        val parse: JsValue = Json.parse(stripCallbackWrapper(zzzzzzzzzzzzz))
+        val parse: JsValue = Json.parse(stripCallbackWrapper(json))
         val games = ((parse \ "scoreboard")(0) \ "games").validate[JsArray] match {
           case JsSuccess(g, _) => g.asInstanceOf[JsArray].value.toList
           case _ => {
-            println("Error")
+            logger.error("Error parsing Json")
             List.empty
           }
         }
         games.map(f)
       } catch {
         case t: Throwable => {
-          logger.error("FUCK YOU YOU FUCKING FUCK")
-          logger.info(zzzzzzzzzzzzz)
-          logger.info("--------\n" + stripCallbackWrapper(zzzzzzzzzzzzz) + "\n----------------")
-          throw t
+          logger.error("Error parsing Json", t)
+         // logger.error(json)
+          List.empty
         }
       }
     }
@@ -136,6 +133,6 @@ object PlayGameScraper extends PlayScraper {
     json
       .replaceFirst( """^callbackWrapper\(\{""", """{""")
       .replaceFirst( """}\);$""", """}""")
-
+      .replaceAll( """,\s+,""", ", ")
   }
 }

@@ -2,7 +2,7 @@ package scraping
 
 import play.api.libs.ws.{Response, WS}
 import scala.concurrent.{Await, Future}
-import scala.xml.{Elem, NodeSeq, Node}
+import scala.xml.{PrettyPrinter, Elem, NodeSeq, Node}
 import models.Team
 import play.api.libs.concurrent.Execution.Implicits._
 import HtmlHelper.loadHtmlFromString
@@ -15,7 +15,7 @@ object PlayTeamScraper extends PlayScraper{
   def teamRawData(): List[(String, Team)] = {
     val teamNames: Map[String, String] = Await.result(loadTeamNames(), 2.minutes)
     logger.info("Loaded team names")
-    val shortName: Map[String, String] = Await.result(loadShortNames(), 2.minutes);
+    val shortName: Map[String, String] = Await.result(loadShortNames(), 2.minutes)
     logger.info("Loaded short names")
 
     val teamDetailBatchSize: Int = 50
@@ -58,16 +58,28 @@ object PlayTeamScraper extends PlayScraper{
 
   def loadTeamNames(): Future[Map[String, String]] = {
     Future.sequence("abcdefghijklmnopqrstuvwxyz".map((c: Char) => {
-      WS.url("http://www.ncaa.com/schools/" + c + "/").get().map(r => scrapeAlphaTeams(loadHtmlFromString(r.body).get))
+      loadUrl("http://www.ncaa.com/schools/" + c + "/").map(r => scrapeAlphaTeams(loadHtmlFromString(r.body).get))
     })).map(_.flatten).map(_.toMap)
   }
 
   def scrapeAlphaTeams(pageXml: Node): Seq[(String, String)] = {
-    val teamNodes = (pageXml \\ "span").filter((node: Node) => (node \ "@class").text == "field-content")
+    val sb= new StringBuilder()
+    new PrettyPrinter(120,2).format(pageXml,sb)
+    logger.info(sb.toString())
+    val teamNodes = (pageXml \\ "div").filter(n=> attrEquals(n,"id","team-list"))
+    logger.info("DIVS:"+teamNodes.length)
     val pageData = teamNodes.map((node: Node) => (node \ "a").map((node: Node) => {
       (node \ "@href").text.split("/").last -> node.text
     })).flatten
     pageData
+  }
+
+  def attrEquals(node: Node, attr:String, value: String):Boolean = {
+
+    node.attribute(attr) match {
+      case Some(seqNode) => seqNode.exists(n=>n.text == value)
+      case _ => false
+    }
   }
 
   def loadShortNames(): Future[Map[String, String]] = {

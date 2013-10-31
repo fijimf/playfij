@@ -46,9 +46,16 @@ trait AbstractGameScraper {
   }
 
   def mapTeams(data: List[ResultData], teamsWithAliases: Map[Team, List[String]]): (List[ResultData], List[ResultData]) = {
-    val teamMap = teamsWithAliases.keys.map(t => t.name.toLowerCase -> t).toMap
+    val keySet = teamsWithAliases.keys.map(t => t.key).toSet
+    val nameMap = teamsWithAliases.keys.map(t => t.name.toLowerCase -> t).toMap
     val aliasMap = teamsWithAliases.keys.foldLeft(Map.empty[String, Team])((map: Map[String, Team], team: Team) => teamsWithAliases(team).foldLeft(map)((m2: Map[String, Team], alias: String) => m2 + (alias.toLowerCase -> team)))
-    def lookup(t: String): Option[String] = teamMap.get(t.toLowerCase).orElse(aliasMap.get(t.toLowerCase)).map(_.key)
+    def lookup(t: String): Option[String] = {
+      if (keySet.contains(t)) {
+        Some(t)
+      } else {
+        nameMap.get(t.toLowerCase).orElse(aliasMap.get(t.toLowerCase)).map(_.key)
+      }
+    }
     val mapped: List[Either[ResultData, ResultData]] = data.map(_.mapTeams(lookup))
     (mapped.filter(_.isRight).map(_.merge), mapped.filter(_.isLeft).map(_.merge))
   }

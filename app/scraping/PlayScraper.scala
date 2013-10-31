@@ -11,7 +11,7 @@ trait PlayScraper {
 
   def loadUrl(url: String): Future[Response] = {
     withLatency(WS.url(url).get).map((tuple: (Long, Response)) => {
-      logger.info("Received %s in %d ms.".format(url,tuple._1))
+      logger.info("%s : Received %d bytes in %d ms.".format(url,tuple._2.body.length, tuple._1))
       tuple._2
     })
   }

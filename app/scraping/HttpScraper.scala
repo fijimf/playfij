@@ -25,7 +25,8 @@ object HtmlHelper {
   }
 
   def loadHtmlFromString(s: String): Option[Node] = {
-    loadHtmlFromReader(new StringReader(s))
+    val node: Option[Node] = loadHtmlFromReader(new StringReader(s))
+    node
   }
 }
 
