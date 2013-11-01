@@ -4,7 +4,7 @@ import scala.slick.driver.ExtendedProfile
 import scala.slick.session.Database._
 import play.api.db.slick.Profile
 import scala.slick.jdbc.meta.MTable
-import scraping.{ScrapingUtil, NcaaTeamScraper}
+import scraping.{ScrapingUtil}
 import play.api.Logger
 import scala.slick.lifted.DDL
 
