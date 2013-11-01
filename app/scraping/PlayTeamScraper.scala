@@ -60,7 +60,7 @@ object PlayTeamScraper extends PlayScraper{
   def loadLongNames(): Future[Map[String, String]] = {
     Future.sequence("abcdefghijklmnopqrstuvwxyz".map((c: Char) => {
       loadUrl("http://www.ncaa.com/schools/" + c + "/").map(r => {
-        val longNames: Seq[(String, String)] = teamNamesFromAlpha(loadHtmlFromString(r.body).get)
+        val longNames: Seq[(String, String)] = teamNamesFromAlphaPage(loadHtmlFromString(r.body).get)
         logger.info("For the letter %s, %d long names retrieved".format(c, longNames.size))
         longNames
       })
@@ -70,7 +70,7 @@ object PlayTeamScraper extends PlayScraper{
   def loadShortNames(): Future[Map[String, String]] = {
     Future.sequence(List("p1", "p2", "p3", "p4", "p5", "p6", "p7").map(t => {
       loadUrl("http://www.ncaa.com/stats/basketball-men/d1/current/team/145/" + t).map(r => {
-        val shortNames: Seq[(String, String)] = teamNamesFromAlpha(loadHtmlFromString(r.body).get)
+        val shortNames: Seq[(String, String)] = teamNamesFromStatPage(loadHtmlFromString(r.body).get)
         logger.info("For the page %s, %d long names retrieved".format(t, shortNames.size))
         shortNames
       })
@@ -78,8 +78,13 @@ object PlayTeamScraper extends PlayScraper{
   }
 
 
-  def teamNamesFromAlpha(node: Node):Seq[(String, String)] = {
+  def teamNamesFromAlphaPage(node: Node):Seq[(String, String)] = {
     val schooList: Option[Node] = (node \\ "div").find(n => attrMatch(n, "id", "school-list")).flatMap(_.headOption)
+    extractNamesAndKeys(schooList).toSeq
+  }
+  
+  def teamNamesFromStatPage(node: Node):Seq[(String, String)] = {
+    val schooList: Option[Node] = (node \\ "div").find(n => attrMatch(n, "class", "ncaa-stat-category-stats")).flatMap(_.headOption)
     extractNamesAndKeys(schooList).toSeq
   }
 
