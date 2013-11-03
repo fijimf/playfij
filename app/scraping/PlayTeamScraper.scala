@@ -100,10 +100,10 @@ object PlayTeamScraper extends PlayScraper{
   }
 
 
-  def teamDetail(key: String, shortName: String): Future[Option[(String, Team)]] = {
+  def teamDetail(key: String, shortName: Option[String]): Future[Option[(String, Team)]] = {
     loadUrl("http://www.ncaa.com/schools/" + key).map(resp => {
       loadHtmlFromString(resp.body).map(node => {
-        val longName = schoolName(node).getOrElse(shortName)
+        val longName = schoolName(node).getOrElse(shortName.getOrElse(key.replaceAll("-"," ").capitalize))
         val metaInfo = schoolMetaInfo(node)
         val nickname = metaInfo.getOrElse("nickname", "MISSING")
         val primaryColor = schoolPrimaryColor(node)
@@ -112,7 +112,7 @@ object PlayTeamScraper extends PlayScraper{
         val officialUrl = schoolOfficialWebsite(node)
         val officialTwitter = schoolOfficialTwitter(node)
         val conference = metaInfo.getOrElse("conf", "MISSING")
-        (conference, Team(0, key, shortName, longName, nickname, primaryColor, secondaryColor, logoUrl, officialUrl, officialTwitter))
+        (conference, Team(0, key, shortName.getOrElse(longName), longName, nickname, primaryColor, secondaryColor, logoUrl, officialUrl, officialTwitter))
       })
     })
   }
