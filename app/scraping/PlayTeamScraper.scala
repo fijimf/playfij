@@ -40,7 +40,7 @@ object PlayTeamScraper extends PlayScraper{
     logger.info("Batching team details (batch size=%d ".format(shortNames.size))
     val iterable: Iterable[Future[Option[(String, Team)]]] = for (k <- shortNames.keys) yield {
       val k1 = k.replaceAll("--", "-")
-      teamDetail(k1, shortNames(k)).recover {
+      teamDetail(k1, Some(shortNames(k))).recover {
         case thr: Throwable => {
           logger.error("Failed loading %s".format(k))
           None
