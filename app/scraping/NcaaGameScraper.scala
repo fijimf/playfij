@@ -1,36 +1,21 @@
 package scraping
 
-import scala.util.control.Exception._
-import play.api.libs.json._
 import play.api.Logger
-import java.text.SimpleDateFormat
-import play.api.libs.ws.Response
 import scala.concurrent.Future
+import scala.util.control.Exception._
 import org.joda.time.LocalDate
-import play.api.libs.concurrent.Execution.Implicits._
-import scala.annotation.tailrec
+import java.text.SimpleDateFormat
+import play.api.libs.json.{Json, JsSuccess, JsArray, JsValue}
 import org.apache.commons.lang3.StringUtils
-import scala.io.Codec
+import play.api.libs.ws.Response
+import play.api.libs.concurrent.Execution.Implicits._
 
-object PlayGameScraper extends PlayScraper {
-  def logger = Logger("GameScraper")
 
-  def scrapeKenPom(url: String): Future[List[ResultData]] = {
-    val inFormat = new SimpleDateFormat("MM/dd/yyyy")
-    loadUrl(url).map((response: Response) => {
-      response.body.split("\n").filter(_.length > 63).map(s => {
-        val d = new LocalDate(inFormat.parse(s.substring(0, 10)).getTime)
-        val at = s.substring(11, 33).trim()
-        val as = catching(classOf[NumberFormatException]) opt s.substring(34, 37).trim().toInt
-        val ht = s.substring(38, 60).trim()
-        val hs = catching(classOf[NumberFormatException]) opt s.substring(61, 64).trim().toInt
-        (hs, as) match {
-          case (Some(h), Some(a)) => ResultData(GameData(d, ht, at), Some((h, a)))
-          case _ => ResultData(GameData(d, ht, at), None)
-        }
-      })
-        .toList
-    })
+object NcaaGameScraper extends AbstractGameScraper {
+  def logger = Logger(this.getClass.getName)
+
+  def fetch(req: GameUpdateRequest): Future[List[ResultData]] = {
+    loadGames(req.fromDate.getOrElse(new LocalDate()), req.toDate.getOrElse(new LocalDate().plusMonths(6)))
   }
 
   def loadGames(from: LocalDate, to: LocalDate, accum: Future[List[ResultData]]): Future[List[ResultData]] = {
@@ -77,7 +62,7 @@ object PlayGameScraper extends PlayScraper {
       } catch {
         case t: Throwable => {
           logger.error("Error parsing Json", t)
-         // logger.error(json)
+          // logger.error(json)
           List.empty
         }
       }
@@ -135,4 +120,5 @@ object PlayGameScraper extends PlayScraper {
       .replaceFirst( """}\);$""", """}""")
       .replaceAll( """,\s+,""", ", ")
   }
+
 }

@@ -6,7 +6,7 @@ import play.api.libs.ws.Response
 import play.api.libs.ws.WS
 import play.api.libs.concurrent.Execution.Implicits._
 
-trait PlayScraper {
+trait AbstractScraper {
   def logger: Logger
 
   def loadUrl(url: String): Future[Response] = {

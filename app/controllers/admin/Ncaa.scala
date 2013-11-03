@@ -2,7 +2,7 @@ package controllers.admin
 
 import play.api.mvc.{Controller, Action}
 import models.{TeamDao, Repository}
-import scraping.{NcaaGameScraper, PlayGameScraper, KenPomGameScraper, GameUpdateRequest}
+import scraping.{NcaaGameScraper, KenPomGameScraper, GameUpdateRequest}
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
@@ -40,7 +40,7 @@ object Ncaa extends Controller {
   }
 
   def scrapeTeams = Action {
-    val data: List[(String, models.Team)] = scraping.PlayTeamScraper.teamRawData()
+    val data: List[(String, models.Team)] = scraping.NcaaTeamScraper.teamRawData()
     play.api.db.slick.DB.withSession {
       try {
         repo.scrapeNcaaTeamsAndConferences(data)

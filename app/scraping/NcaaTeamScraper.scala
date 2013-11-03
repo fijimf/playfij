@@ -8,7 +8,7 @@ import HtmlUtil._
 import scala.concurrent.duration._
 import play.api.Logger
 
-object PlayTeamScraper extends PlayScraper{
+object NcaaTeamScraper extends AbstractScraper{
   val logger = Logger(this.getClass.getName)
 
   def teamRawData(): List[(String, Team)] = {
@@ -35,7 +35,6 @@ object PlayTeamScraper extends PlayScraper{
     }.toList
   }
 
-
   def processBatch(shortNames: Map[String, String], longNames: Map[String, String]): List[(String, Team)] = {
     logger.info("Batching team details (batch size=%d ".format(shortNames.size))
     val iterable: Iterable[Future[Option[(String, Team)]]] = for (k <- shortNames.keys) yield {
@@ -48,10 +47,6 @@ object PlayTeamScraper extends PlayScraper{
       }
     }
     Await.result(Future.sequence(iterable).map(_.flatten.toList), 7.minutes)
-  }
-
-  lazy val teamList: List[Team] = {
-    teamRawData().map(_._2)
   }
 
   def loadLongNames(): Future[Map[String, String]] = {
@@ -98,7 +93,6 @@ object PlayTeamScraper extends PlayScraper{
       href.substring(9) -> link.text
     }
   }
-
 
   def teamDetail(key: String, shortName: Option[String]): Future[Option[(String, Team)]] = {
     loadUrl("http://www.ncaa.com/schools/" + key).map(resp => {
