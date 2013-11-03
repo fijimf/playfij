@@ -1,8 +1,7 @@
 package scraping
 
-import play.api.libs.ws.{Response, WS}
 import scala.concurrent.{Await, Future}
-import scala.xml.{PrettyPrinter, Elem, NodeSeq, Node}
+import scala.xml.Node
 import models.Team
 import play.api.libs.concurrent.Execution.Implicits._
 import HtmlUtil._
@@ -38,7 +37,7 @@ object PlayTeamScraper extends PlayScraper{
 
 
   def processBatch(shortNames: Map[String, String], longNames: Map[String, String]): List[(String, Team)] = {
-    logger.info("Batching team details (batch size=%d ".format(shortNames.size));
+    logger.info("Batching team details (batch size=%d ".format(shortNames.size))
     val iterable: Iterable[Future[Option[(String, Team)]]] = for (k <- shortNames.keys) yield {
       val k1 = k.replaceAll("--", "-")
       teamDetail(k1, shortNames(k)).recover {
@@ -48,9 +47,7 @@ object PlayTeamScraper extends PlayScraper{
         }
       }
     }
-    val result: List[(String, Team)] = Await.result(Future.sequence(iterable).map(_.flatten.toList), 7.minutes)
-    logger.info("Here returning result " + result.size);
-    result
+    Await.result(Future.sequence(iterable).map(_.flatten.toList), 7.minutes)
   }
 
   lazy val teamList: List[Team] = {
@@ -79,22 +76,22 @@ object PlayTeamScraper extends PlayScraper{
 
 
   def teamNamesFromAlphaPage(node: Node):Seq[(String, String)] = {
-    val schooList: Option[Node] = (node \\ "div").find(n => attrMatch(n, "id", "school-list")).flatMap(_.headOption)
-    extractNamesAndKeys(schooList).toSeq
+    val schoolList: Option[Node] = (node \\ "div").find(n => attrMatch(n, "id", "school-list")).flatMap(_.headOption)
+    extractNamesAndKeys(schoolList).toSeq
   }
   
   def teamNamesFromStatPage(node: Node):Seq[(String, String)] = {
-    val schooList: Option[Node] = (node \\ "div").find(n => attrMatch(n, "class", "ncaa-stat-category-stats")).flatMap(_.headOption)
-    extractNamesAndKeys(schooList).toSeq
+    val schoolList: Option[Node] = (node \\ "div").find(n => attrMatch(n, "class", "ncaa-stat-category-stats")).flatMap(_.headOption)
+    extractNamesAndKeys(schoolList).toSeq
   }
 
   /**
    *
-   * @param schooList HTML containing links of the form &lt;a href="school-key"&gt;School Name&lt;/a&gt;
+   * @param schoolList HTML containing links of the form &lt;a href="school-key"&gt;School Name&lt;/a&gt;
    * @return A list of team key and team name pairs.
    */
-  def extractNamesAndKeys(schooList: Option[Node]): Iterator[(String, String)] = {
-    for (d <- schooList.iterator;
+  def extractNamesAndKeys(schoolList: Option[Node]): Iterator[(String, String)] = {
+    for (d <- schoolList.iterator;
          link <- d \\ "a";
          href <- attrValue(link, "href") if href.startsWith("/schools/"))
     yield {
@@ -110,7 +107,7 @@ object PlayTeamScraper extends PlayScraper{
         val metaInfo = schoolMetaInfo(node)
         val nickname = metaInfo.getOrElse("nickname", "MISSING")
         val primaryColor = schoolPrimaryColor(node)
-        val secondaryColor = primaryColor.map(c => desaturate(c))
+        val secondaryColor = primaryColor.map(c => desaturate(c, 0.4))
         val logoUrl = schoolLogo(node)
         val officialUrl = schoolOfficialWebsite(node)
         val officialTwitter = schoolOfficialTwitter(node)
@@ -147,63 +144,11 @@ object PlayTeamScraper extends PlayScraper{
     })
   }
 
-  def desaturate(c:String):String = {
+  def desaturate(c:String, a:Double):String = {
     val r = Integer.parseInt(c.substring(1,3),16)
     val g = Integer.parseInt(c.substring(3,5),16)
     val b = Integer.parseInt(c.substring(5,7),16)
-    "rgba( %d, %d, %d, 0.4".format(r,g,b)
-  }
-  def parseConference(page: Node): Option[String] = {
-    val tableRow: NodeSeq = (page \\ "tr").filter((node: Node) => {
-      val seq: NodeSeq = node \ "td"
-      if (seq.size == 3) {
-        ((seq.head \ "a" \ "@href").text.endsWith("basketball-men") && seq.tail.head.text == "DI")
-      } else {
-        false
-      }
-    })
-    if (tableRow.isEmpty) {
-      None
-    } else {
-      Some((tableRow \ "td").last.text)
-    }
-  }
-
-  private[this] def parseLogoUrl(page: Node): Option[String] = {
-    (page \\ "img").filter((node: Node) => (node \ "@class").text == "school-logo").headOption.map((node: Node) => (node \ "@src").text)
-  }
-
-  private[this] def parseDetails(page: Node, r: Team): Team = {
-    val nicknameKey = "Nickname"
-    val colorsKey = "Colors"
-    val urlKey = "Url"
-    val detailMap: Map[String, String] = (page \\ "td").map((node: Node) => node match {
-      case <td><h6>Nickname</h6><p>{nickname}</p></td> => Some(nicknameKey -> nickname.text)
-      case <td><h6>Athletics Website</h6><p><a>{url}</a></p></td> => Some(urlKey -> url.text)
-      case <td><h6>Colors</h6><p>{colors}</p></td> => Some(colorsKey -> colors.text)
-      case _ => None
-    }).flatten.toMap
-    val optColors = detailMap.get(colorsKey)
-    if (optColors.isDefined) {
-      val carr: Array[String] = optColors.get.trim.split('&')
-      if (carr.length > 1) {
-        r.copy(nickname = detailMap.get(nicknameKey).getOrElse("Missing"),
-          primaryColor = Some(carr(0).trim),
-          secondaryColor = Some(carr(1).trim),
-          officialUrl = detailMap.get(urlKey))
-
-      } else {
-        r.copy(nickname = detailMap.get(nicknameKey).getOrElse("Missing"),
-          primaryColor = Some(carr(0).trim),
-          secondaryColor = None,
-          officialUrl = detailMap.get(urlKey))
-      }
-    } else {
-      r.copy(nickname = detailMap.get(nicknameKey).getOrElse("Missing"),
-        primaryColor = None,
-        secondaryColor = None,
-        officialUrl = detailMap.get(urlKey))
-    }
+    "rgba( %d, %d, %d, %f)".format(r,g,b,a)
   }
 }
 
