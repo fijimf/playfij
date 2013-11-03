@@ -1,12 +1,12 @@
-package scraping
+package scraping.control
 
 import org.joda.time.LocalDate
 
-case class GameMiscRequest(url: String = "",
+case class GameUpdateRequest(url: String = "",
                              doWrite: Boolean = false,
-                             doTeamTwitter: Boolean = true,
-                             doConfTwitter: Boolean = true,
-                             doTeamColor: Boolean = false,
+                             doGameInserts: Boolean = true,
+                             doGameUpdates: Boolean = true,
+                             doGameDeletes: Boolean = false,
                              doResultInserts: Boolean = true,
                              doResultUpdates: Boolean = true,
                              doResultDeletes: Boolean = false,

@@ -4,7 +4,7 @@ import scala.concurrent.{Await, Future}
 import scala.xml.Node
 import models.Team
 import play.api.libs.concurrent.Execution.Implicits._
-import HtmlUtil._
+import scraping.util.HtmlUtil._
 import scala.concurrent.duration._
 import play.api.Logger
 

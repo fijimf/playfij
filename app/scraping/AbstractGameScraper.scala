@@ -7,8 +7,8 @@ import models.Season
 import models.GameDao
 import models.TeamDao
 import scala.concurrent.{Await, Future}
-import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.duration._
+import scraping.control.{GameUpdateResult, GameUpdateRequest}
 
 trait AbstractGameScraper extends AbstractScraper {
   def logger: Logger
@@ -65,14 +65,14 @@ trait AbstractGameScraper extends AbstractScraper {
       ht <- model.Teams if g.homeTeamId === ht.id;
       at <- model.Teams if g.awayTeamId === at.id
     ) yield (g, ht, at, r.homeScore.?, r.awayScore.?)).list()
-    rows.map(_ match {
+    rows.map {
       case (game, home, away, Some(hs), Some(as)) => {
         ResultData(GameData(game.date, home.key, away.key), Some((hs, as)))
       }
       case (game, home, away, _, _) => {
         ResultData(GameData(game.date, home.key, away.key), None)
       }
-    }).filter(rd => dateOk(rd.gameData.date, req, seasons))
+    }.filter(rd => dateOk(rd.gameData.date, req, seasons))
   }
 
   def handleGames(req: GameUpdateRequest, candidateData: List[GameData], teams: List[Team], seasons: List[Season], res: GameUpdateResult)(implicit s: scala.slick.session.Session): GameUpdateResult = {
@@ -108,7 +108,6 @@ trait AbstractGameScraper extends AbstractScraper {
   }
 
   def handleResults(req: GameUpdateRequest, candidateData: List[ResultData], teams: List[Team], seasons: List[Season], res: GameUpdateResult)(implicit s: scala.slick.session.Session): GameUpdateResult = {
-    val teamKeyMap: Map[String, Team] = teams.map(t => t.key -> t).toMap
     val currentData: List[ResultData] = loadCurrentData(req, seasons).filter(_.scores.isDefined)
 
     val candidateMap = candidateData.map(y => y.gameData -> y.scores).toMap

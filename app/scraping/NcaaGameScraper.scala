@@ -9,6 +9,7 @@ import play.api.libs.json.{Json, JsSuccess, JsArray, JsValue}
 import org.apache.commons.lang3.StringUtils
 import play.api.libs.ws.Response
 import play.api.libs.concurrent.Execution.Implicits._
+import scraping.control.GameUpdateRequest
 
 
 object NcaaGameScraper extends AbstractGameScraper {

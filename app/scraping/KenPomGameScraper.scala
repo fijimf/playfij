@@ -5,9 +5,9 @@ import scala.concurrent.Future
 import play.api.Logger
 import java.text.SimpleDateFormat
 import scala.util.control.Exception._
-import scala.Some
 import play.api.libs.ws.Response
 import play.api.libs.concurrent.Execution.Implicits._
+import scraping.control.GameUpdateRequest
 
 
 object KenPomGameScraper extends AbstractGameScraper {

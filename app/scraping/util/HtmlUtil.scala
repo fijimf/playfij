@@ -1,4 +1,4 @@
-package scraping
+package scraping.util
 
 import xml.Node
 import org.xml.sax.InputSource

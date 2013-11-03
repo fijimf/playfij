@@ -1,6 +1,7 @@
-package scraping
+package scraping.control
 
 import org.apache.commons.lang3.StringUtils
+import scraping.{ResultData, GameData}
 
 case class GameUpdateResult(
                              unknownTeam: List[GameData] = List.empty[GameData],

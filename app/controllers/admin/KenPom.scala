@@ -7,10 +7,10 @@ import play.api.data.Forms._
 import models._
 import org.joda.time.{ReadablePartial, LocalDate}
 import play.api.Logger
-import scraping.{KenPomGameScraper, GameUpdateRequest}
+import scraping.{KenPomGameScraper}
 import scala.Some
 import scala.concurrent.{Await, Future}
-
+import scraping.control.GameUpdateRequest
 
 
 object KenPom extends Controller {

@@ -4,9 +4,9 @@ import scala.slick.driver.ExtendedProfile
 import scala.slick.session.Database._
 import play.api.db.slick.Profile
 import scala.slick.jdbc.meta.MTable
-import scraping.{ScrapingUtil}
 import play.api.Logger
 import scala.slick.lifted.DDL
+import scraping.util.ScrapingUtil
 
 class Repository(p: ExtendedProfile) {
   val logger: Logger = Logger("Repository")

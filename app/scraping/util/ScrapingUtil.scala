@@ -1,4 +1,4 @@
-package scraping
+package scraping.util
 
 object ScrapingUtil {
   def textKey(name: String): String = {

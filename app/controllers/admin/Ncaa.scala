@@ -2,11 +2,12 @@ package controllers.admin
 
 import play.api.mvc.{Controller, Action}
 import models.{TeamDao, Repository}
-import scraping.{NcaaGameScraper, KenPomGameScraper, GameUpdateRequest}
+import scraping.{NcaaGameScraper, KenPomGameScraper}
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
 import play.api.Logger
+import scraping.control.GameUpdateRequest
 
 object Ncaa extends Controller {
   val logger = Logger("Ncaa")
