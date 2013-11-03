@@ -6,7 +6,7 @@ import org.joda.time.LocalDate
 import models.util.Mappers._
 import securesocial.core.AuthenticationMethod
 
-trait Model extends Profile{
+trait Model extends Profile {
 
   import profile.simple._
 
@@ -171,7 +171,7 @@ trait Model extends Profile{
 
     def gameFk = foreignKey("res_game_fk", gameId, Games)(_.id)
 
-    def indexGame= index("res_game", gameId, unique = true)
+    def indexGame = index("res_game", gameId, unique = true)
 
   }
 
@@ -186,9 +186,62 @@ trait Model extends Profile{
 
     def * = id ~ quote ~ source ~ url <>(Quote.apply _, Quote.unapply _)
 
-    def autoInc =  quote ~ source ~ url returning id
+    def autoInc = quote ~ source ~ url returning id
 
   }
+
+  object Observations extends Table[Observation]("observations") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def date = column[LocalDate]("date")
+
+    def domainId = column[Long]("domain_id")
+
+    def statisticId = column[Long]("statistic_id")
+
+    def value = column[Double]("value")
+
+    def * = id ~ date ~ domainId ~ statisticId ~ value <>(Observation.apply _, Observation.unapply _)
+
+    def autoInc = date ~ domainId ~ statisticId ~ value returning id
+  }
+
+  object Statistics extends Table[Statistic]("statistics") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def key = column[String]("stat_key")
+
+    def name = column[String]("name")
+
+    def modelId = column[Long]("model_id")
+
+    def targetDomain = column[String]("domain")
+
+    def shortFormat = column[String]("short_format")
+
+    def longFormat = column[String]("long_format")
+
+    def higherIsBetter = column[Boolean]("higher_is_better")
+
+    def * = id ~ key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter <>(Statistic.apply _, Statistic.unapply _)
+
+    def autoInc = key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter returning id
+  }
+
+  object StatisticalModels extends Table[StatisticalModel]("models") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def key = column[String]("model_key")
+
+    def name = column[String]("name")
+
+    def className = column[String]("class_name")
+
+    def * = id ~ key ~ name ~ className <>(StatisticalModel.apply _, StatisticalModel.unapply _)
+
+    def autoInc = key ~ name ~ className returning id
+  }
+
 
   object Users extends Table[User]("users") {
 
@@ -244,6 +297,7 @@ trait Model extends Profile{
                 u.passwordInfo.map(_.password).getOrElse(""), u.passwordInfo.flatMap(_.salt).getOrElse(""))
             )
           )
+
     def autoInc = * returning uid
 
     def userIndex = index("usr_name", userId, unique = true)
