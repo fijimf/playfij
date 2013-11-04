@@ -2,59 +2,61 @@
 
 @import helper._
 @import helper.twitterBootstrap._
+@import tags._
 
-
-@main(title) {
+@mainNoAds(title) {
 
 
 <script>
     function updateLogos() {
-      var url = $("#logoUrl").val();
-      $("#logo-white-background").attr("src",url);
-      $("#logo-primary-background").attr("src",url);
-      $("#logo-secondary-background").attr("src",url);
+    var url = $("#logoUrl").val();
+    $("#logo-white-background").attr("src",url);
+    $("#logo-primary-background").attr("src",url);
+    $("#logo-secondary-background").attr("src",url);
     }
 
     function updatePrimaryColor() {
-      var color = $("#primaryColor").val();
-      $("#logo-primary-background").css("background-color",color);
+    var color = $("#primaryColor").val();
+    $("#logo-primary-background").css("background-color",color);
     }
     function updateSecondaryColor() {
-      var color = $("#secondaryColor").val();
-      $("#logo-secondary-background").css("background-color",color);
+    var color = $("#secondaryColor").val();
+    $("#logo-secondary-background").css("background-color",color);
     }
 
 </script>
-<div class="container">
-    <h1>@title</h1>
-    @if(flash.get("success").isDefined) {
-    <div class="alert alert-success"><p>@flash.get("success").get</p></div>
-    }
-    @if(flash.get("error").isDefined) {
-    <div class="alert alert-error"><p>@flash.get("error").get</p></div>
-    }
-
-    @if(teamForm.hasErrors && teamForm("id").value.isDefined) {
-    <div class="alert alert-error">
-        <p>Please correct errors in the form.</p>
+<div class="row-fluid">
+    <div class="span12">
+        <h3>@title</h3>
     </div>
-    }
-
-    <div class="row" style="margin-bottom:15px;">
-        <div class="span2">
-            <a class="btn btn-block btn-primary" href="@routes.Team.edit(prevKey)">Previous</a>
-        </div>
-        <div class="offset8 span2">
-            <a class="btn btn-block btn-primary" href="@routes.Team.edit(nextKey)">Next</a>
+</div>
+@flashBox(flash)
+@if(teamForm.hasErrors && teamForm("id").value.isDefined) {
+<div class="row-fluid">
+    <div class="span12">
+        <div class="alert alert-error">
+            <p>Please correct errors in the form.</p>
         </div>
     </div>
+</div>
+}
 
+<div class="row-fluid" style="margin-bottom:15px;">
+    <div class="span2">
+        <a class="btn btn-block btn-primary" href="@routes.Team.edit(prevKey)">Previous</a>
+    </div>
+    <div class="offset8 span2">
+        <a class="btn btn-block btn-primary" href="@routes.Team.edit(nextKey)">Next</a>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
         @helper.form(action = routes.Team.submit, 'class->"form form-horizontal well") {
-    <div class="container" style="padding-top:5px;">
-        <div  class="row">
-        <div class="span8">
-            <fieldset>
-                <input type="hidden" name="id" value='@teamForm("id").value.getOrElse(0)'>
+        <div class="container-fluid" style="padding-top:5px;">
+            <div class="row-fluid">
+                <div class="span8">
+                    <fieldset>
+                        <input type="hidden" name="id" value='@teamForm("id").value.getOrElse(0)'>
                 @inputText( teamForm("key"), '_label -> "Key", '_showConstraints -> false, 'class->"input-large" )
                 @inputText( teamForm("name"), '_label -> "Name", '_showConstraints -> false )
                 @inputText( teamForm("longName"), '_label -> "Long Name", '_showConstraints -> false,
@@ -67,45 +69,43 @@
                 @inputText( teamForm("secondaryColor"), '_label -> "Secondary Color",'onchange->"updateSecondaryColor()" )
             </fieldset>
         </div>
-        <div class="span4">
-          <p>
-              <a class="btn btn-small btn-primary" href='@teamForm("officialUrl").value.getOrElse("#")' target="_blank">Check website</a>
-              <a class="btn btn-small btn-primary" href='@{"https://twitter.com/"+teamForm("officialTwitter").value.map(_.drop(1)).getOrElse("#")}' target="_blank">Check twitter</a>
-          </p>
+                <div class="span4">
+                    <p>
+                        <a class="btn btn-small btn-primary" href='@teamForm("officialUrl").value.getOrElse("#")' target="_blank">Check website</a>
+                        <a class="btn btn-small btn-primary" href='@{"https://twitter.com/"+teamForm("officialTwitter").value.map(_.drop(1)).getOrElse("#")}' target="_blank">Check twitter</a>
+                    </p>
 
-            <img id="logo-white-background"
-                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: white;"
-                 src="@teamForm("logoUrl").value.getOrElse("")" />
-            <img id="logo-primary-background"
-                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: @teamForm("primaryColor").value.getOrElse("");"
-                 src="@teamForm("logoUrl").value.getOrElse("")" />
-            <img id="logo-secondary-background"
-                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: @teamForm("secondaryColor").value.getOrElse("");"
-                 src="@teamForm("logoUrl").value.getOrElse("")" />
-            <img id="logo-black-background"
-                 style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: black;"
-                 src="@teamForm("logoUrl").value.getOrElse("")" />
-            <h4>Aliases</h4>
-            @textarea(field = teamForm("aliases"), args = 'rows -> 4, 'cols -> 20)
-            <h4>Conference</h4>
-            <table>
-            @cmap.keys.toList.sortBy(_.key).map { s=>
-                <tr><td>@s.key</td><td>@cmap(s).name</td></tr>
-            }
-            </table>
+                    <img id="logo-white-background"
+                         style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: white;"
+                         src="@teamForm("logoUrl").value.getOrElse("")" />
+                    <img id="logo-primary-background"
+                         style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: @teamForm("primaryColor").value.getOrElse("");"
+                    src="@teamForm("logoUrl").value.getOrElse("")" />
+                    <img id="logo-secondary-background"
+                         style="border-radius: 4px; margin:5px; padding:10px; box-shadow:3px 3px 4px #999; background-color: @teamForm("secondaryColor").value.getOrElse("");"
+                    src="@teamForm("logoUrl").value.getOrElse("")" />
+                    @textarea(field = teamForm("Aliases"), args = 'rows -> 4, 'cols -> 20)
 
+                    <table class="table table-bordered table-subcompact" style="margin-top:25px;">
+                        <thead><tr><th></th><th>Conference</th></tr></thead>
+                        @cmap.keys.toList.sortBy(_.key).map { s=>
+                        <tr>
+                            <td>@s.key</td>
+                            <td>@cmap(s).name</td>
+                        </tr>
+                        }
+                    </table>
+                    <div class="actions" style="padding-top:30px;">
+                        <input type="submit" class="btn btn-primary" value="Save">
+                        <input type="reset" class="btn btn-primary" value="Reset">
+                        <a href="@routes.Team.list" class="btn btn-primary">Cancel</a>
+                    </div>
+
+                </div>
+
+            </div>
         </div>
-
+        }
     </div>
-    <div class="row">
-        <div class="actions span12">
-            <input type="submit" class="btn primary" value="Save">
-            <input type="reset" class="btn primary" value="Reset">
-            <a href="@routes.Team.list" class="btn">Cancel</a>
-        </div>
-    </div>
-        </div>
-    }
-</div>
 </div>
 }
