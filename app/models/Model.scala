@@ -206,6 +206,22 @@ trait Model extends Profile {
     def autoInc = date ~ domainId ~ statisticId ~ value returning id
   }
 
+  object KeyedValues extends Table[KeyedValue]("keyedValues") {
+    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+
+    def key = column[String]("key_str")
+
+    def domainId = column[Long]("domain_id")
+
+    def numericValue = column[Option[Double]]("numeric_value")
+
+    def textValue = column[Option[String]]("text_value")
+
+    def * = id ~ key ~ domainId ~ numericValue ~ textValue <>(KeyedValue.apply _, KeyedValue.unapply _)
+
+    def autoInc = key ~ domainId ~ numericValue ~ textValue returning id
+  }
+
   object Statistics extends Table[Statistic]("statistics") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
