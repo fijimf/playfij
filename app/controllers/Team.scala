@@ -9,6 +9,7 @@ import scala.Some
 import models.ConferenceAssociationDao
 import models.TeamDao
 import securesocial.core.SecureSocial
+import org.apache.commons.lang3.StringUtils
 
 object Team extends Controller with SecureSocial  {
 
@@ -40,7 +41,7 @@ object Team extends Controller with SecureSocial  {
       "officialUrl" -> optional(text),
       "officialTwitter" -> optional(text)
     )((id, key, name, longName, nickname, aliases, primaryColor, secondaryColor, logoUrl, officialUrl, officialTwitter) =>
-      (models.Team(id, key, name, longName, nickname, primaryColor, secondaryColor, logoUrl, officialUrl, officialTwitter), aliases.getOrElse("").split('\n').map(_.trim).toList))
+      (models.Team(id, key, name, longName, nickname, primaryColor, secondaryColor, logoUrl, officialUrl, officialTwitter), aliases.getOrElse("").split('\n').map(_.trim).toList.filter(s=>StringUtils.isNotBlank(s))))
       (
         (tup: (models.Team, List[String])) =>
           Some(tup._1.id, tup._1.key, tup._1.name, tup._1.longName, tup._1.nickname, Some(tup._2.mkString("\n")), tup._1.primaryColor, tup._1.secondaryColor, tup._1.logoUrl, tup._1.officialUrl, tup._1.officialTwitter)
