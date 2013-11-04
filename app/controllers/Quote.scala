@@ -32,7 +32,7 @@ object Quote extends Controller with SecureSocial  {
     )(models.Quote.apply)(models.Quote.unapply)
   )
 
-  def list = Action {
+  def list = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -40,7 +40,7 @@ object Quote extends Controller with SecureSocial  {
       }
   }
 
-  def edit(id: Long) = Action {
+  def edit(id: Long) = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -51,7 +51,7 @@ object Quote extends Controller with SecureSocial  {
       }
   }
 
-  def submit = Action {
+  def submit = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -74,7 +74,7 @@ object Quote extends Controller with SecureSocial  {
       }
   }
 
-  def create = Action {
+  def create = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -86,7 +86,7 @@ object Quote extends Controller with SecureSocial  {
       }
   }
 
-  def delete = Action {
+  def delete = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -102,7 +102,7 @@ object Quote extends Controller with SecureSocial  {
       }
   }
 
-  def view(id:Long) = Action {
+  def view(id:Long) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -113,7 +113,7 @@ object Quote extends Controller with SecureSocial  {
       }
   }
 
-  def loadQuoteAndKeys(id: Long)(implicit s:scala.slick.session.Session): Option[(models.Quote, Long, Long)] = {
+  private [this] def loadQuoteAndKeys(id: Long)(implicit s:scala.slick.session.Session): Option[(models.Quote, Long, Long)] = {
     val oQuote: Option[models.Quote] = dao.find(id)
     if (oQuote.isDefined) {
       val keys: List[Long] = dao.list.map(_.id)

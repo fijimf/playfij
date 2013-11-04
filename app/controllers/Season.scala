@@ -33,7 +33,7 @@ object Season extends Controller with SecureSocial  {
     )(models.Season.apply)(models.Season.unapply)
   )
 
-  def list = Action {
+  def list = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -42,7 +42,7 @@ object Season extends Controller with SecureSocial  {
       }
   }
 
-  def edit(key: String) = Action {
+  def edit(key: String) = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -53,7 +53,7 @@ object Season extends Controller with SecureSocial  {
       }
   }
 
-  def submit = Action {
+  def submit = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -76,7 +76,7 @@ object Season extends Controller with SecureSocial  {
       }
   }
 
-  def create = Action {
+  def create = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -88,7 +88,7 @@ object Season extends Controller with SecureSocial  {
       }
   }
 
-  def delete = Action {
+  def delete = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -104,7 +104,7 @@ object Season extends Controller with SecureSocial  {
       }
   }
 
-  def view(key:String) = Action {
+  def view(key:String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -115,7 +115,7 @@ object Season extends Controller with SecureSocial  {
       }
   }
 
-  def loadSeasonAndKeys(key: String)(implicit s:scala.slick.session.Session): Option[(models.Season, Option[String], Option[String])] = {
+  private [this] def loadSeasonAndKeys(key: String)(implicit s:scala.slick.session.Session): Option[(models.Season, Option[String], Option[String])] = {
     val oSeason: Option[models.Season] = dao.find(key)
     if (oSeason.isDefined) {
       val keys: List[String] = dao.list.map(_.key)

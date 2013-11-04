@@ -40,12 +40,12 @@ object KenPom extends Controller with SecureSocial  {
   )
 
 
-  def index = Action {
+  def index = SecuredAction {
     implicit request =>
       Ok(views.html.kenpomScrape(form.fill(GameUpdateRequest())))
   }
 
-  def scrapeGames = Action {
+  def scrapeGames = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>

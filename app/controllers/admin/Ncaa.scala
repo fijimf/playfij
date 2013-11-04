@@ -1,8 +1,8 @@
 package controllers.admin
 
-import play.api.mvc.{Controller, Action}
+import play.api.mvc.Controller
 import models.{TeamDao, Repository}
-import scraping.{NcaaGameScraper, KenPomGameScraper}
+import scraping.NcaaGameScraper
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
@@ -37,11 +37,14 @@ object Ncaa extends Controller with SecureSocial  {
 
 
 
-  def index = Action {
+  def index = SecuredAction {
+    implicit request =>
+
     Ok(views.html.ncaaIndex(gameForm.fill(GameUpdateRequest())))
   }
 
-  def scrapeTeams = Action {
+  def scrapeTeams = SecuredAction {
+    implicit request =>
     val data: List[(String, models.Team)] = scraping.NcaaTeamScraper.teamRawData()
     play.api.db.slick.DB.withSession {
       try {
@@ -55,7 +58,7 @@ object Ncaa extends Controller with SecureSocial  {
     }
   }
 
-    def scrapeGames = Action {
+    def scrapeGames = SecuredAction {
       implicit request =>
         play.api.db.slick.DB.withSession {
           implicit s =>

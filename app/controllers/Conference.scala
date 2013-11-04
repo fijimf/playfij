@@ -33,7 +33,7 @@ object Conference extends Controller with SecureSocial  {
     )(models.Conference.apply)(models.Conference.unapply)
   )
 
-  def list = Action {
+  def list = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -41,7 +41,7 @@ object Conference extends Controller with SecureSocial  {
       }
   }
 
-  def edit(key: String) = Action {
+  def edit(key: String) = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -52,7 +52,7 @@ object Conference extends Controller with SecureSocial  {
       }
   }
 
-  def submit = Action {
+  def submit = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -75,7 +75,7 @@ object Conference extends Controller with SecureSocial  {
       }
   }
 
-  def create = Action {
+  def create = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -87,7 +87,7 @@ object Conference extends Controller with SecureSocial  {
       }
   }
 
-  def delete = Action {
+  def delete = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -103,7 +103,7 @@ object Conference extends Controller with SecureSocial  {
       }
   }
 
-  def view(key: String) = Action {
+  def view(key: String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -114,7 +114,7 @@ object Conference extends Controller with SecureSocial  {
       }
   }
 
-  def loadConferenceAndKeys(key: String)(implicit s: scala.slick.session.Session): Option[(models.Conference, String, String)] = {
+  private [this] def loadConferenceAndKeys(key: String)(implicit s: scala.slick.session.Session): Option[(models.Conference, String, String)] = {
     val oConf: Option[models.Conference] = dao.find(key)
     if (oConf.isDefined) {
       val keys: List[String] = dao.list.map(_.key)

@@ -10,7 +10,7 @@ object Database extends Controller with SecureSocial  {
 
   private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
-  def index = Action {
+  def index = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         val status: List[(String, Option[Int])] = repo.checkDatabase()
@@ -18,7 +18,7 @@ object Database extends Controller with SecureSocial  {
       }
   }
 
-  def rebuildDatabase = Action {
+  def rebuildDatabase = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         try {
