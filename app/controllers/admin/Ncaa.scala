@@ -53,8 +53,7 @@ object Ncaa extends Controller with SecureSocial  {
       catch {
         case e: Exception => Redirect(routes.Database.index()).flashing("error" -> "Problem rebuilding the database")
       }
-      //TODO Gaaaahhhh terrible!                        EGAD-
-      Redirect("/app/database").flashing("success" -> "Scraped!")
+      Redirect(controllers.routes.Team.list).flashing("success" -> "Scraped!")
     }
   }
 
