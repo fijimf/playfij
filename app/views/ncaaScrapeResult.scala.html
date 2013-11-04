@@ -1,4 +1,4 @@
-@(res:scraping.control.GameUpdateResult, req:scraping.control.GameUpdateRequest, teams:List[models.Team])
+@(res:scraping.control.GameUpdateResult, req:scraping.control.GameUpdateRequest)
 @import helper._
 @import helper.twitterBootstrap._
 
@@ -122,14 +122,9 @@
                     <td>@tc._1</td>
                     <td>@tc._2</td>
                     <td>
-                        <form action=@routes.Team.addAlias method="POST">
-                            <input type="hidden" name="alias" id="alias" value="@tc._1">
-                            <select name="teamKey[]" id="teamKey[]" size="1">
-                                @for(t <- teams){
-                                <option value="@t.key">@t.name</option>
-                                }
-                            </select>
-                            <input type="submit"/>
+                        <form action="scrape-team-key" method="POST">
+                            <input type="hidden" name="teamKey" id="teamKey" value="@tc._1">
+                            <input type="submit" value="Scrape key"/>
                         </form>
                     </td>
                 </tr>

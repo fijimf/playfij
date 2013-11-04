@@ -20,11 +20,22 @@
 </div>
 <div class="row-fluid">
     <div class="span12">
+        <form class="form well" method="post" action="ncaa/scrape-team-key">
+            <p>
+                <input type="text" name="teamKey" class="input-medium" placeholder="team-key" style="vertical-align:top;"/>
+                <input type="submit" class="btn btn-primary span3 offset1" value="Scrape Team By Key" style="vertical-align:baseline;"/> <span class="help-inline">Will attempt to scrape teames based on a key</span>
+            </p>
+            </p>
+        </form>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
         @helper.form(action = admin.routes.Ncaa.scrapeGames, 'class->"form well") {
         <fieldset>
             <div class="row-fluid">
                 <div class="span4">
-                    @inputText( req("url"), '_label -> "URL", '_showConstraints -> false, 'class->"input-xlarge" )
+                    <input type="hidden" name="url" value="not-used">
                     @inputText( req("fromDate"), '_label -> "From", '_showConstraints -> false, 'class->"input-medium" )
                     @inputText( req("toDate"), '_label -> "To", '_showConstraints -> false, 'class->"input-medium" )
                 </div>
@@ -53,16 +64,6 @@
             </div>
         </fieldset>
         }
-    </div>
-</div>
-<div class="row-fluid">
-    <div class="span12">
-        <form class="form well" method="post" action="ncaa/scrape-games-etc">
-            <p>
-                <input type="submit" class="btn btn-primary span2" value="Scrape Misc"/> <span class="help-inline">Will attempt to pull team colors, twitter feeds and conference twitter feeds from ncaa games</span>
-            </p>
-            </p>
-        </form>
     </div>
 </div>
 }

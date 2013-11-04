@@ -50,7 +50,7 @@ GET  /admin/database/show-ddl                   controllers.admin.Database.rebui
 GET  /admin/ncaa                                controllers.admin.Ncaa.index
 POST /admin/ncaa/scrape-teams                   controllers.admin.Ncaa.scrapeTeams
 POST /admin/ncaa/scrape-games                   controllers.admin.Ncaa.scrapeGames
-POST /admin/ncaa/scrape-games-etc               controllers.admin.Ncaa.scrapeGamesEtc
+POST /admin/ncaa/scrape-team-key                controllers.admin.Ncaa.scrapeTeamByKey
 
 GET  /admin/kenpom                              controllers.admin.KenPom.index
 POST /admin/kenpom/scrape-games                 controllers.admin.KenPom.scrapeGames

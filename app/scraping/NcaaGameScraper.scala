@@ -13,6 +13,7 @@ import scraping.control.GameUpdateRequest
 
 
 object NcaaGameScraper extends AbstractGameScraper {
+
   def logger = Logger(this.getClass.getName)
 
   def fetch(req: GameUpdateRequest): Future[List[ResultData]] = {

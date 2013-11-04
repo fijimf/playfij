@@ -9,7 +9,13 @@ import scala.concurrent.duration._
 import play.api.Logger
 
 object NcaaTeamScraper extends AbstractScraper{
+
   val logger = Logger(this.getClass.getName)
+
+  def scrapeKey(s: String) = {
+    Await.result(teamDetail(s, None), 1.minutes)
+
+  }
 
   def teamRawData(): List[(String, Team)] = {
     val longNames: Map[String, String] = Await.result(loadLongNames(), 2.minutes)

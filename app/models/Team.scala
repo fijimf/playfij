@@ -65,6 +65,7 @@ case class TeamDao(model: Model) {
 
   def delete(id: String)(implicit s: scala.slick.session.Session) {
     Aliases.where(_.teamId === id.toLong).delete
+    ConferenceAssociations.where(_.teamId === id.toLong).delete
     Teams.where(_.id === id.toLong).delete
   }
 

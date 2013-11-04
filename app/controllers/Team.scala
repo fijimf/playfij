@@ -129,12 +129,11 @@ object Team extends Controller with SecureSocial  {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val teamName: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("teamName")).flatMap(_.headOption)
           val id: Option[String] = request.body.asFormUrlEncoded.flatMap(_.get("id")).flatMap(_.headOption)
           id match {
             case Some(x) => {
               teamDao.delete(x)
-              Redirect(routes.Team.list()).flashing("success" -> (teamName.getOrElse("Team #" + id.get) + " deleted."))
+              Redirect(routes.Team.list()).flashing("success" -> ("Team:" + x + " deleted."))
             }
             case None => Redirect(routes.Team.list()).flashing("error" -> "No id parameter passed to delete")
           }

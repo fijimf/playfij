@@ -1,8 +1,8 @@
 package controllers.admin
 
 import play.api.mvc.Controller
-import models.{TeamDao, Repository}
-import scraping.NcaaGameScraper
+import models.{Team, TeamDao, Repository}
+import scraping.{NcaaTeamScraper, NcaaGameScraper}
 import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
@@ -10,7 +10,7 @@ import play.api.Logger
 import scraping.control.GameUpdateRequest
 import securesocial.core.SecureSocial
 
-object Ncaa extends Controller with SecureSocial  {
+object Ncaa extends Controller with SecureSocial {
   val logger = Logger("Ncaa")
 
   import play.api.Play.current
@@ -36,45 +36,59 @@ object Ncaa extends Controller with SecureSocial  {
   )
 
 
-
   def index = SecuredAction {
     implicit request =>
-
-    Ok(views.html.ncaaIndex(gameForm.fill(GameUpdateRequest())))
+      Ok(views.html.ncaaIndex(gameForm.fill(GameUpdateRequest())))
   }
 
   def scrapeTeams = SecuredAction {
     implicit request =>
-    val data: List[(String, models.Team)] = scraping.NcaaTeamScraper.teamRawData()
-    play.api.db.slick.DB.withSession {
-      try {
-        repo.scrapeNcaaTeamsAndConferences(data)
-      }
-      catch {
-        case e: Exception => Redirect(routes.Database.index()).flashing("error" -> "Problem rebuilding the database")
-      }
-      Redirect(controllers.routes.Team.list).flashing("success" -> "Scraped!")
-    }
-  }
-
-    def scrapeGames = SecuredAction {
-      implicit request =>
-        play.api.db.slick.DB.withSession {
-          implicit s =>
-            gameForm.bindFromRequest.fold(
-              errors => {
-                logger.info("Problems saving " + errors)
-                BadRequest(views.html.ncaaIndex(errors))
-              },
-              req => {
-                val result = NcaaGameScraper.scrape(repo, req)
-                Ok(views.html.ncaaScrapeResult(result, req, TeamDao(repo.m).list))
-              }
-            )
+      val data: List[(String, models.Team)] = scraping.NcaaTeamScraper.teamRawData()
+      play.api.db.slick.DB.withSession {
+        try {
+          repo.scrapeNcaaTeamsAndConferences(data)
         }
+        catch {
+          case e: Exception => Redirect(routes.Database.index()).flashing("error" -> "Problem rebuilding the database")
+        }
+        Redirect(controllers.routes.Team.list).flashing("success" -> "Scraped!")
+      }
+  }
+
+  def scrapeTeamByKey = SecuredAction {
+    implicit request =>
+      val parms: Option[Map[String, Seq[String]]] = request.body.asFormUrlEncoded
+      val data: List[(String, models.Team)] = parms.flatMap(kv => kv.get("teamKey").flatMap(_.headOption)).flatMap(k => NcaaTeamScraper.scrapeKey(k)).toList
+      play.api.db.slick.DB.withSession {
+        try {
+          repo.scrapeNcaaTeamsAndConferences(data)
+        }
+        catch {
+          case e: Exception => Redirect(routes.Database.index()).flashing("error" -> "Problem scraping that team4")
+        }
+        Redirect(controllers.routes.Team.edit(parms.get.apply("teamKey").head)).flashing("success" -> "Scraped!")
+      }
 
   }
-  def scrapeGamesEtc = TODO
+
+
+  def scrapeGames = SecuredAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          gameForm.bindFromRequest.fold(
+            errors => {
+              logger.info("Problems saving " + errors)
+              BadRequest(views.html.ncaaIndex(errors))
+            },
+            req => {
+              val result = NcaaGameScraper.scrape(repo, req)
+              Ok(views.html.ncaaScrapeResult(result, req))
+            }
+          )
+      }
+
+  }
 
 
 }

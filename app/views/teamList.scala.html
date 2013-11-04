@@ -3,16 +3,6 @@
 @import tags._
 
 @mainNoAds("Teams") {
-<script>
-    function deleteTeam(i,n){
-    var hiddenId = '<input type="hidden" id="id" name="id" value="' + i + '"/>';
-    var hiddenName = '<input type="hidden" id="teamName" name="teamName" value="' + n + '"/>';
-    $('
-    <form>', { "html":hiddenId+hiddenName, "method":'POST', "action":'/teams/delete' } )
-        .appendTo(document.body).submit();
-        }
-</script>
-
 <div class="row-fluid">
     <div class="span12">
         <h3>Teams</h3>
@@ -48,7 +38,7 @@
                 <td>@team.officialUrl.getOrElse("")</td>
                 <td>@team.officialTwitter.getOrElse("")</td>
                 <td>
-                    <button class="btn btn-danger btn-small" onclick="deleteTeam('@team.id', '@team.name')">Delete
+                    <button class="btn btn-danger btn-small" onclick="deleteItem('@team.id', 'id', 'teams')">Delete
                     </button>
                 </td>
             </tr>
