@@ -1,8 +1,9 @@
 package controllers
 
 import play.api.mvc._
+import securesocial.core.SecureSocial
 
-object Game extends Controller {
+object Game extends Controller with SecureSocial  {
 
   def list = TODO
 

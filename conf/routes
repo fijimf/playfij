@@ -4,10 +4,6 @@
 
 # Home page
 GET  /                                          controllers.Application.index
-GET  /teams/:key                                controllers.Application.team(key:String)
-GET  /conferences/:key                          controllers.Application.conference(key:String)
-GET  /statistic/:key                            controllers.Application.statistic(key:String)
-GET  /statistic/:key/:date                      controllers.Application.histStatistic(key:String, date:String)
 
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index

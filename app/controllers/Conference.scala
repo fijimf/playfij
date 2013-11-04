@@ -7,8 +7,9 @@ import play.api.data.Form
 import play.api.data.Forms._
 import scala.Some
 import play.api.db.slick.Profile
+import securesocial.core.SecureSocial
 
-object Conference extends Controller {
+object Conference extends Controller with SecureSocial  {
 
   import play.api.Play.current
 

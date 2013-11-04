@@ -8,8 +8,9 @@ import play.api.Logger
 import scala.Some
 import models.ConferenceAssociationDao
 import models.TeamDao
+import securesocial.core.SecureSocial
 
-object Team extends Controller {
+object Team extends Controller with SecureSocial  {
 
   import play.api.Play.current
 

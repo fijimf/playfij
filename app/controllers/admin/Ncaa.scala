@@ -8,8 +8,9 @@ import play.api.data.Forms._
 import scala.Some
 import play.api.Logger
 import scraping.control.GameUpdateRequest
+import securesocial.core.SecureSocial
 
-object Ncaa extends Controller {
+object Ncaa extends Controller with SecureSocial  {
   val logger = Logger("Ncaa")
 
   import play.api.Play.current

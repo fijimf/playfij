@@ -9,8 +9,9 @@ import scala.Some
 import play.api.db.slick.Profile
 import scala.Some
 import models.QuoteDao
+import securesocial.core.SecureSocial
 
-object Quote extends Controller {
+object Quote extends Controller with SecureSocial  {
 
   import play.api.Play.current
   private val model = new Model(){

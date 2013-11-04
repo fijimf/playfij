@@ -11,9 +11,10 @@ import scraping.{KenPomGameScraper}
 import scala.Some
 import scala.concurrent.{Await, Future}
 import scraping.control.GameUpdateRequest
+import securesocial.core.SecureSocial
 
 
-object KenPom extends Controller {
+object KenPom extends Controller with SecureSocial  {
   val logger = Logger("KenPom")
 
   import play.api.Play.current

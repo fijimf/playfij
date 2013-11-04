@@ -8,8 +8,9 @@ import play.api.data.Forms._
 import scala.Some
 import play.api.db.slick.Profile
 import scala.Some
+import securesocial.core.SecureSocial
 
-object Season extends Controller {
+object Season extends Controller with SecureSocial  {
 
   import play.api.Play.current
 

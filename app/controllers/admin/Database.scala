@@ -2,8 +2,9 @@ package controllers.admin
 
 import models.Repository
 import play.api.mvc.{Action, Controller}
+import securesocial.core.SecureSocial
 
-object Database extends Controller {
+object Database extends Controller with SecureSocial  {
 
   import play.api.Play.current
 
