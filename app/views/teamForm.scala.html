@@ -9,18 +9,19 @@
 
 <script>
     function updateLogos() {
-    var url = $("#logoUrl").val();
-    $("#logo-white-background").attr("src",url);
-    $("#logo-primary-background").attr("src",url);
-    $("#logo-secondary-background").attr("src",url);
+      var url = $("#logoUrl").val();
+      $("#logo-white-background").attr("src",url);
+      $("#logo-primary-background").attr("src",url);
+      $("#logo-secondary-background").attr("src",url);
     }
+
     function updatePrimaryColor() {
-    var color = $("#primaryColor").val();
-    $("#logo-primary-background").css("background","linear-gradient(to bottom, #eee 0%, "+color+" 27%, "+color+" 73%, #eee 100%)");
+      var color = $("#primaryColor").val();
+      $("#logo-primary-background").css("background-color",color);
     }
     function updateSecondaryColor() {
-    var color = $("#secondaryColor").val();
-    $("#logo-secondary-background").css("background","linear-gradient(to bottom, #eee 0%, "+color+" 27%, "+color+" 73%, #eee 100%)");
+      var color = $("#secondaryColor").val();
+      $("#logo-secondary-background").css("background-color",color);
     }
 
 </script>
