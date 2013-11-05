@@ -64,6 +64,14 @@ object Team extends Controller with SecureSocial  {
           }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
+  def test = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+            Ok(views.html.teamEg() )
+        }
+
+  }
 
 
   def list = SecuredAction {

@@ -24,6 +24,7 @@ POST /admin/conferences/delete                  controllers.Conference.delete
 GET  /admin/teams                               controllers.Team.list
 POST /admin/teams                               controllers.Team.submit
 GET  /admin/teams/new                           controllers.Team.create
+GET  /admin/teams/test                          controllers.Team.test
 GET  /admin/teams/:key                          controllers.Team.view(key)
 GET  /admin/teams/:key/edit                     controllers.Team.edit(key)
 POST /admin/teams/delete                        controllers.Team.delete
