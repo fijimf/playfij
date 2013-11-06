@@ -60,7 +60,7 @@ object Team extends Controller with SecureSocial  {
           teamDao.find(key).map(t => {
             val (prevKey, nextKey) = nextKeys(key)
             conferenceAssociationDao.queryByTeam(t)
-            Ok(views.html.teamView(t, t.name + " " + t.nickname, prevKey, nextKey))
+            Ok(views.html.teamView(t))
           }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
