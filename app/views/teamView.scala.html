@@ -1,6 +1,6 @@
 @(team: models.Team)
 
-@richMain(team.name, Some("Bite the Big Apple -- on't mind the maggots."), None) {
+@richMain(team.name, Some("Bite the Big Apple -- don't mind the maggots."), None) {
 
 <div class="row-fluid team-header-row"
      style="border-top:12px solid @team.primaryColor.getOrElse("#444");border-bottom:12px solid @team.primaryColor.getOrElse("#444");background-color:@team.secondaryColor.getOrElse("#ddd");">
