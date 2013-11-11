@@ -1,4 +1,4 @@
-@(team: models.Team)
+@(p: models.TeamPage)
 
 @richMain(team.name, Some("Bite the Big Apple -- don't mind the maggots."), None) {
 
@@ -9,7 +9,7 @@
              src="@team.logoUrl.getOrElse("")">
     </div>
     <div class="span11">
-        <h3>@team.name @team.nickname</h3>
+        <h3>@p.team.name @p.team.nickname</h3>
         <h4>(23-10, 14-2 Big East)</h4>
     </div>
 </div>

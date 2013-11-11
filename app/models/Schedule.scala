@@ -1,12 +1,14 @@
 package models
 
 import org.joda.time.LocalDate
+import org.joda.time.format.DateTimeFormat
 
 case class ScheduleDao(m: Model) {
 
   import m.profile.simple._
 
-  def schedule(): Schedule = {
+  val fmt = DateTimeFormat.forPattern("yyyyMMdd");
+  def schedule(implicit s: scala.slick.session.Session): Schedule = {
     val teams: List[Team] = TeamDao(m).list
     val seasons: List[Season] = SeasonDao(m).list
     val conferences: List[Conference] = ConferenceDao(m).list
@@ -25,6 +27,67 @@ case class ScheduleDao(m: Model) {
 
     Schedule(teams, seasons, conferences, gameData, assnData)
   }
+
+  val seasonQuery = for (season <- m.Seasons) yield season
+  val teamQuery = for (team <- m.Teams) yield team
+  val assocQuery = for (assoc <- m.ConferenceAssociations) yield assoc
+  val conferenceQuery = for (conf <- m.Conferences) yield conf
+
+  def teamPage(teamKey:String)(implicit s: scala.slick.session.Session):Option[TeamPage]={
+    currentSeason() match {
+      case Some(season) => teamPage(teamKey, season.key, new LocalDate().toString(fmt))
+      case _ => None
+    }
+  }
+
+  def teamPage(teamKey:String, yyyymmdd:String)(implicit s: scala.slick.session.Session):Option[TeamPage] ={
+    season(fmt.parseLocalDate(yyyymmdd)) match {
+      case Some(season) => teamPage(teamKey, season.key, yyyymmdd)
+      case _ => None
+    }
+  }
+
+  def teamPage(teamKey:String, seasonKey:String, yyyymmdd:String)(implicit s: scala.slick.session.Session):Option[TeamPage]= {
+    (for {team<-teamQuery if team.key === teamKey
+      season<-seasonQuery if season.key === seasonKey
+      assoc <- assocQuery if assoc.seasonId === season.id && assoc.teamId === team.id
+      conference <- conferenceQuery if conference.id === assoc.conferenceId
+    } yield {
+      (team, season, conference)
+    }).firstOption match {
+      case Some((team, season, conference)) => buildPage(team, season, conference, fmt.parseLocalDate(yyyymmdd))
+      case _ =>None
+    }
+  }
+  
+  def buildPage(team:Team, season:Season, conference:Conference, date:LocalDate)(implicit s: scala.slick.session.Session):Option[TeamPage] ={
+    val gameData: List[(LocalDate, Team, Team, Result)] = (for {(game, result) <- m.Games leftJoin m.Results on (_.id === _.gameId) if game.homeTeamId === team.id || game.awayTeamId === team.id
+                                                                           homeTeam <- game.homeTeamFk
+                                                                           awayTeam <- game.awayTeamFk
+    }
+    yield {
+      (game.date, homeTeam, awayTeam, result)
+    }).list()
+    val results: List[(LocalDate, Team, Team, Result)] = gameData.filter(_._4!=null)
+    val schedule: List[(LocalDate, Team, Team)] = gameData.filter(_._4==null).map(t=>(t._1, t._2, t._3))
+    
+    None
+  }
+
+  def season(d: LocalDate)(implicit s: scala.slick.session.Session): Option[Season] = {
+    seasonQuery.list().find(season=> season.from.isBefore(d) && season.to.isAfter(d))
+  }
+
+  def currentSeason(): Option[Season] = {
+    season(new LocalDate).orElse(seasonQuery.list().sortBy(_.to.toDate).reverse.headOption)
+  }
+
+}
+
+
+
+case class TeamPage(team:Team, conference:Conference, season:Option[Season], games:List[Game], results:List[Result]) {
+  val gameMap=games.map(g=>g.id->g)
 }
 
 case class Schedule(teams: List[Team], seasons: List[Season], conferences: List[Conference], gameData: Map[Season, List[(Season, Game, Team, Option[Int], Team, Option[Int])]], assnData: Map[Season, List[(Season, Team, Conference)]]) {
@@ -33,58 +96,66 @@ case class Schedule(teams: List[Team], seasons: List[Season], conferences: List[
   val confToTeam: Map[Season, Map[Conference, List[Team]]] = assnData.mapValues(_.map(t => (t._3, t._2)).groupBy(_._1).mapValues(_.map(_._2)))
 
 
-  def season(d: LocalDate): Option[Season] = {
-    seasons.find(s => d.isAfter(s.from) && d.isBefore(s.to))
-  }
-
-  def currentSeason: Season = {
-    season(new LocalDate).getOrElse(seasons.sortBy(_.to).reverse.head)
-  }
-
-  def generateRecords(fs: Map[String, (Game, Team) => Boolean]): Map[(String, String, String), Record] = {
-    val z: Map[(String, String, String), Record] = Map.empty[(String, String, String), Record].withDefaultValue(Record())
-    gameData.values.flatten.foldLeft(z)((map: Map[(String, String, String), Record], data: (Season, Game, Team, Option[Int], Team, Option[Int])) => {
-      val (season, game, homeTeam, homeScore, awayTeam, awayScore) = data
-      val (winner, loser) = (homeScore, awayScore) match {
-        case (Some(h), Some(a)) if (h > a) => (Some(homeTeam), Some(awayTeam))
-        case (Some(h), Some(a)) if (h < a) => (Some(awayTeam), Some(homeTeam))
-        case _ => (None, None)
-      }
-      fs.foldLeft() {
-        case (label: String, function: ((Game, Team) => Boolean)) => {
-          if (winner.isDefined && function(game, winner.get)) {
-            val compoundKey = (winner.get.key, season.key, label)
-            z+ (compoundKey -> z(compoundKey).++)
-          }
-        }
-      }
-    })
+  def generateRecords(defs: List[RecordDef]): Map[RecordKey, Record] = {
+    Map.empty[RecordKey, Record]
   }
 }
 
-trait Streak {
-  def ++():Streak
-  def --():Streak
-}
+  trait Streak {
+    def ++ : Streak
 
-case class WinStreak(n:Int) extends Streak {
-  def ++(): Streak = WinStreak(n+1)
+    def -- : Streak
+  }
 
-  def --(): Streak = LossStreak(1)
-}
+  case class WinStreak(n: Int) extends Streak {
+    def ++ : Streak = WinStreak(n + 1)
+           def -- : Streak = LossStreak(1)
+  }
 
-case class LossStreak(n:Int) extends Streak {
-  def ++(): Streak = WinStreak(1)
+  case class LossStreak(n: Int) extends Streak {
+    def ++ : Streak = WinStreak(1)
 
-  def --(): Streak = LossStreak(n+1)
-}
+    def -- : Streak = LossStreak(n + 1)
+  }
 
-case object emptyStreak extends Streak {
-  def ++(): Streak = WinStreak(1)
-  def --(): Streak = LossStreak(1)
-}
+  case object emptyStreak extends Streak {
+    def ++ : Streak = WinStreak(1)
 
-case class Record(wins:Int=0, losses:Int=0, streak:Streak=emptyStreak){
-  def ++(): Record = Record(wins+1, losses, streak++)
-  def --(): Record = Record(wins, losses+1, streak--)
-}
+    def -- : Streak = LossStreak(1)
+  }
+
+  case class Record(wins: Int = 0, losses: Int = 0, streak: Streak = emptyStreak) {
+    def ++ : Record = Record(wins + 1, losses, streak++)
+
+    def -- : Record = Record(wins, losses + 1, streak--)
+  }
+
+  case class RecordKey(teamKey: String, seasonKey: String, typeKey: String)
+
+  trait RecordDef {
+    def label: String
+
+    def include(g: Game): Boolean
+  }
+
+  case object OverallRecord extends RecordDef {
+    def label: String = "Overall"
+
+    def include(g: Game): Boolean = true
+
+  }
+
+  case class ConferenceTest(teamToConf: Map[Season, Map[Team, Conference]], matchConf: Boolean) extends RecordDef {
+    private val idMap: Map[Long, Map[Long, Long]] = teamToConf.map {
+      case (season: Season, map: Map[Team, Conference]) => season.id -> map.map {
+        case (team: Team, conference: Conference) => (team.id, conference.id)
+      }.toMap
+    }.toMap
+
+    def label: String = if (matchConf) "Conference" else "Non-Conference"
+
+    def include(g: Game): Boolean = idMap.get(g.seasonId) match {
+      case Some(lookup) => matchConf == (lookup.get(g.homeTeamId) == lookup.get(g.awayTeamId))
+      case _ => false
+    }
+  }
