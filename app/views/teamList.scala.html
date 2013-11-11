@@ -31,7 +31,7 @@
             <tr>
                 <td style="background-color:@team.primaryColor.getOrElse("white")"><img src="@team.logoUrl.getOrElse("")"/></td>
                 <td><a class="btn btn-primary btn-small" href="@controllers.routes.Team.edit(team.key)">Edit</a></td>
-                <td><a href="@controllers.routes.Team.view(team.key)">@team.name</a></td>
+                <td><a href="@controllers.routes.Schedule.team(team.key)">@team.name</a></td>
                 <td>@team.nickname</td>
                 <td>@team.longName</td>
                 <td>@teams(team).mkString(", ")</td>

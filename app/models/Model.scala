@@ -166,6 +166,12 @@ trait Model extends Profile {
     def numOts = column[Int]("num_ots")
 
     def * = id ~ gameId ~ homeScore ~ awayScore ~ numOts <>(Result.apply _, Result.unapply _)
+    def maybe = id.? ~ gameId.? ~ homeScore.? ~ awayScore.? ~ numOts.? <> (tupToResult _, (res: Option[Result]) => None)
+
+    def tupToResult(tuple: (Option[Long],Option[Long],Option[Int],Option[Int],Option[Int])) : Option[Result] = tuple match {
+      case (Some(id),Some(gameId),Some(homeScore),Some(awayScore), Some(numOts)) => Some(Result(id, gameId, homeScore, awayScore, numOts))
+      case _ => None
+    }
 
     def autoInc = gameId ~ homeScore ~ awayScore ~ numOts returning id
 

@@ -54,17 +54,6 @@ object Team extends Controller with SecureSocial  {
       "teamKey" -> seq(nonEmptyText))((alias, teamKey) => (alias, teamKey))((tup: (String, Seq[String])) => Some(tup))
   )
 
-  def view(key: String) = UserAwareAction {
-    implicit request =>
-      play.api.db.slick.DB.withSession {
-        implicit s =>
-          teamDao.find(key).map(t => {
-            val (prevKey, nextKey) = nextKeys(key)
-            conferenceAssociationDao.queryByTeam(t)
-            Ok(views.html.teamView(t))
-          }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
-      }
-  }
   def test = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
