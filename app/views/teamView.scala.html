@@ -48,85 +48,17 @@
 </div>
 <div class="span4">
 
-    <h5>Big East Standings</h5>
+    <h5>@p.conferenceStandings.conference.name Standings</h5>
     <table class="table table-compact table-bordered table-subcompact">
         <thead/>
         <tbody>
+        @p.conferenceStandings.records.map{tup=>
         <tr>
-            <td>17 - 4</td>
-            <td> 35 - 5</td>
-            <td> Louisville</td>
+            <td>@tup._2._1</td>
+            <td>@tup._2._2</td>
+            <td>@tup._1.name</td>
         </tr>
-        <tr>
-            <td>15 - 5</td>
-            <td> 25 - 7</td>
-            <td> Georgetown</td>
-        </tr>
-        <tr>
-            <td>14 - 6</td>
-            <td> 26 - 9</td>
-            <td> Marquette</td>
-        </tr>
-        <tr>
-            <td>15 - 8</td>
-            <td> 29 - 10</td>
-            <td> Syracuse</td>
-        </tr>
-        <tr>
-            <td>13 - 8</td>
-            <td> 25 - 10</td>
-            <td> Notre Dame</td>
-        </tr>
-        <tr>
-            <td>12 - 7</td>
-            <td> 24 - 9</td>
-            <td> Pittsburgh</td>
-        </tr>
-        <tr>
-            <td>11 - 9</td>
-            <td> 19 - 14</td>
-            <td> Villanova</td>
-        </tr>
-        <tr>
-            <td>10 - 8</td>
-            <td> 20 - 10</td>
-            <td> Connecticut</td>
-        </tr>
-        <tr>
-            <td>10 - 10</td>
-            <td> 22 - 12</td>
-            <td> Cincinnati</td>
-        </tr>
-        <tr>
-            <td>9 - 10</td>
-            <td> 19 - 15</td>
-            <td> Providence</td>
-        </tr>
-        <tr>
-            <td>8 - 11</td>
-            <td> 17 - 16</td>
-            <td> St. John's (NY)</td>
-        </tr>
-        <tr>
-            <td>6 - 14</td>
-            <td> 15 - 16</td>
-            <td> Rutgers</td>
-        </tr>
-        <tr>
-            <td>4 - 16</td>
-            <td> 15 - 18</td>
-            <td> Seton Hall</td>
-        </tr>
-        <tr>
-            <td>3 - 16</td>
-            <td> 12 - 19</td>
-            <td> South Fla.</td>
-        </tr>
-        <tr>
-            <td>2 - 17</td>
-            <td> 11 - 21</td>
-            <td> DePaul Blue</td>
-        </tr>
+        }
         </tbody>
     </table>
     <h5>Record</h5>
