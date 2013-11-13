@@ -19,25 +19,13 @@
 
 <div class="row-fluid">
 <div class="span4">
-    <h5>Schedule</h5>
-    <table class="table table-compact table-bordered table-subcompact ">
-        <thead/>
-        <tbody>
-        @p.schedule.map { g =>
-        <tr>
-            <td>@g.date.toString("d-MMM-yyyy")</td>
-            <td>@g.versusOrAt <a href="@controllers.routes.Schedule.team(g.opp.key)">@g.opp.name</a></td>
-        </tr>
-        }
-        </tbody>
-    </table>
     <h5>Results</h5>
     <table class="table table-compact table-bordered table-subcompact ">
         <thead/>
         <tbody>
         @p.results.map { r =>
         <tr>
-            <td>@r.date.toString("d-MMM-yyyy")</td>
+            <td style="text-align:right;">@r.date.toString("d-MMM-yyyy")</td>
             <td>@r.outcome</td>
             <td>@r.scores</td>
             <td>@r.versusOrAt <a href="@controllers.routes.Schedule.team(r.opp.key)">@r.opp.name</a></td>
@@ -45,6 +33,19 @@
         }
         </tbody>
     </table>
+    <h5>Schedule</h5>
+    <table class="table table-compact table-bordered table-subcompact ">
+        <thead/>
+        <tbody>
+        @p.schedule.map { g =>
+        <tr>
+            <td style="text-align:right;">@g.date.toString("d-MMM-yyyy")</td>
+            <td>@g.versusOrAt <a href="@controllers.routes.Schedule.team(g.opp.key)">@g.opp.name</a></td>
+        </tr>
+        }
+        </tbody>
+    </table>
+
 </div>
 <div class="span4">
 

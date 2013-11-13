@@ -85,7 +85,7 @@ case class ScheduleDao(m: Model) {
           }
         }
       }
-    }
+    }.sortBy(_.date.toDate)
     val schedule: List[ScheduleLine] = gameData.filter(_._4.isEmpty).map {
       case (date: LocalDate, homeTeam: Team, awayTeam: Team, _) => {
         if (team == homeTeam) {
@@ -94,7 +94,7 @@ case class ScheduleDao(m: Model) {
           ScheduleLine(date, homeTeam, "at")
         }
       }
-    }
+    }.sortBy(_.date.toDate)
 
 
     Some(TeamPage(team, conference, season, schedule, results, loadConference(conference.key, season.key)))
