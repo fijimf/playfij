@@ -31,7 +31,7 @@ object Database extends Controller with SecureSocial  {
       }
   }
 
-  def showDDL = UserAwareAction {
+  def showDDL = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         try {
