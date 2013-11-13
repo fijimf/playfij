@@ -46,7 +46,7 @@ POST /admin/quotes/delete                       controllers.Quote.delete
 
 GET  /admin/database                            controllers.admin.Database.index
 POST /admin/database/rebuild                    controllers.admin.Database.rebuildDatabase
-GET  /admin/database/show-ddl                   controllers.admin.Database.rebuildDatabase
+GET  /admin/database/show-ddl                   controllers.admin.Database.showDDL
 
 GET  /admin/ncaa                                controllers.admin.Ncaa.index
 POST /admin/ncaa/scrape-teams                   controllers.admin.Ncaa.scrapeTeams

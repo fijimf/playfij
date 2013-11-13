@@ -17,7 +17,7 @@ object Mappers {
   )
 
   implicit def tuple2UserId(tuple: (String, String)) = tuple match {
-    case (userId, providerId) => UserId(userId, providerId)
+    case (userId, providerId) => IdentityId(userId, providerId)
   }
 
   implicit def string2AuthenticationMethod: TypeMapper[AuthenticationMethod] =

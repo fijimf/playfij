@@ -30,4 +30,16 @@ object Database extends Controller with SecureSocial  {
         Redirect(routes.Database.index()).flashing("success" -> "Database rebuilt")
       }
   }
+
+  def showDDL = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        try {
+          Ok(repo.showDDL())
+        }
+        catch {
+          case e: Exception => Redirect(routes.Database.index()).flashing("error" -> "Problem rebuilding the database")
+        }
+      }
+  }
 }

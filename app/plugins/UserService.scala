@@ -1,7 +1,7 @@
 package plugins
 
 import play.api.Application
-import securesocial.core.{UserId, Identity, UserServicePlugin}
+import securesocial.core.{IdentityId, Identity, UserServicePlugin}
 import securesocial.core.providers.Token
 import models.User
 import play.api.Logger
@@ -11,7 +11,7 @@ import models.UserDao
 class UserService(application: Application) extends UserServicePlugin(application) {
 
 
-  def find(id: UserId) = {
+  def find(id: IdentityId) = {
     import play.api.Play.current
 
     val model = new Model() {

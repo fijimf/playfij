@@ -2,7 +2,6 @@ package models
 
 import scala.slick.driver.ExtendedProfile
 import scala.slick.session.Database._
-import play.api.db.slick.Profile
 import scala.slick.jdbc.meta.MTable
 import play.api.Logger
 import scala.slick.lifted.DDL
@@ -24,7 +23,11 @@ class Repository(p: ExtendedProfile) {
     m.Games,
     m.Results,
     m.Users,
-    m.Quotes
+    m.Quotes,
+    m.Observations,
+    m.KeyedValues,
+    m.Statistics,
+    m.StatisticalModels
   )
 
   def checkDatabase(): List[(String, Option[Int])] = {
@@ -108,6 +111,10 @@ class Repository(p: ExtendedProfile) {
         teamDao.insert(t)
       }
     })
+  }
+
+  def showDDL():String={
+    modelTables.map(t => t.ddl.dropStatements.map(_+";\n").mkString).mkString("\n") + modelTables.map(t => t.ddl.createStatements.map(_+";\n").mkString).mkString("\n")
   }
 }
 

@@ -312,7 +312,7 @@ trait Model extends Profile {
         (t => User(Option(t._1), (t._2, t._3), t._4, t._5, t._6, t._7, t._8, t._9, (t._10, t._11), (t._12, t._13, t._14, t._15)),
           (u: User) =>
             Some(
-              (u.uid.getOrElse(0L), u.id.id, u.id.providerId, u.firstName, u.lastName, u.fullName, u.email, u.avatarUrl, u.authMethod,
+              (u.uid.getOrElse(0L), u.identityId.userId, u.identityId.providerId, u.firstName, u.lastName, u.fullName, u.email, u.avatarUrl, u.authMethod,
                 u.oAuth1Info.map(_.token), u.oAuth1Info.map(_.secret), u.oAuth2Info.map(_.accessToken),
                 u.oAuth2Info.flatMap(_.tokenType), u.oAuth2Info.flatMap(_.expiresIn),
                 u.oAuth2Info.flatMap(_.refreshToken), u.passwordInfo.map(_.hasher).getOrElse(""),
