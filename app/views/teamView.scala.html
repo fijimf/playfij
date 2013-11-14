@@ -25,10 +25,10 @@
         <tbody>
         @p.results.map { r =>
         <tr>
-            <td style="text-align:right;">@r.date.toString("d-MMM-yyyy")</td>
-            <td>@r.outcome</td>
-            <td>@r.scores</td>
-            <td>@r.versusOrAt <a href="@controllers.routes.Schedule.team(r.opp.key)">@r.opp.name</a></td>
+            <td style="text-align:right; width: 7em;">@r.date.toString("d-MMM-yyyy")</td>
+            <td style="text-align:center; width: 1em;">@r.outcome</td>
+            <td style="text-align:center;">@r.scores</td>
+            <td style="width:13em;">@r.versusOrAt <a href="@controllers.routes.Schedule.team(r.opp.key)">@r.opp.name</a></td>
         </tr>
         }
         </tbody>
@@ -39,8 +39,9 @@
         <tbody>
         @p.schedule.map { g =>
         <tr>
-            <td style="text-align:right;">@g.date.toString("d-MMM-yyyy")</td>
-            <td>@g.versusOrAt <a href="@controllers.routes.Schedule.team(g.opp.key)">@g.opp.name</a></td>
+            <td style="text-align:right; width: 7em;">@g.date.toString("d-MMM-yyyy")</td>
+            <td colspan="2"></td>
+            <td style="width:13em;">@g.versusOrAt <a href="@controllers.routes.Schedule.team(g.opp.key)">@g.opp.name</a></td>
         </tr>
         }
         </tbody>
@@ -55,9 +56,9 @@
         <tbody>
         @p.conferenceStandings.records.map{tup=>
         <tr>
-            <td>@tup._2._1</td>
-            <td>@tup._2._2</td>
-            <td>@tup._1.name</td>
+            <td style="text-align:center;">@tup._2._1</td>
+            <td style="text-align:center;">@tup._2._2</td>
+            <td><a href="@controllers.routes.Schedule.team(tup._1.key)">@tup._1.name</a></td>
         </tr>
         }
         </tbody>
