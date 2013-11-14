@@ -3,8 +3,8 @@
 # ~~~~
 
 # Home page
-GET  /                                          controllers.Application.index
-GET  /teams/:key                                controllers.Schedule.team(key)
+GET  /deepfij/                                          controllers.Application.index
+GET  /deepfij/teams/:key                                controllers.Schedule.team(key)
 
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index
