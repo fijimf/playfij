@@ -67,61 +67,16 @@
     <table class="table table-compact table-bordered table-subcompact">
         <thead/>
         <tbody>
+
+        @p.currentRecords.map { cr =>
         <tr>
-            <td>Overall</td>
-            <td>35 - 5</td>
-            <td>0.940</td>
+            <td >@cr._1</td>
+            <td >@cr._2.toString</td>
+            <td >@cr._2.streak.toString</td>
+            <td >@cr._2.performanceString(p.currentRecords(0)._2)</td>
         </tr>
-        <tr>
-            <td>Conference</td>
-            <td>14 - 2</td>
-            <td>-0.036</td>
-        </tr>
-        <tr>
-            <td>Non-conference</td>
-            <td>21 - 3</td>
-            <td>+ 0.036</td>
-        </tr>
-        <tr>
-            <td>Home</td>
-            <td>35 - 5</td>
-            <td>+ 0.036</td>
-        </tr>
-        <tr>
-            <td>Away</td>
-            <td>35 - 5</td>
-            <td>-0.036</td>
-        </tr>
-        <tr>
-            <td>Neutral</td>
-            <td>0 - 0</td>
-            <td> -</td>
-        </tr>
-        <tr>
-            <td>Last 10</td>
-            <td>9 - 1</td>
-            <td>-0.036</td>
-        </tr>
-        <tr>
-            <td>Last 5</td>
-            <td>5 - 0</td>
-            <td>-0.036</td>
-        </tr>
-        <tr>
-            <td>November</td>
-            <td>3 - 0</td>
-            <td>-0.036</td>
-        </tr>
-        <tr>
-            <td>December</td>
-            <td>7 - 1</td>
-            <td>-0.036</td>
-        </tr>
-        <tr>
-            <td>January</td>
-            <td>5 - 3</td>
-            <td>-0.036</td>
-        </tr>
+        }
+
         </tbody>
     </table>
     <h5>Previous</h5>

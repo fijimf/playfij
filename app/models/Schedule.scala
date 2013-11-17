@@ -2,33 +2,13 @@ package models
 
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
+import scala.slick.lifted
 
 case class ScheduleDao(m: Model) {
 
   import m.profile.simple._
 
   val fmt = DateTimeFormat.forPattern("yyyyMMdd")
-
-//  def schedule(implicit s: scala.slick.session.Session): Schedule = {
-//    val teams: List[Team] = TeamDao(m).list
-//    val seasons: List[Season] = SeasonDao(m).list
-//    val conferences: List[Conference] = ConferenceDao(m).list
-//
-//    val gameData: Map[Season, List[(Season, Game, Team, Option[Int], Team, Option[Int])]] = (for {(g, r) <- m.Games leftJoin m.Results on (_.id === _.gameId)
-//                                                                                                  h <- g.homeTeamFk
-//                                                                                                  a <- g.awayTeamFk
-//                                                                                                  s <- g.seasonFk
-//                                                                                                  g <- g} yield (s, g, h, r.homeScore.?, a, r.awayScore.?)).list().groupBy(_._1)
-//    val assnData: Map[Season, List[(Season, Team, Conference)]] = (for {ca <- m.ConferenceAssociations
-//                                                                        s <- m.Seasons if s.id === ca.seasonId
-//                                                                        t <- m.Teams if t.id === ca.teamId
-//                                                                        c <- m.Conferences if c.id === ca.conferenceId
-//
-//    } yield (s, t, c)).list.groupBy(_._1)
-//
-//    Schedule(teams, seasons, conferences, gameData, assnData)
-//  }
-
   val seasonQuery = for (season <- m.Seasons) yield season
   val teamQuery = for (team <- m.Teams) yield team
   val assocQuery = for (assoc <- m.ConferenceAssociations) yield assoc
@@ -68,6 +48,7 @@ case class ScheduleDao(m: Model) {
      Record()
 
   }
+
   def teamResultData(team:Team) = resultData.where(t=>t._3.id === team.id || t._4.id===team.id)
 
   val resultData= for {result <- resultQuery
@@ -92,6 +73,56 @@ case class ScheduleDao(m: Model) {
     yield {
       (game.date, homeTeam, awayTeam, result.maybe)
     }).list()
+
+    val results: List[ResultLine] = loadResults(gameData, team)
+    val schedule: List[ScheduleLine] = loadSchedule(gameData, team)
+    val standings: ConferenceStandings = loadConference(conference.key, season.key)
+    val resultData = teamResultData(team).list.map(t=>ResultData.tupled(t))
+    val currentRecords = loadCurrentRecords(team, resultData)
+    val seasonRecords = loadSeasonRecords(team, resultData)
+    Some(TeamPage(team, conference, season, schedule, results, standings, currentRecords, seasonRecords))
+  }
+
+  def loadCurrentRecords(team: Team, data: List[ResultData])(implicit s: scala.slick.session.Session) = {
+    currentSeason.map(current => {
+      val seasonRecord: RecordGenerator = SeasonRecord(current)
+      List(
+        "Overall" -> seasonRecord(team, data),
+        "Conference" -> (seasonRecord + ConferenceRecord)(team, data),
+        "Non-Conference" -> (seasonRecord + NonConferenceRecord)(team, data),
+        "Home" -> (seasonRecord + HomeRecord(team))(team, data),
+        "Away" -> (seasonRecord + AwayRecord(team))(team, data),
+        "Neutral" -> (seasonRecord + NeutralRecord)(team, data),
+        "Last 10" -> (seasonRecord + LastNRecord(10))(team, data),
+        "Last 5" -> (seasonRecord + LastNRecord(5))(team, data),
+        "November" -> (seasonRecord + MonthRecord(11))(team, data),
+        "December" -> (seasonRecord + MonthRecord(12))(team, data),
+        "January" -> (seasonRecord + MonthRecord(1))(team, data),
+        "February" -> (seasonRecord + MonthRecord(2))(team, data),
+        "March" -> (seasonRecord + MonthRecord(3))(team, data),
+        "<3 pt Margin" -> (seasonRecord + LessThanMarginRecord(3))(team, data)
+      )
+    }).getOrElse(List.empty[(String, Record)])
+
+  }
+
+  def loadSeasonRecords(team:Team, data:List[ResultData])(implicit s: scala.slick.session.Session) = {
+    val confMap: Map[Season, Conference] = data.foldLeft(Map.empty[Season, Conference])((map: Map[Season, Conference], data: ResultData) => {
+      if (data.homeTeam == team) {
+        map + (data.season -> data.homeConference)
+      } else {
+        map + (data.season -> data.awayConference)
+      }
+    })
+    val seasons: List[Season] = seasonQuery.list()
+    seasons.map(s=>{
+      val seasonRecord: RecordGenerator = SeasonRecord(s)
+      (s, confMap(s), seasonRecord(team, data), (seasonRecord+ConferenceRecord)(team, data))
+    })
+  }
+
+
+  def loadResults(gameData: List[(LocalDate, Team, Team, Option[Result])], team: Team): List[ResultLine] = {
     val results: List[ResultLine] = gameData.filter(_._4.isDefined).map {
       case (date: LocalDate, homeTeam: Team, awayTeam: Team, result: Option[Result]) => {
         if (team == homeTeam) {
@@ -109,6 +140,10 @@ case class ScheduleDao(m: Model) {
         }
       }
     }.sortBy(_.date.toDate)
+    results
+  }
+
+  def loadSchedule(gameData: List[(LocalDate, Team, Team, Option[Result])], team: Team): List[ScheduleLine] = {
     val schedule: List[ScheduleLine] = gameData.filter(_._4.isEmpty).map {
       case (date: LocalDate, homeTeam: Team, awayTeam: Team, _) => {
         if (team == homeTeam) {
@@ -118,9 +153,7 @@ case class ScheduleDao(m: Model) {
         }
       }
     }.sortBy(_.date.toDate)
-
-
-    Some(TeamPage(team, conference, season, schedule, results, loadConference(conference.key, season.key)))
+    schedule
   }
 
   def season(d: LocalDate)(implicit s: scala.slick.session.Session): Option[Season] = {
@@ -260,24 +293,28 @@ object ConferenceRecord extends RecordGenerator {
 }
 
 object NonConferenceRecord extends RecordGenerator {
-  def label: String = "Conference"
+  def label: String = "NonConference"
 
   def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.homeConference.key != d.awayConference.key)
 }
-object HomeRecord extends RecordGenerator {
-  def label: String = "Conference"
+object HomeRecord {
+  def apply(t:Team) = new RecordGenerator {
+    def label: String = "Home"
 
-  def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.homeConference.key != d.awayConference.key)
+    def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> !d.game.isNeutralSite && d.homeTeam.key == t.key)
+  }
 }
-object AwayRecord extends RecordGenerator {
-  def label: String = "Conference"
+object AwayRecord {
+  def apply(t:Team) = new RecordGenerator {
+    def label: String = "Away"
 
-  def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.homeConference.key != d.awayConference.key)
+    def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> !d.game.isNeutralSite && d.awayTeam.key == t.key)
+  }
 }
 object NeutralRecord extends RecordGenerator {
   def label: String = "Conference"
 
-  def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.homeConference.key != d.awayConference.key)
+  def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.game.isNeutralSite)
 }
 
 object LastNRecord {
@@ -289,3 +326,24 @@ object LastNRecord {
     }
   }
 }
+
+object MonthRecord {
+  def apply(month: Int): RecordGenerator = {
+    new RecordGenerator {
+      def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.game.date.getMonthOfYear==month-1)
+
+      def label: String = "Month %d".format(month)
+    }
+  }
+}
+
+object LessThanMarginRecord {
+  def apply(margin: Int): RecordGenerator = {
+    new RecordGenerator {
+      def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> math.abs(d.result.homeScore - d.result.awayScore)<margin)
+
+      def label: String = "< %d".format(margin)
+    }
+  }
+}
+

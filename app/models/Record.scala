@@ -18,4 +18,30 @@ case class Record(wins: Int = 0, losses: Int = 0, streak: Streak = EmptyStreak) 
     "%d - %d".format(wins, losses)
   }
 
+  val pct:Option[Double] = if (wins + losses > 0) {
+    Some(wins.toDouble / (wins.toDouble + losses.toDouble))
+  } else {
+    None
+  }
+
+  def pctString(fmt: String = "%06.4f"):String = {
+    pct match {
+      case Some(p) => fmt.format(p)
+      case _ => "-"
+    }
+  }
+
+  def performance(cmp: Record):Option[Double] = {
+     (pct, cmp.pct) match {
+      case (Some(p), Some(q)) => Some(p - q)
+      case _ => None
+    }
+  }
+
+  def performanceString(cmp: Record, fmt: String = "%+06.4f"):String = {
+    performance(cmp) match {
+      case Some(p) => fmt.format(p)
+      case None => "-"
+    }
+  }
 }
