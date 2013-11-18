@@ -3,6 +3,7 @@ package models
 import org.apache.commons.lang3.StringUtils
 import play.api.db.slick.Profile
 import scala.slick.driver.ExtendedProfile
+import scala.util.Random
 
 case class Quote(id: Long,
                  quote: String,
@@ -18,6 +19,15 @@ case class QuoteDao(model: Model) {
 
   def list(implicit s: scala.slick.session.Session): List[Quote] = {
     Query(Quotes).sortBy(_.id).to[List]
+  }
+
+  def random(implicit s: scala.slick.session.Session): Option[Quote] = {
+    val quotes: List[Quote] = Query(Quotes).sortBy(_.id).to[List]
+    if (quotes.isEmpty){
+      None
+    } else {
+      Some(quotes(Random.nextInt(quotes.size)))
+    }
   }
 
   def find(id: Long)(implicit s: scala.slick.session.Session): Option[Quote] = {

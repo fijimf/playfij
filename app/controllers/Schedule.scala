@@ -3,7 +3,8 @@ package controllers
 import securesocial.core.SecureSocial
 import play.mvc.Controller
 import play.api.Logger
-import models.{ScheduleDao, ConferenceAssociationDao, TeamDao, Model}
+import models._
+import models.ScheduleDao
 
 object Schedule extends Controller with SecureSocial {
   import play.api.Play.current
@@ -14,14 +15,16 @@ object Schedule extends Controller with SecureSocial {
   }
 
   private val scheduleDao: ScheduleDao = ScheduleDao(model)
+  private val quoteDao = new QuoteDao(model)
 
 
   def team(key:String)  = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
+          val q = quoteDao.random
           scheduleDao.teamPage(key).map(tp => {
-            Ok(views.html.teamView(tp))
+            Ok(views.html.teamView(q,tp))
           }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
