@@ -66,7 +66,7 @@ case class ScheduleDao(m: Model) {
 
 
   def buildPage(team: Team, season: Season, conference: Conference, date: LocalDate)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
-    val gameData: List[(LocalDate, Team, Team, Option[Result])] = (for {(game, result) <- m.Games leftJoin m.Results on (_.id === _.gameId) if game.homeTeamId === team.id || game.awayTeamId === team.id
+    val gameData: List[(LocalDate, Team, Team, Option[Result])] = (for {(game, result) <- m.Games leftJoin m.Results on (_.id === _.gameId) if (game.homeTeamId === team.id || game.awayTeamId === team.id) && game.seasonId === season.id
                                                                         homeTeam <- game.homeTeamFk
                                                                         awayTeam <- game.awayTeamFk
     }
@@ -178,6 +178,7 @@ case class ScheduleDao(m: Model) {
 
     val gameData = (for {result <- m.Results
                          game <- result.gameFk
+                         season <- game.seasonFk if season.key === seasonKey
                          homeTeam <- game.homeTeamFk
                          awayTeam <- game.awayTeamFk} yield {
       (homeTeam, result.homeScore, awayTeam, result.awayScore)
