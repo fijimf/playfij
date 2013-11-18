@@ -1,4 +1,4 @@
-@(quote: models.Quote, title:String, prevKey:Long, nextKey:Long)(implicit flash:Flash)
+@(quote: models.Quote, title:String)(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -13,16 +13,6 @@
     @if(flash.get("error").isDefined) {
     <div class="alert alert-error"><p>@flash.get("error").get</p></div>
     }
-
-    <div class="row" style="margin-bottom:15px;">
-        <div class="span2">
-            <a class="btn btn-block btn-primary" href="@routes.Quote.view(prevKey)">Previous</a>
-        </div>
-        <div class="offset8 span2">
-            <a class="btn btn-block btn-primary" href="@routes.Quote.view(nextKey)">Next</a>
-        </div>
-    </div>
-
 
     <div class="container" style="padding-top:5px;">
         <div class="row">

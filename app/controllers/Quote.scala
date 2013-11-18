@@ -44,8 +44,8 @@ object Quote extends Controller with SecureSocial  {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-        loadQuoteAndKeys(id) match {
-          case Some((quote, prevId, nextId)) => Ok(views.html.quoteForm(quoteForm.fill(quote), "Quote", prevId, nextId))
+        loadQuote(id) match {
+          case Some(quote) => Ok(views.html.quoteForm(quoteForm.fill(quote), "Quote"))
           case None => NotFound(views.html.resourceNotFound("quote", id.toString))
         }
       }
@@ -59,7 +59,7 @@ object Quote extends Controller with SecureSocial  {
         quoteForm.bindFromRequest.fold(
           errors => {
             logger.info("Problems saving " + errors)
-            BadRequest(views.html.quoteForm(errors, "Save failed",0,0))  //FIXME......
+            BadRequest(views.html.quoteForm(errors, "Save failed"))  //FIXME......
           },
           quote => {
             if (quote.id == 0) {
@@ -78,11 +78,7 @@ object Quote extends Controller with SecureSocial  {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-        val ids: List[Long] = dao.list.map(_.id)
-        val prevId = ids.last
-        val nextId = ids.head
-
-        Ok(views.html.quoteForm(quoteForm.bind(Map.empty[String, String]), "New Quote", prevId, nextId))
+        Ok(views.html.quoteForm(quoteForm.bind(Map.empty[String, String]), "New Quote"))
       }
   }
 
@@ -106,31 +102,14 @@ object Quote extends Controller with SecureSocial  {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-        loadQuoteAndKeys(id) match {
-          case Some((quote, prevId, nextId)) => Ok(views.html.quoteView(quote, "Quote", prevId, nextId))
+        loadQuote(id) match {
+          case Some(quote) => Ok(views.html.quoteView(quote, "Quote"))
           case None => NotFound(views.html.resourceNotFound("quote", id.toString))
         }
       }
   }
 
-  private [this] def loadQuoteAndKeys(id: Long)(implicit s:scala.slick.session.Session): Option[(models.Quote, Long, Long)] = {
-    val oQuote: Option[models.Quote] = dao.find(id)
-    if (oQuote.isDefined) {
-      val keys: List[Long] = dao.list.map(_.id)
-      val n = keys.indexOf(id)
-      val prevKey = if (n == 0) {
-        keys.last
-      } else {
-        keys(n - 1)
-      }
-      val nextKey = if (n == (keys.size - 1)) {
-        keys.head
-      } else {
-        keys(n + 1)
-      }
-      Some(oQuote.get, prevKey, nextKey)
-    } else {
-      None
-    }
+  private [this] def loadQuote(id: Long)(implicit s:scala.slick.session.Session): Option[models.Quote] = {
+    dao.find(id)
   }
 }

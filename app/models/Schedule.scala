@@ -107,17 +107,17 @@ case class ScheduleDao(m: Model) {
   }
 
   def loadSeasonRecords(team:Team, data:List[ResultData])(implicit s: scala.slick.session.Session) = {
-    val confMap: Map[Season, Conference] = data.foldLeft(Map.empty[Season, Conference])((map: Map[Season, Conference], data: ResultData) => {
+    val confMap: Map[String, Conference] = data.foldLeft(Map.empty[String, Conference])((map: Map[String, Conference], data: ResultData) => {
       if (data.homeTeam == team) {
-        map + (data.season -> data.homeConference)
+        map + (data.season.key -> data.homeConference)
       } else {
-        map + (data.season -> data.awayConference)
+        map + (data.season.key -> data.awayConference)
       }
     })
     val seasons: List[Season] = seasonQuery.list()
     seasons.map(s=>{
       val seasonRecord: RecordGenerator = SeasonRecord(s)
-      (s, confMap(s), seasonRecord(team, data), (seasonRecord+ConferenceRecord)(team, data))
+      (s, confMap(s.key), seasonRecord(team, data), (seasonRecord+ConferenceRecord)(team, data))
     })
   }
 

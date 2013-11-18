@@ -83,24 +83,14 @@
     <table class="table table-compact table-bordered table-subcompact">
         <thead/>
         <tbody>
+        @p.seasonRecords.map { sr =>
         <tr>
-            <td>2013</td>
-            <td>23-10</td>
-            <td>14-2</td>
-            <td>Big East</td>
+            <td>@sr._1.key</td>
+            <td>@sr._3</td>
+            <td>@sr._4</td>
+            <td>@sr._2.name</td>
         </tr>
-        <tr>
-            <td>2012</td>
-            <td>25-8</td>
-            <td>14-2</td>
-            <td>Big East</td>
-        </tr>
-        <tr>
-            <td>2011</td>
-            <td>21-11</td>
-            <td>12-4</td>
-            <td>Big East</td>
-        </tr>
+        }
         </tbody>
     </table>
 </div>

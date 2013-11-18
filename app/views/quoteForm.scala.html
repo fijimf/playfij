@@ -1,4 +1,4 @@
-@(quoteForm: Form[Quote], title:String, prevKey:Long, nextKey:Long)(implicit flash:Flash)
+@(quoteForm: Form[Quote], title:String)(implicit flash:Flash)
 
 @import helper._
 @import helper.twitterBootstrap._
@@ -21,25 +21,15 @@
     </div>
     }
 
-    <div class="row" style="margin-bottom:15px;">
-        <div class="span2">
-            <a class="btn btn-block btn-primary" href="@routes.Quote.edit(prevKey)">Previous</a>
-        </div>
-        <div class="offset8 span2">
-            <a class="btn btn-block btn-primary" href="@routes.Quote.edit(nextKey)">Next</a>
-        </div>
-    </div>
-
         @helper.form(action = routes.Quote.submit, 'class->"form form-horizontal well") {
     <div class="container" style="padding-top:5px;">
         <div  class="row">
         <div class="span9">
             <fieldset>
                 <input type="hidden" name="id" value='@quoteForm("id").value.getOrElse(0)'>
-                @inputText( quoteForm("quote"), '_label -> "Key", '_showConstraints -> false, 'class->"input-large" )
-                @inputText( quoteForm("source"), '_label -> "Name", '_showConstraints -> false )
-                @inputText( quoteForm("url"), '_label -> "Long Name", '_showConstraints -> false,
-                'class->"input-xxlarge" )
+                @inputText( quoteForm("quote"), '_label -> "Quote", '_showConstraints -> false, 'class->"input-xxlarge" )
+                @inputText( quoteForm("source"), '_label -> "Source", '_showConstraints -> false, 'class->"input-xlarge"  )
+                @inputText( quoteForm("url"), '_label -> "URL", '_showConstraints -> false, 'class->"input-xlarge" )
             </fieldset>
         </div>
     </div>
