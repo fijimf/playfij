@@ -4,11 +4,11 @@ trait RecordGenerator {
   self: RecordGenerator =>
   def label: String
 
-  def filter(data: List[ResultData]): List[ResultData]
+  def filter(data: List[ScheduleData]): List[ScheduleData]
 
-  def apply(team: Team, data: List[ResultData]): Record = {
-    filter(data).foldLeft(Record())((record: Record, d: ResultData) => {
-      if (d.homeTeam.key == team.key && d.result.homeScore > d.result.awayScore) {
+  def apply(team: Team, data: List[ScheduleData]): Record = {
+    filter(data.filter(_.result.isDefined)).foldLeft(Record())((record: Record, d: ScheduleData) => {
+      if (d.homeTeam.key == team.key && d.result.get.homeScore > d.result.get.awayScore) {
         record.addWin()
       } else {
         record.addLoss()
@@ -18,7 +18,7 @@ trait RecordGenerator {
 
   def +(rg: RecordGenerator): RecordGenerator = {
     new RecordGenerator {
-      def filter(data: List[ResultData]): List[ResultData] = rg.filter(self.filter(data))
+      def filter(data: List[ScheduleData]): List[ScheduleData] = rg.filter(self.filter(data))
 
       def label: String = self.label + rg.label
     }
@@ -29,7 +29,7 @@ trait RecordGenerator {
 object SeasonRecord {
   def apply(season:Season): RecordGenerator = {
     new RecordGenerator {
-      def filter(data: List[ResultData]): List[ResultData] = data.filter(_.season.id==season.id).sortBy(_.game.date.toDate())
+      def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(_.season.id==season.id).sortBy(_.game.date.toDate)
       def label: String = season.key
     }
   }
@@ -38,38 +38,38 @@ object SeasonRecord {
 object ConferenceRecord extends RecordGenerator {
   def label: String = "Conference"
 
-  def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.homeConference.key == d.awayConference.key)
+  def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(d=> d.homeConference.key == d.awayConference.key)
 }
 
 object NonConferenceRecord extends RecordGenerator {
   def label: String = "NonConference"
 
-  def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.homeConference.key != d.awayConference.key)
+  def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(d=> d.homeConference.key != d.awayConference.key)
 }
 object HomeRecord {
   def apply(t:Team) = new RecordGenerator {
     def label: String = "Home"
 
-    def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> !d.game.isNeutralSite && d.homeTeam.key == t.key)
+    def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(d=> !d.game.isNeutralSite && d.homeTeam.key == t.key)
   }
 }
 object AwayRecord {
   def apply(t:Team) = new RecordGenerator {
     def label: String = "Away"
 
-    def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> !d.game.isNeutralSite && d.awayTeam.key == t.key)
+    def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(d=> !d.game.isNeutralSite && d.awayTeam.key == t.key)
   }
 }
 object NeutralRecord extends RecordGenerator {
   def label: String = "Conference"
 
-  def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.game.isNeutralSite)
+  def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(d=> d.game.isNeutralSite)
 }
 
 object LastNRecord {
   def apply(n: Int): RecordGenerator = {
     new RecordGenerator {
-      def filter(data: List[ResultData]): List[ResultData] = data.sortBy(_.game.date.toDate()).reverse.take(n).reverse
+      def filter(data: List[ScheduleData]): List[ScheduleData] = data.sortBy(_.game.date.toDate).reverse.take(n).reverse
 
       def label: String = "Last %d".format(n)
     }
@@ -79,7 +79,7 @@ object LastNRecord {
 object MonthRecord {
   def apply(month: Int): RecordGenerator = {
     new RecordGenerator {
-      def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> d.game.date.getMonthOfYear==month)
+      def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(d=> d.game.date.getMonthOfYear==month)
 
       def label: String = "Month %d".format(month)
     }
@@ -89,7 +89,7 @@ object MonthRecord {
 object LessThanMarginRecord {
   def apply(margin: Int): RecordGenerator = {
     new RecordGenerator {
-      def filter(data: List[ResultData]): List[ResultData] = data.filter(d=> math.abs(d.result.homeScore - d.result.awayScore)<margin)
+      def filter(data: List[ScheduleData]): List[ScheduleData] = data.filter(d=> math.abs(d.result.get.homeScore - d.result.get.awayScore)<margin)
 
       def label: String = "< %d".format(margin)
     }
