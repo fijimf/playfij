@@ -1,9 +1,10 @@
 package models
 
 import org.joda.time.LocalDate
+import play.api.cache.Cache
 
 case class ScheduleDao(m: Model) {
-
+  import play.api.Play.current
   import m.profile.simple._
 
   val seasonQuery = for (season <- m.Seasons) yield season
@@ -14,16 +15,20 @@ case class ScheduleDao(m: Model) {
   val resultQuery = for (result <- m.Results) yield result
   val gameResultQuery = for {(game, result) <- m.Games leftJoin m.Results on (_.id === _.gameId)} yield (game, result.maybe)
 
-  def teamPage(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = currentSeason.flatMap( season => teamPage(teamKey, season.key))
+  def teamPage(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = currentSeason.flatMap(season => teamPage(teamKey, season.key))
 
   def teamPage(teamKey: String, seasonKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
-    (for {team <- teamQuery if team.key === teamKey
-          season <- seasonQuery if season.key === seasonKey
-          assoc <- assocQuery if assoc.seasonId === season.id && assoc.teamId === team.id
-          conference <- conferenceQuery if conference.id === assoc.conferenceId
-    } yield {
-      (team, season, conference)
-    }).firstOption.flatMap{case (team: Team, season: Season, conference: Conference) => buildPage(team, season, conference, currentSeason.exists(_.key == seasonKey))}
+    Cache.getOrElse[Option[TeamPage]](teamKey + ":" + seasonKey) {
+      (for {team <- teamQuery if team.key === teamKey
+            season <- seasonQuery if season.key === seasonKey
+            assoc <- assocQuery if assoc.seasonId === season.id && assoc.teamId === team.id
+            conference <- conferenceQuery if conference.id === assoc.conferenceId
+      } yield {
+        (team, season, conference)
+      }).firstOption.flatMap {
+        case (team: Team, season: Season, conference: Conference) => buildPage(team, season, conference, currentSeason.exists(_.key == seasonKey))
+      }
+    }
   }
 
 
@@ -42,7 +47,9 @@ case class ScheduleDao(m: Model) {
 
 
   def buildPage(team: Team, season: Season, conference: Conference, isCurrentSeason: Boolean)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
-    val games: List[ScheduleData] = scheduleData.list.map(ScheduleData.tupled) // TODO Cache me
+    val games: List[ScheduleData] = Cache.getOrElse[List[ScheduleData]]("!game-data", 3600){
+      scheduleData.list.map(ScheduleData.tupled)
+    }
 
     val results: List[ResultLine] = loadResults(games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined), team)
     val schedule: List[ScheduleLine] = loadSchedule(games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isEmpty), team)
@@ -82,7 +89,7 @@ case class ScheduleDao(m: Model) {
       }
     })
     (for (season <- confMap.keys;
-         conference <- confMap.get(season)) yield {
+          conference <- confMap.get(season)) yield {
       val seasonRecord: RecordGenerator = SeasonRecord(season)
       (season, conference, seasonRecord(team, data), (seasonRecord + ConferenceRecord)(team, data))
     }).toList

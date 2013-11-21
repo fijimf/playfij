@@ -8,10 +8,12 @@ trait RecordGenerator {
 
   def apply(team: Team, data: List[ScheduleData]): Record = {
     filter(data.filter(_.result.isDefined)).foldLeft(Record())((record: Record, d: ScheduleData) => {
-      if (d.homeTeam.key == team.key && d.result.get.homeScore > d.result.get.awayScore) {
+      if (d.isWinner(team)) {
         record.addWin()
-      } else {
+      } else  if (d.isLoser(team)){
         record.addLoss()
+      } else {
+        record
       }
     })
   }

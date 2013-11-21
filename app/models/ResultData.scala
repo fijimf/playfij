@@ -25,4 +25,8 @@ case class ScheduleData(
 
   def isConference: Boolean = homeConference.key == awayConference.key
 
+  def isWinner(t: Team) = result.exists(r => (r.homeScore > r.awayScore && t.key == homeTeam.key) || r.awayScore > r.homeScore && t.key == awayTeam.key)
+
+  def isLoser(t: Team) = result.exists(r => (r.homeScore < r.awayScore && t.key == homeTeam.key) || r.awayScore < r.homeScore && t.key == awayTeam.key)
+
 }

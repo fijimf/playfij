@@ -118,8 +118,8 @@
         <tbody>
         @p.seasonRecords.map { sr =>
         <tr>
-            <td><a href="@controllers.routes.Schedule.teamSeason(p.team.key,sr._1.key)">@sr._1.key</a>
-
+            <td>
+                <a href="@controllers.routes.Schedule.teamSeason(p.team.key,sr._1.key)">@sr._1.key</a>
             </td>
             <td>@sr._3</td>
             <td>@sr._4</td>
