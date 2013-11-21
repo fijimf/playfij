@@ -18,10 +18,9 @@ object ApplicationBuild extends Build {
     "mysql" % "mysql-connector-java" % "5.1.5",
     "org.ccil.cowan.tagsoup" % "tagsoup" % "1.2",
     "com.google.guava" % "guava" % "14.0",
-    "com.typesafe.play" %% "play-slick" % "0.5.0.8" exclude("org.scala-stm", "scala-stm_2.10.0") exclude("play", "*")  ,
-    "securesocial" %% "securesocial" % "2.1.2" exclude("org.scala-stm", "scala-stm_2.10.0") exclude("play", "*")
-
-
+    "com.typesafe.play" %% "play-slick" % "0.5.0.8" exclude("org.scala-stm", "scala-stm_2.10.0") exclude("play", "*"),
+    "securesocial" %% "securesocial" % "2.1.2" exclude("org.scala-stm", "scala-stm_2.10.0") exclude("play", "*"),
+    "org.scala-saddle" %% "saddle-core" % "1.3.+"
   )
 
 

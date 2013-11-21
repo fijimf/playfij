@@ -4,6 +4,7 @@ import org.joda.time.LocalDate
 import play.api.cache.Cache
 
 case class ScheduleDao(m: Model) {
+
   import play.api.Play.current
   import m.profile.simple._
 
@@ -47,7 +48,7 @@ case class ScheduleDao(m: Model) {
 
 
   def buildPage(team: Team, season: Season, conference: Conference, isCurrentSeason: Boolean)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
-    val games: List[ScheduleData] = Cache.getOrElse[List[ScheduleData]]("!game-data", 3600){
+    val games: List[ScheduleData] = Cache.getOrElse[List[ScheduleData]]("!game-data", 3600) {
       scheduleData.list.map(ScheduleData.tupled)
     }
 

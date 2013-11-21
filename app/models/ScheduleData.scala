@@ -1,14 +1,5 @@
 package models
 
-case class ResultData(
-                       season: Season,
-                       game: Game,
-                       homeTeam: Team,
-                       awayTeam: Team,
-                       homeConference: Conference,
-                       awayConference: Conference,
-                       result: Result)
-
 case class ScheduleData(
                          season: Season,
                          game: Game,
