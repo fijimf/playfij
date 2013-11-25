@@ -20,4 +20,7 @@ case class ScheduleData(
 
   def isLoser(t: Team) = result.exists(r => (r.homeScore < r.awayScore && t.key == homeTeam.key) || r.awayScore < r.homeScore && t.key == awayTeam.key)
 
+  def winner = result.map(r => if (r.homeScore > r.awayScore) homeTeam else awayTeam)
+
+  def loser = result.map(r => if (r.homeScore < r.awayScore) homeTeam else awayTeam)
 }
