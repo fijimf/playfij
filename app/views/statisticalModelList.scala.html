@@ -1,0 +1,51 @@
+@(models: List[StatisticalModel])(implicit flash:Flash)
+
+@import tags._
+
+@mainNoAds("Models") {
+<script>
+    function deleteQuote(i,n){
+      var hiddenId =   '<input type="hidden" id="id"       name="id"       value="' + i + '"/>';
+      var hiddenName = '<input type="hidden" id="key" name="key" value="' + n + '"/>';
+      $('<form>', { "html":hiddenId+hiddenName, "method":'POST', "action":'/models/delete' } )
+        .appendTo(document.body).submit();
+    }
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        <h3>Models</h3>
+    </div>
+</div>
+@flashBox(flash)
+<div class="row-fluid">
+    <div class="span12">
+        <table class="table table-condensed table-bordered table-admin">
+            <thead>
+            <tr>
+                <th style="width:4em;">
+                    <a href="@controllers.routes.StatisticalModel.create" class="btn btn-primary btn-small" style="margin-top:15px;">New</a>
+                </th>
+                <th style="width:18em;">Model</a></th>
+                <th style="width:10em;">Key</th>
+                <th style="width:10em;">Class</th>
+                <th style="width:4em;"></th>
+            </tr>
+            </thead>
+            <tbody>
+            @models.map { model=>
+            <tr>
+                <td><a class="btn btn-primary btn-small" href="@controllers.routes.StatisticalModel.edit(model.id)">Edit</a></td>
+                <td style="overflow-x:hidden;">@model.key</td>
+                <td style="overflow-x:hidden;">@model.name</td>
+                <td style="overflow-x:hidden;">@model.className</td>
+                <td>
+                    <button class="btn btn-danger btn-small" onclick="deleteQuote('@model.id', '@model.key')">Delete</button>
+                </td>
+            </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+}

@@ -1,8 +1,7 @@
 package analysis
 
-import scala.Some
-import scala.Some
 import org.joda.time.LocalDate
+import models.ScheduleData
 
 class WonLostModel extends DerivedModel {
   def key = "won-lost"

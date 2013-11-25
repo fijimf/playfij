@@ -45,6 +45,13 @@ GET  /admin/quotes/:id                          controllers.Quote.view(id:Long)
 GET  /admin/quotes/:id/edit                     controllers.Quote.edit(id:Long)
 POST /admin/quotes/delete                       controllers.Quote.delete
 
+GET  /admin/models                              controllers.StatisticalModel.list
+POST /admin/models                              controllers.StatisticalModel.submit
+GET  /admin/models/new                          controllers.StatisticalModel.create
+GET  /admin/models/:id                          controllers.StatisticalModel.view(id:Long)
+GET  /admin/models/:id/edit                     controllers.StatisticalModel.edit(id:Long)
+POST /admin/models/delete                       controllers.StatisticalModel.delete
+
 GET  /admin/database                            controllers.admin.Database.index
 POST /admin/database/rebuild                    controllers.admin.Database.rebuildDatabase
 GET  /admin/database/show-ddl                   controllers.admin.Database.showDDL

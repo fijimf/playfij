@@ -1,0 +1,47 @@
+@(statModelForm: Form[StatisticalModel], title:String)(implicit flash:Flash)
+
+@import helper._
+@import helper.twitterBootstrap._
+
+
+@main(title) {
+
+<div class="container">
+    <h1>@title</h1>
+    @if(flash.get("success").isDefined) {
+    <div class="alert alert-success"><p>@flash.get("success").get</p></div>
+    }
+    @if(flash.get("error").isDefined) {
+    <div class="alert alert-error"><p>@flash.get("error").get</p></div>
+    }
+
+    @if(statModelForm.hasErrors && statModelForm("id").value.isDefined) {
+    <div class="alert alert-error">
+        <p>Please correct errors in the form.</p>
+    </div>
+    }
+
+        @helper.form(action = routes.StatisticalModel.submit, 'class->"form form-horizontal well") {
+    <div class="container" style="padding-top:5px;">
+        <div  class="row">
+        <div class="span9">
+            <fieldset>
+                <input type="hidden" name="id" value='@statModelForm("id").value.getOrElse(0)'>
+                @inputText( statModelForm("name"), '_label -> "Model", '_showConstraints -> false, 'class->"input-large" )
+                @inputText( statModelForm("key"), '_label -> "Key", '_showConstraints -> false, 'class->"input-large"  )
+                @inputText( statModelForm("className"), '_label -> "Model Class", '_showConstraints -> false, 'class->"input-xxlarge" )
+            </fieldset>
+        </div>
+    </div>
+    <div class="row">
+        <div class="actions span12">
+            <input type="submit" class="btn primary" value="Save">
+            <input type="reset" class="btn primary" value="Reset">
+            <a href="@routes.StatisticalModel.list" class="btn">Cancel</a>
+        </div>
+    </div>
+        </div>
+    }
+</div>
+</div>
+}
