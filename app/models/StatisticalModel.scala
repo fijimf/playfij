@@ -22,6 +22,10 @@ case class StatisticalModelDao(model: Model) {
     Query(StatisticalModels).where(_.id === id).firstOption
   }
 
+  def findByKey(key:String)(implicit s: scala.slick.session.Session): Option[StatisticalModel] = {
+    Query(StatisticalModels).where(_.key === key).firstOption
+  }
+
   def update(quote: StatisticalModel)(implicit s: scala.slick.session.Session) {
     StatisticalModels.where(_.id === quote.id).update(quote)
   }

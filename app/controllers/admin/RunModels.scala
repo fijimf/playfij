@@ -1,29 +1,45 @@
 package controllers.admin
 
-import scala.concurrent.duration._
-import play.api.mvc.{Action, Controller}
-import play.api.data.Form
-import play.api.data.Forms._
+import play.api.mvc.Controller
 import models._
-import org.joda.time.{ReadablePartial, LocalDate}
 import play.api.Logger
-import scraping.{KenPomGameScraper}
-import scala.Some
-import scala.concurrent.{Await, Future}
-import scraping.control.GameUpdateRequest
 import securesocial.core.SecureSocial
+import analysis.ComputableModel
+import org.joda.time.LocalDate
+import scala.slick.lifted.Query
 
 
-object RunModels extends Controller with SecureSocial  {
+object RunModels extends Controller with SecureSocial {
   val logger = Logger("RunModels")
 
   import play.api.Play.current
 
-  private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
+  private val model = new Model() {
+    val profile = play.api.db.slick.DB.driver
+  }
 
-  def index = SecuredAction {
+  def saveOrUpdate(statModel: StatisticalModel, result: Map[String, Map[LocalDate, Map[Long, Double]]])(implicit s: scala.slick.session.Session) {
+
+  }
+
+  def run = SecuredAction {
     implicit request =>
-      Ok("yuk")
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          val statModelDao: StatisticalModelDao = StatisticalModelDao(model)
+          val statDao: StatisticDao = StatisticDao(model)
+          val obsDao: ObservationDao = ObservationDao(model)
+          val models: List[StatisticalModel] = statModelDao.list
+          val scheduleData: List[ScheduleData] = ScheduleDao(model).loadScheduleData
+
+          models.foreach(statModel => {
+            val computableModel: ComputableModel = Class.forName(statModel.className).newInstance().asInstanceOf[ComputableModel]
+            val result = computableModel.compute(scheduleData)
+
+
+          })
+          Redirect(controllers.admin.routes.Admin.index)
+      }
   }
 
 }

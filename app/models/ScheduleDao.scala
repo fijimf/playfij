@@ -48,9 +48,7 @@ case class ScheduleDao(m: Model) {
 
 
   def buildPage(team: Team, season: Season, conference: Conference, isCurrentSeason: Boolean)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
-    val games: List[ScheduleData] = Cache.getOrElse[List[ScheduleData]]("!game-data", 3600) {
-      scheduleData.list.map(ScheduleData.tupled)
-    }
+    val games: List[ScheduleData] = loadScheduleData
 
     val results: List[ResultLine] = loadResults(games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined), team)
     val schedule: List[ScheduleLine] = loadSchedule(games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isEmpty), team)
@@ -58,6 +56,13 @@ case class ScheduleDao(m: Model) {
     val currentRecords = loadCurrentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))
     val seasonRecords = loadSeasonRecords(team, games)
     Some(TeamPage(team, conference, season, isCurrentSeason, schedule, results, standings, currentRecords, seasonRecords))
+  }
+
+
+  def loadScheduleData(implicit s: scala.slick.session.Session): List[ScheduleData] = {
+    Cache.getOrElse[List[ScheduleData]]("!game-data", 3600) {
+      scheduleData.list.map(ScheduleData.tupled)
+    }
   }
 
   def loadCurrentRecords(season: Season, team: Team, data: List[ScheduleData])(implicit s: scala.slick.session.Session) = {

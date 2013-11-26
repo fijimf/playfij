@@ -15,6 +15,7 @@ trait ComputableModel {
     data.groupBy(_.season).map(_._2).toList.map(lst => computeSeason(lst)).flatten.toMap
   }
 
+  def statistics:Map[String, Statistic]
   def computeSeason(data: List[ScheduleData]): ModelResult
 }
 

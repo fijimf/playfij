@@ -1,10 +1,11 @@
 package analysis
 
 import org.joda.time.LocalDate
-import models.ScheduleData
+import models.{Statistic, ScheduleData}
 
 class WonLostModel extends DerivedModel {
   def key = "won-lost"
+
 
   def deriveResults(result: ModelResult): ModelResult = {
     (for (wins <- result.get("wins");
@@ -68,5 +69,16 @@ class WonLostModel extends DerivedModel {
         }
       }
     )
+
+    def statistics: Map[String, Statistic] = List(
+      Statistic(-1, "wins", "Wins", -1, "Team", "%d", "%d", higherIsBetter = true),
+      Statistic(-1, "losses", "Losses", -1, "Team", "%d", "%d", higherIsBetter = false),
+      Statistic(-1, "streak", "Streak", -1, "Team", "%d", "%d", higherIsBetter = true)
+
+    ).map(s => s.key -> s).toMap
   }
+
+  def statistics: Map[String, Statistic] = baseModel.statistics++List(
+    Statistic(-1, "wp", "Winning Pct", -1, "Team", "%0.3f", "%0.5f", higherIsBetter = true)
+  ).map(s => s.key -> s).toMap
 }
