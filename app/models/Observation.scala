@@ -36,5 +36,13 @@ case class ObservationDao(model: Model) {
     Observations.where(_.id === id).delete
   }
 
+  def upsert(obs:Observation) (implicit s: scala.slick.session.Session) {
+    Query(Observations).where(o=>(o.date === obs.date) && (o.statisticId === obs.statisticId) && (o.domainId == obs.domainId)).firstOption  match {
+      case Some(oo)=>update(oo.copy(obs.value))
+      case None => insert(obs)
+    }
+    Observations.autoInc.insert(obs.date, obs.domainId, obs.statisticId, obs.value)
+  }
+
 
 }
