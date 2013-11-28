@@ -12,7 +12,7 @@ class WonLostModel extends DerivedModel {
           losses <- result.get("losses"))
     yield {
       val outerKeys: Set[LocalDate] = wins.keySet.intersect(losses.keySet)
-      key -> outerKeys.foldLeft(Map.empty[LocalDate, Map[Long, Double]])((outer: Map[LocalDate, Map[Long, Double]], date: LocalDate) => {
+      "wp" -> outerKeys.foldLeft(Map.empty[LocalDate, Map[Long, Double]])((outer: Map[LocalDate, Map[Long, Double]], date: LocalDate) => {
         for (w <- wins.get(date);
              l <- losses.get(date)) yield {
           val innerKeys: Set[Long] = w.keySet.intersect(l.keySet)
@@ -35,10 +35,14 @@ class WonLostModel extends DerivedModel {
       new AccumulativeStatistic {
         val key = "wins"
 
-        def accumulateDate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
-          obs.winner match {
+        def accumulate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
+          val d = obs.winner match {
             case Some(t) => data + (t.id -> (data.getOrElse(t.id, 0.0) + 1.0))
             case None => data
+          }
+          obs.loser match {
+            case Some(t) => d + (t.id -> data.getOrElse(t.id, 0.0))
+            case None => d
           }
         }
       },
@@ -46,10 +50,14 @@ class WonLostModel extends DerivedModel {
       new AccumulativeStatistic {
         val key = "losses"
 
-        def accumulateDate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
-          obs.loser match {
-            case Some(t) => data + (t.id -> (data.getOrElse(t.id, 0.0) + 1.0))
+        def accumulate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
+          val d = obs.winner match {
+            case Some(t) => data + (t.id -> data.getOrElse(t.id, 0.0))
             case None => data
+          }
+          obs.loser match {
+            case Some(t) => d + (t.id -> (data.getOrElse(t.id, 0.0) + 1.0))
+            case None => d
           }
         }
       },
@@ -57,7 +65,7 @@ class WonLostModel extends DerivedModel {
       new AccumulativeStatistic {
         val key = "streak"
 
-        def accumulateDate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
+        def accumulate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
           val d = obs.winner match {
             case Some(t) => data + (t.id -> math.max(data.getOrElse(t.id, 0.0) + 1.0, 1.0))
             case None => data

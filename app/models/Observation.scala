@@ -1,6 +1,7 @@
 package models
 
 import org.joda.time.LocalDate
+import util.Mappers._
 
 case class Observation(
                         id: Long,
@@ -35,13 +36,16 @@ case class ObservationDao(model: Model) {
   def delete(id: Long)(implicit s: scala.slick.session.Session) {
     Observations.where(_.id === id).delete
   }
+  def deleteByDateStat(statId: Long, date:LocalDate)(implicit s: scala.slick.session.Session) {
+    Observations.where(o => o.statisticId === statId && o.date === date).delete
+  }
 
   def upsert(obs:Observation) (implicit s: scala.slick.session.Session) {
-    Query(Observations).where(o=>(o.date === obs.date) && (o.statisticId === obs.statisticId) && (o.domainId == obs.domainId)).firstOption  match {
-      case Some(oo)=>update(oo.copy(obs.value))
+    val option=(for (o<-Observations if o.date === obs.date && o.statisticId === obs.statisticId && o.domainId === obs.domainId) yield o).firstOption
+    option  match {
+      case Some(oo)=> update(Observation(oo.id, oo.date, oo.domainId, oo.statisticId, obs.value))
       case None => insert(obs)
     }
-    Observations.autoInc.insert(obs.date, obs.domainId, obs.statisticId, obs.value)
   }
 
 

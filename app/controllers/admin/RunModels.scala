@@ -35,22 +35,24 @@ object RunModels extends Controller with SecureSocial {
           models.foreach(statModel => {
             val computableModel: ComputableModel = Class.forName(statModel.className).newInstance().asInstanceOf[ComputableModel]
             val result = computableModel.compute(scheduleData)
-            for(sk<-result.keys) {
+            for (sk <- result.keys) {
               val stat: Statistic = statDao.findByKey(sk) match {
                 case Some(statistic) => statistic
                 case None => {
-                  computableModel.statistics.get(sk).map(_.copy(modelId = statModel.id)).foreach(s => statDao.insert(s))
+                  computableModel.statistics.get(sk).map(_.copy(modelId = statModel.id)).foreach(st => statDao.insert(st))
                   statDao.findByKey(sk).get
 
                 }
               }
               val inner: Map[LocalDate, Map[Long, Double]] = result(sk)
-              for (d <- inner.keys;
-                   id <- inner(d).keys) {
-                Observation(-1, d, id, stat.id, inner(d)(id))
-                obsDao.upsert()
+              for (d <- inner.keys){
+                obsDao.deleteByDateStat(stat.id, d)
+                for (id <- inner(d).keys) {
+                  obsDao.insert(Observation(-1, d, id, stat.id, inner(d)(id)))
+                }
               }
-              stat
+
+
             }
 
           })

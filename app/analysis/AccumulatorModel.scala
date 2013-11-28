@@ -7,12 +7,22 @@ trait AccumulatorModel extends ComputableModel {
   def accumulators: List[AccumulativeStatistic]
 
   def computeSeason(data: List[ScheduleData]) = {
-    val z = Map.empty[String, StatisticalResult].withDefault(_ => Map.empty[LocalDate, Observations].withDefault(_ => Map.empty[Long, Double]))
-    data.sortBy(_.game.date.toDate).foldLeft(z)((modelResult: ModelResult, obs: ScheduleData) => {
-      accumulators.foldLeft(z)((innerResult: ModelResult, statistic: AccumulativeStatistic) => {
-        innerResult + (statistic.key -> statistic.accumulate(obs, innerResult(statistic.key)))
-      })
-    })
+    val results: List[ScheduleData] = data.filter(_.result.isDefined).sortBy(_.game.date.toDate)
+    logger.info("Filtered results size %d".format(results.size))
+    logger.info("First date is %s".format(results.head.game.date))
+
+    val zero = Map.empty[String, (Observations, StatisticalResult)].withDefault(_ =>
+      (Map.empty[Long, Double], Map.empty[LocalDate, Observations]))
+    results.foldLeft(zero)(handleObs).mapValues(_._2)
   }
 
+  def handleObs(running: Map[String, (Observations, StatisticalResult)], obs: ScheduleData) = {
+    accumulators.foldLeft(running)(accumulateStatistic(_, _, obs))
+  }
+
+  def accumulateStatistic(running: Map[String, (Observations, StatisticalResult)], statistic: AccumulativeStatistic, obs: ScheduleData) = {
+    val (runningTotals, dateResults) = running(statistic.key)
+    val updatedTotals = statistic.accumulate(obs, runningTotals)
+    running + (statistic.key ->(updatedTotals, dateResults + (obs.game.date -> updatedTotals)))
+  }
 }
