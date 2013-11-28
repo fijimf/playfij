@@ -13,17 +13,21 @@ class WonLostModel extends DerivedModel {
     yield {
       val outerKeys: Set[LocalDate] = wins.keySet.intersect(losses.keySet)
       "wp" -> outerKeys.foldLeft(Map.empty[LocalDate, Map[Long, Double]])((outer: Map[LocalDate, Map[Long, Double]], date: LocalDate) => {
-        for (w <- wins.get(date);
-             l <- losses.get(date)) yield {
+        (for (w <- wins.get(date);
+              l <- losses.get(date)) yield {
           val innerKeys: Set[Long] = w.keySet.intersect(l.keySet)
           date -> innerKeys.foldLeft(Map.empty[Long, Double])((inner: Map[Long, Double], id: Long) => {
             inner + (id -> w(id) / (w(id) + l(id)))
           })
+        })
+        match {
+          case Some(pair) => outer + pair
+          case _ => outer
         }
-      }.toMap)
+      })
     }) match {
       case Some(pair) => result + pair
-      case None => result
+      case _ => result
     }
   }
 
