@@ -2,6 +2,8 @@ package models
 
 import org.joda.time.LocalDate
 import play.api.cache.Cache
+import util.Mappers._
+import org.saddle.Series
 
 case class ScheduleDao(m: Model) {
 
@@ -15,6 +17,36 @@ case class ScheduleDao(m: Model) {
   val gameQuery = for (game <- m.Games) yield game
   val resultQuery = for (result <- m.Results) yield result
   val gameResultQuery = for {(game, result) <- m.Games leftJoin m.Results on (_.id === _.gameId)} yield (game, result.maybe)
+
+  val scheduleData = for {
+    (game, result) <- gameResultQuery
+    season <- game.seasonFk
+    homeTeam <- game.homeTeamFk
+    awayTeam <- game.awayTeamFk
+    homeAssoc <- assocQuery if homeAssoc.teamId === homeTeam.id && homeAssoc.seasonId === season.id
+    awayAssoc <- assocQuery if awayAssoc.teamId === awayTeam.id && awayAssoc.seasonId === season.id
+    homeConf <- homeAssoc.conferenceFk
+    awayConf <- awayAssoc.conferenceFk
+  } yield {
+    (season, game, homeTeam, awayTeam, homeConf, awayConf, result)
+  }
+
+  val statData = for {
+    observation <- m.Observations
+    statistic <- m.Statistics
+    model <- m.StatisticalModels
+  } yield {
+    (observation, statistic, model)
+  }
+  val teamStatData = for {
+    (observation, statistic, model)<-statData if statistic.targetDomain==="teams"
+    team<-m.Teams if observation.domainId === team.id
+  } yield {
+    (observation, statistic, model, team)
+  }
+
+
+
 
   def teamPage(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = currentSeason.flatMap(season => teamPage(teamKey, season.key))
 
@@ -33,21 +65,31 @@ case class ScheduleDao(m: Model) {
   }
 
 
-  val scheduleData = for {
-    (game, result) <- gameResultQuery
-    season <- game.seasonFk
-    homeTeam <- game.homeTeamFk
-    awayTeam <- game.awayTeamFk
-    homeAssoc <- assocQuery if homeAssoc.teamId === homeTeam.id && homeAssoc.seasonId === season.id
-    awayAssoc <- assocQuery if awayAssoc.teamId === awayTeam.id && awayAssoc.seasonId === season.id
-    homeConf <- homeAssoc.conferenceFk
-    awayConf <- awayAssoc.conferenceFk
-  } yield {
-    (season, game, homeTeam, awayTeam, homeConf, awayConf, result)
+  def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session):Map[Statistic, Series[String, Double]] = {
+    val statDates: Map[Statistic, LocalDate] = getStatDates(date)
+    val statMap: Map[Statistic, LocalDate] = getStatDates(date)
+    statDates.keys.map{key => {
+      val list = teamStatData.filter { case (observations, statistics, models, teams) => observations.date === statDates(key) && statistics.key === key.key}.list()
+      val pairs: List[(String, Double)] = list.map{case (observation, statistic, model, team) => team.key -> observation.value}
+      key->Series(pairs: _*)
+    }}.toMap
   }
 
 
+  def getStatDates(date: LocalDate)(implicit s: scala.slick.session.Session):Map[Statistic,LocalDate]= {
+    (for {
+      o <- m.Observations if o.date <= date
+      s <- o.statisticFk
+    } yield (o, s)).groupBy(_._2).map {
+      case (key, oss) =>
+        (key, oss.map(_._1.date).max)
+    }.list().filter(_._2.isDefined).map {
+      case (key, d) => key -> d.get
+    }.toMap
+  }
+
   def buildPage(team: Team, season: Season, conference: Conference, isCurrentSeason: Boolean)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
+
     val games: List[ScheduleData] = loadScheduleData
 
     val results: List[ResultLine] = loadResults(games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined), team)
@@ -55,7 +97,8 @@ case class ScheduleDao(m: Model) {
     val standings: ConferenceStandings = loadConference(games, conference, season)
     val currentRecords = loadCurrentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))
     val seasonRecords = loadSeasonRecords(team, games)
-    Some(TeamPage(team, conference, season, isCurrentSeason, schedule, results, standings, currentRecords, seasonRecords))
+    val stats: Map[Statistic, Series[String, Double]] = loadStats(season.to)
+    Some(TeamPage(team, conference, season, isCurrentSeason, schedule, results, standings, currentRecords, seasonRecords, stats))
   }
 
 

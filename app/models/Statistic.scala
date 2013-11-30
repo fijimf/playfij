@@ -8,7 +8,8 @@ case class Statistic(
                       targetDomain: String,
                       shortFormat: String,
                       longFormat: String,
-                      higherIsBetter: Boolean
+                      higherIsBetter: Boolean,
+                      displayOrder:Int
                       )
 
 
@@ -34,7 +35,7 @@ case class StatisticDao(model: Model) {
   }
 
   def insert(stat: Statistic)(implicit s: scala.slick.session.Session) {
-    Statistics.autoInc.insert(stat.key, stat.name, stat.modelId, stat.targetDomain, stat.shortFormat, stat.longFormat, stat.higherIsBetter)
+    Statistics.autoInc.insert(stat.key, stat.name, stat.modelId, stat.targetDomain, stat.shortFormat, stat.longFormat, stat.higherIsBetter, stat.displayOrder)
   }
 
   def delete(id: Long)(implicit s: scala.slick.session.Session) {

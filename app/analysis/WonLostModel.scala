@@ -83,14 +83,14 @@ class WonLostModel extends DerivedModel {
     )
 
     def statistics: Map[String, Statistic] = List(
-      Statistic(-1, "wins", "Wins", -1, "Team", "%d", "%d", higherIsBetter = true),
-      Statistic(-1, "losses", "Losses", -1, "Team", "%d", "%d", higherIsBetter = false),
-      Statistic(-1, "streak", "Streak", -1, "Team", "%d", "%d", higherIsBetter = true)
+      Statistic(-1, "wins", "Wins", -1, "Team", "%d", "%d", higherIsBetter = true, 1),
+      Statistic(-1, "losses", "Losses", -1, "Team", "%d", "%d", higherIsBetter = false, 2),
+      Statistic(-1, "streak", "Streak", -1, "Team", "%d", "%d", higherIsBetter = true, 3)
 
     ).map(s => s.key -> s).toMap
   }
 
   def statistics: Map[String, Statistic] = baseModel.statistics++List(
-    Statistic(-1, "wp", "Winning Pct", -1, "Team", "%0.3f", "%0.5f", higherIsBetter = true)
+    Statistic(-1, "wp", "Winning Pct", -1, "Team", "%0.3f", "%0.5f", higherIsBetter = true, 4)
   ).map(s => s.key -> s).toMap
 }

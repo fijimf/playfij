@@ -166,10 +166,11 @@ trait Model extends Profile {
     def numOts = column[Int]("num_ots")
 
     def * = id ~ gameId ~ homeScore ~ awayScore ~ numOts <>(Result.apply _, Result.unapply _)
-    def maybe = id.? ~ gameId.? ~ homeScore.? ~ awayScore.? ~ numOts.? <> (tupToResult _, (res: Option[Result]) => None)
 
-    def tupToResult(tuple: (Option[Long],Option[Long],Option[Int],Option[Int],Option[Int])) : Option[Result] = tuple match {
-      case (Some(id),Some(gameId),Some(homeScore),Some(awayScore), Some(numOts)) => Some(Result(id, gameId, homeScore, awayScore, numOts))
+    def maybe = id.? ~ gameId.? ~ homeScore.? ~ awayScore.? ~ numOts.? <>(tupToResult _, (res: Option[Result]) => None)
+
+    def tupToResult(tuple: (Option[Long], Option[Long], Option[Int], Option[Int], Option[Int])): Option[Result] = tuple match {
+      case (Some(id), Some(gameId), Some(homeScore), Some(awayScore), Some(numOts)) => Some(Result(id, gameId, homeScore, awayScore, numOts))
       case _ => None
     }
 
@@ -206,6 +207,10 @@ trait Model extends Profile {
     def statisticId = column[Long]("statistic_id")
 
     def value = column[Double]("value")
+
+    def statisticFk = foreignKey("obs_stat_fk", statisticId, Statistics)(_.id)
+
+    def indexGame = index("obs_date", (domainId, statisticId, date), unique = true)
 
     def * = id ~ date ~ domainId ~ statisticId ~ value <>(Observation.apply _, Observation.unapply _)
 
@@ -245,9 +250,17 @@ trait Model extends Profile {
 
     def higherIsBetter = column[Boolean]("higher_is_better")
 
-    def * = id ~ key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter <>(Statistic.apply _, Statistic.unapply _)
+    def displayOrder = column[Int]("display_order")
 
-    def autoInc = key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter returning id
+    def gameFk = foreignKey("stat_mod_fk", modelId, StatisticalModels)(_.id)
+
+    def indexStatKey = index("idx_stat_key", key, unique = true)
+
+    def indexStatName = index("idx_stat_name", name, unique = true)
+
+    def * = id ~ key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter  ~ displayOrder <>(Statistic.apply _, Statistic.unapply _)
+
+    def autoInc = key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter ~ displayOrder returning id
   }
 
   object StatisticalModels extends Table[StatisticalModel]("models") {
@@ -258,6 +271,10 @@ trait Model extends Profile {
     def name = column[String]("name")
 
     def className = column[String]("class_name")
+
+    def indexModName = index("mod_name", name, unique = true)
+
+    def indexModKey = index("mod_key", name, unique = true)
 
     def * = id ~ key ~ name ~ className <>(StatisticalModel.apply _, StatisticalModel.unapply _)
 
