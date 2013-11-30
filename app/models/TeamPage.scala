@@ -1,6 +1,7 @@
 package models
 
 import org.saddle.Series
+import analysis.ModelRecord
 
 case class TeamPage(
                      team: Team,
@@ -12,7 +13,7 @@ case class TeamPage(
                      conferenceStandings: ConferenceStandings,
                      currentRecords: List[(String, Record)],
                      seasonRecords: List[(Season, Conference, Record, Record)],
-                     stats: Map[Statistic, Series[String, Double]]
+                     stats: List[ModelRecord]
                      ) {
 
 }

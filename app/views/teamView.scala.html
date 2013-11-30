@@ -142,124 +142,14 @@
         </tr>
         </thead>
         <tbody>
+        @p.stats.map { st =>
         <tr>
-            <th colspan="4">Winning</th>
+            <td>@st.name</td>
+            <td>@st.value</td>
+            <td>@st.rank</td>
+            <td>@st.z</td>
         </tr>
-        <tr>
-            <td>Wins</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Losses</td>
-            <td>35</td>
-            <td>(T) 2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>WP</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Opp Wins</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Opp Losses</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Opp WP</td>
-            <td>35</td>
-            <td>12</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Opp Opp Wins</td>
-            <td>35</td>
-            <td>22</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Opp Opp Losses</td>
-            <td>3345</td>
-            <td>23</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Opp Opp WP</td>
-            <td>.675</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Pseudo RPI</td>
-            <td>35</td>
-            <td>1</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <th colspan="4">Scoring</th>
-        </tr>
-        <tr>
-            <td>Mean Points For</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Mean Points Against</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Mean Margin</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Adj Mean Points For</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Adj Mean Points Against</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Adj Mean Margin</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-
-        <tr>
-            <th colspan="4">Regressions</th>
-        </tr>
-        <tr>
-            <td>Simple Linear</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
-        <tr>
-            <td>Binary Linear</td>
-            <td>35</td>
-            <td>2</td>
-            <td>1.93</td>
-        </tr>
+        }
         </tbody>
     </table>
 </div>
