@@ -9,12 +9,13 @@ import org.saddle.stats.RankTie
 import analysis.ModelRecord
 import scala.slick.lifted
 import java.util.IllegalFormatConversionException
+import play.api.Logger
 
 case class ScheduleDao(m: Model) {
 
   import play.api.Play.current
   import m.profile.simple._
-
+  val logger = Logger("ScgeduleDao")
   val seasonQuery = for (season <- m.Seasons) yield season
   val teamQuery = for (team <- m.Teams) yield team
   val assocQuery = for (assoc <- m.ConferenceAssociations) yield assoc
@@ -38,8 +39,8 @@ case class ScheduleDao(m: Model) {
 
   val statData = for {
     observation <- m.Observations
-    statistic <- m.Statistics
-    model <- m.StatisticalModels
+    statistic <- observation.statisticFk
+    model <- statistic.modelFk
   } yield {
     (observation, statistic, model)
   }
@@ -81,6 +82,7 @@ case class ScheduleDao(m: Model) {
         val pairs: List[(String, Double)] = list.map {
           case (observation, statistic, model, team) => team.key -> observation.value
         }
+        logger.info("For %s on %s loaded %d records".format(key.key, statDates(key), pairs.size))
         key -> Series(pairs: _*)
       }
     }.toList.sortBy(_._1.displayOrder)

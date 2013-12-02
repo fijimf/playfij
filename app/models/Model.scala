@@ -252,7 +252,7 @@ trait Model extends Profile {
 
     def displayOrder = column[Int]("display_order")
 
-    def gameFk = foreignKey("stat_mod_fk", modelId, StatisticalModels)(_.id)
+    def modelFk = foreignKey("stat_mod_fk", modelId, StatisticalModels)(_.id)
 
     def indexStatKey = index("idx_stat_key", key, unique = true)
 

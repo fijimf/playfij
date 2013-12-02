@@ -34,52 +34,42 @@ class WonLostModel extends DerivedModel {
   def baseModel = new AccumulatorModel {
     def key: String = "inner-win-loss"
 
+    def ident(x: Double) = x
 
-    def accumulators: List[AccumulativeStatistic] = List(
-      new AccumulativeStatistic {
-        val key = "wins"
 
-        def accumulate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
-          val d = obs.winner match {
-            case Some(t) => data + (t.id -> (data.getOrElse(t.id, 0.0) + 1.0))
-            case None => data
-          }
-          obs.loser match {
-            case Some(t) => d + (t.id -> data.getOrElse(t.id, 0.0))
-            case None => d
-          }
+    def accumulators: List[AccumulativeStatistic[_]] = List(
+      AccumulativeStatistic[Double](Map("wins" -> ident), (obs, data) => {
+        val d = obs.winner match {
+          case Some(t) => data + (t.id -> (data.getOrElse(t.id, 0.0) + 1.0))
+          case None => data
         }
-      },
-
-      new AccumulativeStatistic {
-        val key = "losses"
-
-        def accumulate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
-          val d = obs.winner match {
-            case Some(t) => data + (t.id -> data.getOrElse(t.id, 0.0))
-            case None => data
-          }
-          obs.loser match {
-            case Some(t) => d + (t.id -> (data.getOrElse(t.id, 0.0) + 1.0))
-            case None => d
-          }
+        obs.loser match {
+          case Some(t) => d + (t.id -> data.getOrElse(t.id, 0.0))
+          case None => d
         }
-      },
+      }),
 
-      new AccumulativeStatistic {
-        val key = "streak"
-
-        def accumulate(obs: ScheduleData, data: Map[Long, Double]): Map[Long, Double] = {
-          val d = obs.winner match {
-            case Some(t) => data + (t.id -> math.max(data.getOrElse(t.id, 0.0) + 1.0, 1.0))
-            case None => data
-          }
-          obs.loser match {
-            case Some(t) => d + (t.id -> math.min(d.getOrElse(t.id, 0.0) - 1.0, -1.0))
-            case None => d
-          }
+      AccumulativeStatistic[Double](Map("losses" -> ident), (obs, data) => {
+        val d = obs.winner match {
+          case Some(t) => data + (t.id -> data.getOrElse(t.id, 0.0))
+          case None => data
         }
-      }
+        obs.loser match {
+          case Some(t) => d + (t.id -> (data.getOrElse(t.id, 0.0) + 1.0))
+          case None => d
+        }
+      }),
+
+      AccumulativeStatistic[Double](Map("streak" -> ident), (obs, data) => {
+        val d = obs.winner match {
+          case Some(t) => data + (t.id -> math.max(data.getOrElse(t.id, 0.0) + 1.0, 1.0))
+          case None => data
+        }
+        obs.loser match {
+          case Some(t) => d + (t.id -> math.min(d.getOrElse(t.id, 0.0) - 1.0, -1.0))
+          case None => d
+        }
+      })
     )
 
     def statistics: Map[String, Statistic] = List(

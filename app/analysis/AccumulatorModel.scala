@@ -1,28 +1,28 @@
 package analysis
 
-import models.ScheduleData
 import org.joda.time.LocalDate
+import scala.Predef._
+import models.ScheduleData
 
 trait AccumulatorModel extends ComputableModel {
-  def accumulators: List[AccumulativeStatistic]
+  def accumulators: List[AccumulativeStatistic[_]]
 
   def computeSeason(data: List[ScheduleData]) = {
     val results: List[ScheduleData] = data.filter(_.result.isDefined).sortBy(_.game.date.toDate)
-    logger.info("Filtered results size %d".format(results.size))
-    logger.info("First date is %s".format(results.head.game.date))
-
-    val zero = Map.empty[String, (Observations, StatisticalResult)].withDefault(_ =>
-      (Map.empty[Long, Double], Map.empty[LocalDate, Observations]))
-    results.foldLeft(zero)(handleObs).mapValues(_._2)
+    val zero = (accumulators, Map.empty[String, Map[LocalDate,Map[Long,Double]]])
+    results.foldLeft(zero)(handleObs)._2
   }
 
-  def handleObs(running: Map[String, (Observations, StatisticalResult)], obs: ScheduleData) = {
-    accumulators.foldLeft(running)(accumulateStatistic(_, _, obs))
+  def handleObs(outer: (List[AccumulativeStatistic[_]], Map[String, Map[LocalDate, Map[Long, Double]]]), obs: ScheduleData) = {
+    val (accumulators, data) = outer
+    val zero: (List[AccumulativeStatistic[_]], Map[String, Map[LocalDate, Map[Long, Double]]]) = (List.empty[AccumulativeStatistic[_]], data)
+    accumulators.foldLeft(zero) {
+      case (inner: (List[AccumulativeStatistic[_]], Map[String, Map[LocalDate, Map[Long, Double]]]), accumulator: AccumulativeStatistic[_]) => {
+        val (newAccs, newTotals) = inner
+        val tup: ((AccumulativeStatistic[_], Map[String, Map[LocalDate, Map[Long, Double]]])) = accumulator.handleObs(newTotals, obs)
+        (tup._1 :: newAccs, tup._2)
+      }
+    }
   }
 
-  def accumulateStatistic(running: Map[String, (Observations, StatisticalResult)], statistic: AccumulativeStatistic, obs: ScheduleData) = {
-    val (runningTotals, dateResults) = running(statistic.key)
-    val updatedTotals = statistic.accumulate(obs, runningTotals)
-    running + (statistic.key ->(updatedTotals, dateResults + (obs.game.date -> updatedTotals)))
-  }
 }
