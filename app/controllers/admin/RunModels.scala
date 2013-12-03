@@ -18,8 +18,14 @@ object RunModels extends Controller with SecureSocial {
     val profile = play.api.db.slick.DB.driver
   }
 
-  def saveOrUpdate(statModel: StatisticalModel, result: Map[String, Map[LocalDate, Map[Long, Double]]])(implicit s: scala.slick.session.Session) {
-
+  def index = SecuredAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          val statModelDao: StatisticalModelDao = StatisticalModelDao(model)
+        val models: List[String] = statModelDao.list.map(_.name)
+          Ok(views.html.runModelIndex(models) )
+      }
   }
 
   def run = SecuredAction {

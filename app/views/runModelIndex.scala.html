@@ -1,0 +1,13 @@
+@(ms:List[String])
+@import helper._
+@import helper.twitterBootstrap._
+
+@mainNoAds("Run Models") {
+
+<div class="row-fluid">
+    <div class="span12">
+        <h3>RunModels</h3>
+        @select(field="models", options=options(ms :_*))
+    </div>
+</div>
+}

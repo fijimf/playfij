@@ -64,6 +64,7 @@ POST /admin/ncaa/scrape-team-key                controllers.admin.Ncaa.scrapeTea
 GET  /admin/kenpom                              controllers.admin.KenPom.index
 POST /admin/kenpom/scrape-games                 controllers.admin.KenPom.scrapeGames
 
+GET  /admin/model-index                         controllers.admin.RunModels.index
 GET  /admin/run-models                          controllers.admin.RunModels.run
 ### SECURE SOCIAL ###
 # Login page
