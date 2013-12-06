@@ -36,11 +36,11 @@
     </appender>
 
     <!-- All the logs called with LoggerFactory.getLogger("performance") will go trough this logger -->
-    <logger name="performance" level="DEBUG" additivity="false">
+    <logger name="performance" level="INFO" additivity="false">
         <appender-ref ref="PERF"/>
     </logger>
 
-    <root level="TRACE">
+    <root level="INFO">
         <appender-ref ref="S"/>
     </root>
 </configuration>

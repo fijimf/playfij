@@ -13,17 +13,17 @@ class ScoringModel extends AccumulatorModel {
     Statistic(-1, "mean-points-margin", "Mean Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 3),
     Statistic(-1, "mean-points-total", "Mean Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 4),
     Statistic(-1, "stddev-points-for", "Std Dev Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 5),
-    Statistic(-1, "stddev-points-against", "Std Dev Points Agains", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 6),
+    Statistic(-1, "stddev-points-against", "Std Dev Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 6),
     Statistic(-1, "stddev-points-margin", "Std Dev Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 7),
     Statistic(-1, "stddev-points-total", "Std Dev Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 8),
-    Statistic(-1, "max-points-for", "Mean Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 9),
-    Statistic(-1, "max-points-against", "Mean Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 10),
-    Statistic(-1, "max-points-margin", "Mean Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 11),
-    Statistic(-1, "max-points-total", "Mean Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 12),
-    Statistic(-1, "min-points-for", "Std Dev Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 13),
-    Statistic(-1, "min-points-against", "Std Dev Points Agains", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 14),
-    Statistic(-1, "min-points-margin", "Std Dev Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 15),
-    Statistic(-1, "min-points-total", "Std Dev Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 16)
+    Statistic(-1, "max-points-for", "Max Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 9),
+    Statistic(-1, "max-points-against", "Max Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 10),
+    Statistic(-1, "max-points-margin", "Max Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 11),
+    Statistic(-1, "max-points-total", "Max Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 12),
+    Statistic(-1, "min-points-for", "Min Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 13),
+    Statistic(-1, "min-points-against", "Min Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 14),
+    Statistic(-1, "min-points-margin", "Min Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 15),
+    Statistic(-1, "min-points-total", "Min Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 16)
   ).map(s => s.key -> s).toMap
 
   def mean(ds: DescriptiveStatistics): Double = ds.getMean
