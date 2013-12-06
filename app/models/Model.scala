@@ -210,7 +210,13 @@ trait Model extends Profile {
 
     def statisticFk = foreignKey("obs_stat_fk", statisticId, Statistics)(_.id)
 
-    def indexGame = index("obs_date", (domainId, statisticId, date), unique = true)
+    def indexUniq = index("obs_date_domain_stat", (domainId, statisticId, date), unique = true)
+
+    def indexDS = index("obs_date_stat", (statisticId, date), unique = false)
+
+    def indexSD = index("obs_stat_date", (date, statisticId), unique = false)
+
+    def indexT = index("obs_domain", (domainId), unique = false)
 
     def * = id ~ date ~ domainId ~ statisticId ~ value <>(Observation.apply _, Observation.unapply _)
 
@@ -258,7 +264,7 @@ trait Model extends Profile {
 
     def indexStatName = index("idx_stat_name", name, unique = true)
 
-    def * = id ~ key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter  ~ displayOrder <>(Statistic.apply _, Statistic.unapply _)
+    def * = id ~ key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter ~ displayOrder <>(Statistic.apply _, Statistic.unapply _)
 
     def autoInc = key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter ~ displayOrder returning id
   }

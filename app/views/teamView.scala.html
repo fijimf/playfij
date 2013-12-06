@@ -142,12 +142,12 @@
         </tr>
         </thead>
         <tbody>
-        @p.stats.map { st =>
+        @p.stats.sortBy(_.displayOrder).map { st =>
         <tr>
             <td>@st.name</td>
-            <td>@st.value</td>
-            <td>@st.rank</td>
-            <td>@st.z</td>
+            <td class="text-right">@st.value</td>
+            <td class="text-right">@st.rank</td>
+            <td class="text-right">@st.z</td>
         </tr>
         }
         </tbody>
