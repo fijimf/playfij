@@ -3,6 +3,7 @@ package controllers.admin
 import play.api.mvc.{Controller, Action}
 import models.Repository
 import securesocial.core.SecureSocial
+import play.api.cache.{EhCachePlugin, Cache}
 
 object Admin extends Controller with SecureSocial {
   import play.api.Play.current
@@ -12,9 +13,17 @@ object Admin extends Controller with SecureSocial {
   def index = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
-        val status: List[(String, Option[Int])] = repo.checkDatabase()
-        Ok(views.html.adminIndex(status))
+        Ok(views.html.adminIndex(repo.checkDatabase()))
       }
   }
 
+  def invalidateCache = SecuredAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        for(p <- current.plugin[EhCachePlugin]){
+          p.manager.clearAll()
+        }
+        Ok(views.html.adminIndex(repo.checkDatabase()))
+      }
+  }
 }

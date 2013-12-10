@@ -12,10 +12,10 @@ import java.util.IllegalFormatConversionException
 import play.api.Logger
 
 case class ScheduleDao(m: Model) {
-
+  val SCHEDULE_DATA_CACHE_KEY: String = "!game-data"
   import play.api.Play.current
   import m.profile.simple._
-  val logger = Logger("ScgeduleDao")
+  val logger = Logger("ScheduleDao")
   val seasonQuery = for (season <- m.Seasons) yield season
   val teamQuery = for (team <- m.Teams) yield team
   val assocQuery = for (assoc <- m.ConferenceAssociations) yield assoc
@@ -57,7 +57,7 @@ case class ScheduleDao(m: Model) {
   def teamPage(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = currentSeason.flatMap(season => teamPage(teamKey, season.key))
 
   def teamPage(teamKey: String, seasonKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
-    Cache.getOrElse[Option[TeamPage]](teamKey + ":" + seasonKey) {
+    Cache.getOrElse[Option[TeamPage]](teamKey + ":" + seasonKey, 900) {
       (for {team <- teamQuery if team.key === teamKey
             season <- seasonQuery if season.key === seasonKey
             assoc <- assocQuery if assoc.seasonId === season.id && assoc.teamId === team.id
@@ -139,7 +139,7 @@ case class ScheduleDao(m: Model) {
 
 
   def loadScheduleData(implicit s: scala.slick.session.Session): List[ScheduleData] = {
-    Cache.getOrElse[List[ScheduleData]]("!game-data", 3600) {
+    Cache.getOrElse[List[ScheduleData]](SCHEDULE_DATA_CACHE_KEY, 3600) {
       scheduleData.list.map(ScheduleData.tupled)
     }
   }

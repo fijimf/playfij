@@ -66,6 +66,7 @@ POST /admin/kenpom/scrape-games                 controllers.admin.KenPom.scrapeG
 
 GET  /admin/model-index                         controllers.admin.RunModels.index
 GET  /admin/run-models                          controllers.admin.RunModels.run
+GET  /admin/invalidate-cache                    controllers.admin.Admin.invalidateCache
 ### SECURE SOCIAL ###
 # Login page
 GET  /login                                     securesocial.controllers.LoginPage.login

@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
 
-    <appender name="S" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%p] [%c{1}] %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <!-- Plain Text Rolling Appender -->
-
     <appender name="R" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <Append>true</Append>
         <File>logs/jongo.log</File>
@@ -21,26 +14,7 @@
         </rollingPolicy>
     </appender>
 
-    <!-- An specific Appender for Performance logs -->
-
-    <appender name="PERF" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <Append>true</Append>
-        <File>logs/performance.log</File>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %c{1}:%L [%p] %m%n</pattern>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/performance.log.%d{yyyy-MM-dd}</fileNamePattern>
-            <maxHistory>10</maxHistory>
-        </rollingPolicy>
-    </appender>
-
-    <!-- All the logs called with LoggerFactory.getLogger("performance") will go trough this logger -->
-    <logger name="performance" level="INFO" additivity="false">
-        <appender-ref ref="PERF"/>
-    </logger>
-
     <root level="INFO">
-        <appender-ref ref="S"/>
+        <appender-ref ref="R"/>
     </root>
 </configuration>
