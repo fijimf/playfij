@@ -25,7 +25,7 @@ object Global extends GlobalSettings {
   def schedule() {
     try {
       val now: DateTime = new DateTime()
-      val clock = now.withHourOfDay(0).withMinuteOfHour(45).withSecondOfMinute(0).withMillisOfSecond(0)
+      val clock = now.withHourOfDay(10).withMinuteOfHour(45).withSecondOfMinute(0).withMillisOfSecond(0)
       val d = if (clock.isBefore(now)) {
         logger.info("Scheduling job to run at " + (clock.plusDays(1)))
         Duration.create(clock.plusDays(1).getMillis - now.getMillis, TimeUnit.MILLISECONDS)
