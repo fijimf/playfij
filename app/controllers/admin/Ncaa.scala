@@ -9,6 +9,7 @@ import scala.Some
 import play.api.Logger
 import scraping.control.GameUpdateRequest
 import securesocial.core.SecureSocial
+import play.api.libs.concurrent.Akka
 
 object Ncaa extends Controller with SecureSocial {
   val logger = Logger("Ncaa")
@@ -89,6 +90,5 @@ object Ncaa extends Controller with SecureSocial {
       }
 
   }
-
 
 }

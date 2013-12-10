@@ -130,7 +130,7 @@ case class ScheduleDao(m: Model) {
     val stats: List[ModelRecord] = zzzz.map{case (stat: Statistic, ser: Series[String, Double]) => {
       val ix: Int = ser.index.getFirst(team.key)
       val value:Scalar[Double] = ser.at(ix)
-      val rank:Scalar[Double] = ser.rank(RankTie.Max,stat.higherIsBetter).at(ix)
+      val rank:Scalar[Double] = ser.rank(RankTie.Max,!stat.higherIsBetter).at(ix)
       val z:Scalar[Double] = value.map(x=>(x-ser.mean)/ser.stdev)
       ModelRecord(stat.name, cleanString(value, stat.longFormat), cleanString(rank,"%.0f"), cleanString(z,"%4.2f"), stat.displayOrder)
     }}

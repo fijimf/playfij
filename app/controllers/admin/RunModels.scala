@@ -55,36 +55,40 @@ object RunModels extends Controller with SecureSocial {
             },
             req => {
               val (from, to)=req
-              val statModelDao: StatisticalModelDao = StatisticalModelDao(model)
-              val statDao: StatisticDao = StatisticDao(model)
-              val obsDao: ObservationDao = ObservationDao(model)
-              val models: List[StatisticalModel] = statModelDao.list
-              val scheduleData: List[ScheduleData] = ScheduleDao(model).loadScheduleData
-
-              models.foreach(statModel => {
-                val computableModel: ComputableModel = Class.forName(statModel.className).newInstance().asInstanceOf[ComputableModel]
-                val result = computableModel.compute(scheduleData)
-                for (sk <- result.keys) {
-                  val stat: Statistic = statDao.findByKey(sk) match {
-                    case Some(statistic) => statistic
-                    case None => {
-                      computableModel.statistics.get(sk).map(_.copy(modelId = statModel.id)).foreach(st => statDao.insert(st))
-                      statDao.findByKey(sk).get
-                    }
-                  }
-                  val inner: Map[LocalDate, Map[Long, Double]] = result(sk)
-                  for (d <- inner.keys if (!d.isBefore(from) && !d.isAfter(to))) {
-                    obsDao.deleteByDateStat(stat.id, d)
-                    for (id <- inner(d).keys) {
-                      obsDao.insert(Observation(-1, d, id, stat.id, inner(d)(id)))
-                    }
-                  }
-                }
-              })
+              runModelsForDates(from, to)
               Redirect(controllers.admin.routes.Admin.index)
             }
           )
       }
+  }
+
+  def runModelsForDates(from: LocalDate, to: LocalDate)(implicit s:scala.slick.session.Session) {
+    val statModelDao: StatisticalModelDao = StatisticalModelDao(model)
+    val statDao: StatisticDao = StatisticDao(model)
+    val obsDao: ObservationDao = ObservationDao(model)
+    val models: List[StatisticalModel] = statModelDao.list
+    val scheduleData: List[ScheduleData] = ScheduleDao(model).loadScheduleData
+
+    models.foreach(statModel => {
+      val computableModel: ComputableModel = Class.forName(statModel.className).newInstance().asInstanceOf[ComputableModel]
+      val result = computableModel.compute(scheduleData)
+      for (sk <- result.keys) {
+        val stat: Statistic = statDao.findByKey(sk) match {
+          case Some(statistic) => statistic
+          case None => {
+            computableModel.statistics.get(sk).map(_.copy(modelId = statModel.id)).foreach(st => statDao.insert(st))
+            statDao.findByKey(sk).get
+          }
+        }
+        val inner: Map[LocalDate, Map[Long, Double]] = result(sk)
+        for (d <- inner.keys if (!d.isBefore(from) && !d.isAfter(to))) {
+          obsDao.deleteByDateStat(stat.id, d)
+          for (id <- inner(d).keys) {
+            obsDao.insert(Observation(-1, d, id, stat.id, inner(d)(id)))
+          }
+        }
+      }
+    })
   }
 }
 
