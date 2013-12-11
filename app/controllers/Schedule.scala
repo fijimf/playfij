@@ -45,8 +45,13 @@ object Schedule extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
+          val teams: List[(Team, Conference)] = scheduleDao.search(q).sortBy(_._1.name)
           val quote = quoteDao.random
-          Ok(views.html.searchView(quote, scheduleDao.search(q)))
+          if (teams.size == 1) {
+            Redirect(routes.Schedule.team(teams.head._1.key))
+          } else {
+            Ok(views.html.searchView(quote, teams))
+          }
       }
   }
 

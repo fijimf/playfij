@@ -13,20 +13,23 @@
         <div class="container-fluid">
 
             <div class="row-fluid">
-                <div class="span8 offset2">
+                <div class="span6" style="min-height: 200px; margin-top:50px;">
                     @if(!data.isEmpty){
                     <table class="table table-compact table-bordered table-subcompact ">
                         <thead/>
                         <tbody>
                         @data.map { tup =>
                         <tr>
-                            <td style="width:5em;"><img src="@tup._1.logoUrl" /></td>
-                            <td style="text-align:left; width: 40em;">@tup._1.name @tup._1.nickname</td>
-                            <td style="text-align:left; width: 20em;">@tup._2.name</td>
+                            <td style="width:5em; vertical-align: middle;"><img src="@tup._1.logoUrl" /></td>
+                            <td style="text-align:left; width: 40em; vertical-align: middle;"><a href="@controllers.routes.Schedule.team(tup._1.key)">@tup._1.name @tup._1.nickname</a></td>
+                            <td style="text-align:left; width: 20em; vertical-align: middle;">@tup._2.name</td>
                         </tr>
                         }
                         </tbody>
                     </table>
+                    }
+                    @if(data.isEmpty){
+                        <p>Sorry, no teams or conferences were returned for that search.</p>
                     }
                 </div>
             </div>
