@@ -44,6 +44,7 @@ case class ScheduleDao(m: Model) {
   } yield {
     (observation, statistic, model)
   }
+
   val teamStatData = for {
     (observation, statistic, model)<-statData if statistic.targetDomain==="Team"
     team<-m.Teams if observation.domainId === team.id
@@ -223,6 +224,23 @@ case class ScheduleDao(m: Model) {
     ConferenceStandings.createConferenceStandings(season, conference, teams, gameData)
   }
 
+
+  def search(q:String)(implicit s: scala.slick.session.Session):List[(Team, Conference)] = {
+    currentSeason.map(ss => {
+      (for {team <- teamQuery
+            season <- seasonQuery if season.key === ss.key
+            assoc <- assocQuery if assoc.seasonId === season.id && assoc.teamId === team.id
+            conference <- conferenceQuery if conference.id === assoc.conferenceId
+      } yield {
+        (team, conference)
+      }).list.filter{case (team: Team, conference: Conference) =>{
+        team.name.toLowerCase.contains(q.toLowerCase) ||
+          team.longName.toLowerCase.contains(q.toLowerCase) ||
+          team.nickname.toLowerCase.contains(q.toLowerCase) ||
+        conference.name.toLowerCase.contains(q.toLowerCase)
+      } }
+    }).getOrElse(List.empty[(Team, Conference)])
+  }
 }
 
 

@@ -6,6 +6,7 @@
 GET  /deepfij/                                          controllers.Application.index
 GET  /deepfij/teams/:key                                controllers.Schedule.team(key)
 GET  /deepfij/teams/:key/:seasonKey                     controllers.Schedule.teamSeason(key, seasonKey)
+GET  /deepfij/search                                    controllers.Schedule.search(q:String)
 
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index

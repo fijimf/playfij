@@ -9,8 +9,8 @@
             <li><a href="#">Analysis</a></li>
             <li><a href="#">About</a></li>
             <!--<li><a href="@admin.routes.Admin.index">Admin</a></li>-->
-            <form class="navbar-search pull-left">
-                <input type="text" class="search-query" placeholder="Teams, nicknames, stats, dates ...">
+            <form class="navbar-search pull-left" action="/deepfij/search" method="GET">
+                <input id="q" name="q" type="text" class="search-query" placeholder="Teams, nicknames, stats, dates ...">
             </form>
 
         </ul>

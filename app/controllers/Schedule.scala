@@ -7,6 +7,7 @@ import models._
 import models.ScheduleDao
 
 object Schedule extends Controller with SecureSocial {
+
   import play.api.Play.current
 
   private val logger = Logger("ScheduleController")
@@ -18,28 +19,36 @@ object Schedule extends Controller with SecureSocial {
   private val quoteDao = new QuoteDao(model)
 
 
-  def team(key:String)  = UserAwareAction {
+  def team(key: String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
           val q = quoteDao.random
           scheduleDao.teamPage(key).map(tp => {
-            Ok(views.html.teamView(q,tp))
+            Ok(views.html.teamView(q, tp))
           }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
 
-  def teamSeason(key:String, seasonKey:String)  = UserAwareAction {
+  def teamSeason(key: String, seasonKey: String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
           val q = quoteDao.random
           scheduleDao.teamPage(key, seasonKey).map(tp => {
-            Ok(views.html.teamView(q,tp))
+            Ok(views.html.teamView(q, tp))
           }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
 
+  def search(q: String) = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          val quote = quoteDao.random
+          Ok(views.html.searchView(quote, scheduleDao.search(q)))
+      }
+  }
 
 }
 
