@@ -5,6 +5,7 @@ import play.mvc.Controller
 import play.api.Logger
 import models._
 import models.ScheduleDao
+import org.joda.time.LocalDate
 
 object Schedule extends Controller with SecureSocial {
 
@@ -52,6 +53,16 @@ object Schedule extends Controller with SecureSocial {
           } else {
             Ok(views.html.searchView(quote, teams))
           }
+      }
+  }
+
+  def date(yyyy: Int, mm: Int, dd: Int) = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          val d = new LocalDate(yyyy, mm, dd)
+          val q = quoteDao.random
+          Ok(views.html.dateView(q, scheduleDao.datePage(d)))
       }
   }
 

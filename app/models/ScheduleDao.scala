@@ -13,8 +13,10 @@ import play.api.Logger
 
 case class ScheduleDao(m: Model) {
   val SCHEDULE_DATA_CACHE_KEY: String = "!game-data"
+
   import play.api.Play.current
   import m.profile.simple._
+
   val logger = Logger("ScheduleDao")
   val seasonQuery = for (season <- m.Seasons) yield season
   val teamQuery = for (team <- m.Teams) yield team
@@ -46,13 +48,11 @@ case class ScheduleDao(m: Model) {
   }
 
   val teamStatData = for {
-    (observation, statistic, model)<-statData if statistic.targetDomain==="Team"
-    team<-m.Teams if observation.domainId === team.id
+    (observation, statistic, model) <- statData if statistic.targetDomain === "Team"
+    team <- m.Teams if observation.domainId === team.id
   } yield {
     (observation, statistic, model, team)
   }
-
-
 
 
   def teamPage(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = currentSeason.flatMap(season => teamPage(teamKey, season.key))
@@ -72,7 +72,7 @@ case class ScheduleDao(m: Model) {
   }
 
 
-  def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session):List[(Statistic, Series[String, Double])] = {
+  def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[String, Double])] = {
     val statDates: Map[Statistic, LocalDate] = getStatDates(date)
     statDates.keys.map {
       key => {
@@ -90,7 +90,7 @@ case class ScheduleDao(m: Model) {
   }
 
 
-  def getStatDates(date: LocalDate)(implicit s: scala.slick.session.Session):Map[Statistic,LocalDate]= {
+  def getStatDates(date: LocalDate)(implicit s: scala.slick.session.Session): Map[Statistic, LocalDate] = {
     (for {
       o <- m.Observations if o.date <= date
       s <- o.statisticFk
@@ -102,22 +102,23 @@ case class ScheduleDao(m: Model) {
     }.toMap
   }
 
-  def cleanString(x:Scalar[Double], format:String="%5.2f"):String = {
-     if (x.isNA) {
-       "N/A"
-     } else {
-       try {
-         format.format(x.get)
-       }
-       catch {
-         case ex:IllegalFormatConversionException =>if (ex.getConversion=='d'){
-           "%.0f".format(x.get)
-         } else {
-           "%f".format(x.get)
-         }
-       }
-     }
+  def cleanString(x: Scalar[Double], format: String = "%5.2f"): String = {
+    if (x.isNA) {
+      "N/A"
+    } else {
+      try {
+        format.format(x.get)
+      }
+      catch {
+        case ex: IllegalFormatConversionException => if (ex.getConversion == 'd') {
+          "%.0f".format(x.get)
+        } else {
+          "%f".format(x.get)
+        }
+      }
+    }
   }
+
   def buildPage(team: Team, season: Season, conference: Conference, isCurrentSeason: Boolean)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
 
     val games: List[ScheduleData] = loadScheduleData
@@ -128,13 +129,15 @@ case class ScheduleDao(m: Model) {
     val currentRecords = loadCurrentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))
     val seasonRecords = loadSeasonRecords(team, games)
     val zzzz: List[(Statistic, Series[String, Double])] = loadStats(season.to)
-    val stats: List[ModelRecord] = zzzz.map{case (stat: Statistic, ser: Series[String, Double]) => {
-      val ix: Int = ser.index.getFirst(team.key)
-      val value:Scalar[Double] = ser.at(ix)
-      val rank:Scalar[Double] = ser.rank(RankTie.Max,!stat.higherIsBetter).at(ix)
-      val z:Scalar[Double] = value.map(x=>(x-ser.mean)/ser.stdev)
-      ModelRecord(stat.name, cleanString(value, stat.longFormat), cleanString(rank,"%.0f"), cleanString(z,"%4.2f"), stat.displayOrder)
-    }}
+    val stats: List[ModelRecord] = zzzz.map {
+      case (stat: Statistic, ser: Series[String, Double]) => {
+        val ix: Int = ser.index.getFirst(team.key)
+        val value: Scalar[Double] = ser.at(ix)
+        val rank: Scalar[Double] = ser.rank(RankTie.Max, !stat.higherIsBetter).at(ix)
+        val z: Scalar[Double] = value.map(x => (x - ser.mean) / ser.stdev)
+        ModelRecord(stat.name, cleanString(value, stat.longFormat), cleanString(rank, "%.0f"), cleanString(z, "%4.2f"), stat.displayOrder)
+      }
+    }
     Some(TeamPage(team, conference, season, isCurrentSeason, schedule, results, standings, currentRecords, seasonRecords, stats))
   }
 
@@ -225,7 +228,7 @@ case class ScheduleDao(m: Model) {
   }
 
 
-  def search(q:String)(implicit s: scala.slick.session.Session):List[(Team, Conference)] = {
+  def search(q: String)(implicit s: scala.slick.session.Session): List[(Team, Conference)] = {
     currentSeason.map(ss => {
       (for {team <- teamQuery
             season <- seasonQuery if season.key === ss.key
@@ -233,13 +236,19 @@ case class ScheduleDao(m: Model) {
             conference <- conferenceQuery if conference.id === assoc.conferenceId
       } yield {
         (team, conference)
-      }).list.filter{case (team: Team, conference: Conference) =>{
-        team.name.toLowerCase.contains(q.toLowerCase) ||
-          team.longName.toLowerCase.contains(q.toLowerCase) ||
-          team.nickname.toLowerCase.contains(q.toLowerCase) ||
-        conference.name.toLowerCase.contains(q.toLowerCase)
-      } }
+      }).list.filter {
+        case (team: Team, conference: Conference) => {
+          team.name.toLowerCase.contains(q.toLowerCase) ||
+            team.longName.toLowerCase.contains(q.toLowerCase) ||
+            team.nickname.toLowerCase.contains(q.toLowerCase) ||
+            conference.name.toLowerCase.contains(q.toLowerCase)
+        }
+      }
     }).getOrElse(List.empty[(Team, Conference)])
+  }
+
+  def datePage(date: LocalDate)(implicit s: scala.slick.session.Session): DatePage = {
+    DatePage(date, date.minusDays(1), date.plusDays(1), loadScheduleData.filter(d => d.game.date == date && d.result.isDefined), loadScheduleData.filter(d => d.game.date == date && d.result.isEmpty))
   }
 }
 

@@ -4,6 +4,7 @@
 
 # Home page
 GET  /deepfij/                                          controllers.Application.index
+GET  /deepfij/:yyyy/:mm/:dd                             controllers.Schedule.date(yyyy:Int,mm:Int,dd:Int)
 GET  /deepfij/teams/:key                                controllers.Schedule.team(key)
 GET  /deepfij/teams/:key/:seasonKey                     controllers.Schedule.teamSeason(key, seasonKey)
 GET  /deepfij/search                                    controllers.Schedule.search(q:String)
