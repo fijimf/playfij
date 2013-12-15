@@ -1,5 +1,6 @@
 
 import _root_.controllers.admin.RunModels
+import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 import models.Repository
 import org.joda.time.{LocalDateTime, LocalDate, DateTime}
@@ -68,7 +69,7 @@ object Global extends GlobalSettings {
 
   def notifyRestart() {
     emailAdmin("Deep Fij restarted") {
-      "Deep Fij was restarted on %s at %s.".format(System.getProperty("hostname", "unknown host"), new LocalDateTime().toString("yyyy-MM-dd HH:mm:ss"))
+      "Deep Fij was restarted on %s at %s.".format(InetAddress.getLocalHost.getHostName, new LocalDateTime().toString("yyyy-MM-dd HH:mm:ss"))
     }
   }
 

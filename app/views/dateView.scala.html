@@ -14,38 +14,105 @@
     </div>
 </div>
 <div class="row-fluid">
-<div class="span12">
-<div class="container-fluid">
-    I'm the all night drug prowling wolf
-
-</div>
-</div>
-</div>
-<div class="row-fluid">
     <div class="span12">
-        <h6 style="text-align:center; ">For entertainment purposes only.  &copy;2013 fijimf.com.  Contact us <a href="mailto:deepfij@@gmail.com">deepfij@@gmail.com</a></h6>
+        <div class="container-fluid">
+            @if(!p.results.isEmpty) {
+            <div class="row-fluid">
+                <div class="span12">
+                    <h3>Results</h3>
+                    <table class="table table-compact table-bordered table-subcompact">
+                        <thead>
+                        <tr>
+                            <th colspan="4">Results</th>
+                            <th colspan="4">Postdictions</th>
+                        </tr>
+                        <tr>
+                            <th>Home</th>
+                            <th></th>
+                            <th>Away</th>
+                            <th></th>
+                            <th>Margin</th>
+                            <th>Error</th>
+                            <th>Margin</th>
+                            <th>Error</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @p.results.map{ res=>
+                        <tr>
+                            <td><a href="@routes.Schedule.team(res.homeTeam.key)">@res.homeTeam.name</a></td>
+                            <td>@res.result.get.homeScore</td>
+                            <td><a href="@routes.Schedule.team(res.awayTeam.key)">@res.awayTeam.name</a></td>
+                            <td>@res.result.get.awayScore</td>
+                        </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            }
+            @if(!p.games.isEmpty) {
+            <div class="row-fluid">
+                <div class="span12">
+                    <h3>Schedule</h3>
+                    <table class="table table-compact table-bordered table-subcompact">
+                        <thead>
+                        <tr>
+                            <th colspan="2">Results</th>
+                            <th colspan="6">Predictions</th>
+                            <th>Prob</th>
+                            <th>Margin</th>
+                            <th>Error</th>
+                            <th>Prob</th>
+                            <th>Margin</th>
+                            <th>Error</th>
+
+                        </tr>
+                        <tr>
+                            <th>Home</th>
+                            <th>Away</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @p.games.map { res=>
+                        <tr>
+                            <td><a href="@routes.Schedule.team(res.homeTeam.key)">@res.homeTeam.name</a></td>
+                            <td><a href="@routes.Schedule.team(res.awayTeam.key)">@res.awayTeam.name</a></td>
+                        </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            }
+        </div>
     </div>
-</div>
-<div class="row-fluid">
-    <div class="span12">
-        <hr/>
+    <div class="row-fluid">
+        <div class="span12">
+            <h6 style="text-align:center; ">For entertainment purposes only. &copy;2013 fijimf.com. Contact us <a
+                    href="mailto:deepfij@@gmail.com">deepfij@@gmail.com</a></h6>
+        </div>
     </div>
-</div>
-<div class="row-fluid">
-    <div class="span12">
-        <script type="text/javascript"><!--
-google_ad_client = "ca-pub-8640781414553071";
-/* bottom */
-google_ad_slot = "3752417978";
-google_ad_width = 728;
-google_ad_height = 90;
-//-->
-        </script>
-        <script type="text/javascript"
-                src="//pagead2.googlesyndication.com/pagead/show_ads.js">
-        </script>
+    <div class="row-fluid">
+        <div class="span12">
+            <hr/>
+        </div>
     </div>
-</div>
+    <div class="row-fluid">
+        <div class="span12">
+            <script type="text/javascript"><!--
+            google_ad_client = "ca-pub-8640781414553071";
+            /* bottom */
+            google_ad_slot = "3752417978";
+            google_ad_width = 728;
+            google_ad_height = 90;
+            //-->
+            </script>
+            <script type="text/javascript"
+                    src="//pagead2.googlesyndication.com/pagead/show_ads.js">
+            </script>
+        </div>
+    </div>
 
 
-}
+    }
