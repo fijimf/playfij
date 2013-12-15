@@ -2,7 +2,7 @@
 import _root_.controllers.admin.RunModels
 import java.util.concurrent.TimeUnit
 import models.Repository
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.{LocalDateTime, LocalDate, DateTime}
 import play.api._
 import play.api.libs.concurrent.Akka
 import scala.concurrent.duration.Duration
@@ -20,6 +20,7 @@ object Global extends GlobalSettings {
   override def onStart(app: Application) {
     super.onStart(app)
     schedule()
+    notifyRestart()
   }
 
   def schedule() {
@@ -40,10 +41,23 @@ object Global extends GlobalSettings {
         logger.info("Running scheduled job updating games and results")
         val req = GameUpdateRequest("", true, true, true, true, true, true, true, Some(from), Some(to))
         val repo: Repository = new Repository(play.api.db.slick.DB.driver)
-        play.api.db.slick.DB.withSession { implicit s:Session=>
-          val result = NcaaGameScraper.scrape(repo, req)
-          logger.info("Results inserted: " + result.resultsInserted.size);
-          RunModels.runModelsForDates(from, to)
+        play.api.db.slick.DB.withSession {
+          implicit s: Session =>
+            val result = NcaaGameScraper.scrape(repo, req)
+            logger.info("Results inserted: " + result.resultsInserted.size);
+            RunModels.runModelsForDates(from, to)
+            emailAdmin("Schedule Updated") {
+              ("Schedule updated:\n\n" +
+                "Games Inserted:\n%s\nGames Updated:\n%s\nGames Deleted:\n%s\n" +
+                "Results Inserted:\n%s\nResults Updated:\n%s\nResults Deleted:\n%s\n").format(
+                  result.gamesInserted.map(_.toString).mkString("\n"),
+                  result.gamesUpdated.map(_.toString).mkString("\n"),
+                  result.gamesDeleted.map(_.toString).mkString("\n"),
+                  result.resultsInserted.map(_.toString).mkString("\n"),
+                  result.resultsUpdated.map(_.toString).mkString("\n"),
+                  result.resultsDeleted.map(_.toString).mkString("\n")
+                )
+            }
         }
         schedule(); //Schedule for next time
       }
@@ -52,5 +66,20 @@ object Global extends GlobalSettings {
     }
   }
 
+  def notifyRestart() {
+    emailAdmin("Deep Fij restarted") {
+      "Deep Fij was restarted on %s at %s.".format(System.getProperty("hostname", "unknown host"), new LocalDateTime().toString("yyyy-MM-dd HH:mm:ss"))
+    }
+  }
 
+
+  def emailAdmin(subject: String)(f: => String) {
+    import com.typesafe.plugin._
+    val mail = use[MailerPlugin].email
+    mail.setSubject(subject)
+    //TODO make that a config setting
+    mail.setRecipient("fijimf@gmail.com")
+    mail.setFrom("Deep Fij <deepfij@gmail.com>")
+    mail.send(f)
+  }
 }
