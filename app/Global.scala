@@ -9,6 +9,7 @@ import play.api.libs.concurrent.Akka
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.slick.session.Session
+import scala.util.control.NonFatal
 import scraping.control.GameUpdateRequest
 import scraping.NcaaGameScraper
 
@@ -76,11 +77,16 @@ object Global extends GlobalSettings {
 
   def emailAdmin(subject: String)(f: => String) {
     import com.typesafe.plugin._
-    val mail = use[MailerPlugin].email
-    mail.setSubject(subject)
-    //TODO make that a config setting
-    mail.setRecipient("fijimf@gmail.com")
-    mail.setFrom("Deep Fij <deepfij@gmail.com>")
-    mail.send(f)
+    try {
+      val mail = use[MailerPlugin].email
+      mail.setSubject(subject)
+      //TODO make that a config setting
+      mail.setRecipient("fijimf@gmail.com")
+      mail.setFrom("Deep Fij <deepfij@gmail.com>")
+      mail.send(f)
+    }
+    catch {
+      case NonFatal(e) =>  logger.error("CaughtException trying to send mail.", e)
+    }
   }
 }
