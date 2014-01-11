@@ -8,6 +8,7 @@ GET  /deepfij/:yyyy/:mm/:dd                             controllers.Schedule.dat
 GET  /deepfij/teams/:key                                controllers.Schedule.team(key)
 GET  /deepfij/teams/:key/:seasonKey                     controllers.Schedule.teamSeason(key, seasonKey)
 GET  /deepfij/search                                    controllers.Schedule.search(q:String)
+GET  /deepfij/stats/:key                                controllers.Schedule.stats(key)
 
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index

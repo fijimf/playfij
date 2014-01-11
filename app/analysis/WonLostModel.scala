@@ -6,7 +6,6 @@ import models.{Statistic, ScheduleData}
 class WonLostModel extends DerivedModel {
   def key = "won-lost"
 
-
   def deriveResults(result: ModelResult): ModelResult = {
     (for (wins <- result.get("wins");
           losses <- result.get("losses"))

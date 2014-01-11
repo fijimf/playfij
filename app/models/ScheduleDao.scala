@@ -2,12 +2,10 @@ package models
 
 import org.joda.time.LocalDate
 import play.api.cache.Cache
-import util.Mappers._
-import org.saddle.Series
+import org.saddle.{Frame, Series}
 import org.saddle.scalar.Scalar
 import org.saddle.stats.RankTie
 import analysis.ModelRecord
-import scala.slick.lifted
 import java.util.IllegalFormatConversionException
 import play.api.Logger
 
@@ -16,6 +14,7 @@ case class ScheduleDao(m: Model) {
 
   import play.api.Play.current
   import m.profile.simple._
+  import models.util.Mappers._
 
   val logger = Logger("ScheduleDao")
   val seasonQuery = for (season <- m.Seasons) yield season
@@ -54,6 +53,21 @@ case class ScheduleDao(m: Model) {
     (observation, statistic, model, team)
   }
 
+  def statPage(statKey: String)(implicit s: scala.slick.session.Session): Option[(Statistic, Frame[LocalDate, Team, Double])] = {
+    currentSeason.map(season => {
+      val rawData: List[(Statistic, Team, LocalDate, Double)] = (
+        for {
+          (observation, statistic, model, team) <- teamStatData if statistic.targetDomain === "Team" && statistic.key === statKey  && (observation.date >= season.from) && (observation.date <= season.to)
+        } yield {
+          (statistic, team, observation.date, observation.value)
+        }).list()
+      val series: Map[Team, Series[LocalDate, Double]] = rawData.groupBy(_._2).mapValues(lst => {
+        Series[LocalDate, Double](lst.map(x => (x._3, x._4)): _*)
+      })
+      val stat = rawData.head._1
+      (stat, Frame.apply[LocalDate, Team, Double](series.toList: _*))
+    })
+  }
 
   def teamPage(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = currentSeason.flatMap(season => teamPage(teamKey, season.key))
 
@@ -72,7 +86,7 @@ case class ScheduleDao(m: Model) {
   }
 
 
-  def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[String, Double])] = {
+  def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[Team, Double])] = {
     val statDates: Map[Statistic, LocalDate] = getStatDates(date)
     statDates.keys.map {
       key => {
@@ -80,8 +94,8 @@ case class ScheduleDao(m: Model) {
           case (observations, statistics, models, teams) => observations.date === statDates(key) && statistics.key === key.key
         }
         val list = qqq.list()
-        val pairs: List[(String, Double)] = list.map {
-          case (observation, statistic, model, team) => team.key -> observation.value
+        val pairs: List[(Team, Double)] = list.map {
+          case (observation, statistic, model, team) => team -> observation.value
         }
         logger.info("For %s on %s loaded %d records".format(key.key, statDates(key), pairs.size))
         key -> Series(pairs: _*)
@@ -128,10 +142,10 @@ case class ScheduleDao(m: Model) {
     val standings: ConferenceStandings = loadConference(games, conference, season)
     val currentRecords = loadCurrentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))
     val seasonRecords = loadSeasonRecords(team, games)
-    val zzzz: List[(Statistic, Series[String, Double])] = loadStats(season.to)
-    val stats: List[ModelRecord] = zzzz.map {
-      case (stat: Statistic, ser: Series[String, Double]) => {
-        val ix: Int = ser.index.getFirst(team.key)
+    val seriesMap: List[(Statistic, Series[Team, Double])] = loadStats(season.to)
+    val stats: List[ModelRecord] = seriesMap.map {
+      case (stat: Statistic, ser: Series[Team, Double]) => {
+        val ix: Int = ser.index.getFirst(team)
         val value: Scalar[Double] = ser.at(ix)
         val rank: Scalar[Double] = ser.rank(RankTie.Max, !stat.higherIsBetter).at(ix)
         val z: Scalar[Double] = value.map(x => (x - ser.mean) / ser.stdev)

@@ -2,8 +2,15 @@ package analysis.predictors
 
 import models.{Team, ScheduleData}
 
-trait WinnerPredictor {
+trait GamePredictor {
+
+
+}
+
+
+trait WinnerPredictor extends GamePredictor {
   def winner(s: ScheduleData): Option[Team]
+
 }
 
 trait SpreadPredictor extends WinnerPredictor {

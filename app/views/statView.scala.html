@@ -1,0 +1,14 @@
+@(q: Option[models.Quote],p: (models.Statistic, org.saddle.Frame[org.joda.time.LocalDate, models.Team, Double]))
+
+@richMain("Hello stats", q.map(_.quote), None) {
+
+<div class="row-fluid team-header-row"
+     style="border-top:12px solid #444;border-bottom:12px solid #444; background-color:#ddd;">
+    <div class="span12">
+        <h3>@p._1.name</h3>
+        <h5>Min: @p._2.min</h5>
+        <h5>Med: @p._2.median</h5>
+        <h5>Max: @p._2.max</h5>
+    </div>
+</div>
+}

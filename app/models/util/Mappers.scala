@@ -1,7 +1,7 @@
 package models.util
 
 import scala.slick.lifted.{TypeMapper, MappedTypeMapper}
-import org.joda.time.{LocalDate, DateMidnight}
+import org.joda.time.{DateTime, LocalDate, DateMidnight}
 import java.sql.Date
 import securesocial.core._
 import securesocial.core.OAuth2Info
@@ -44,4 +44,6 @@ object Mappers {
       case (hasher, password, salt) => Some(PasswordInfo(hasher, password, salt))
       case _ => None
     }
+
+  implicit def dateTimeOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isBefore _)
 }

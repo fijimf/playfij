@@ -1,13 +1,17 @@
 package analysis
 
-import models.{Statistic, ScheduleData}
+import models.{Team, Statistic, ScheduleData}
+import org.joda.time.LocalDate
+import scala.Predef._
+import models.ScheduleData
+import models.Statistic
+import models.Team
 
-class PseudoRpiModel extends AccumulatorModel {
+class PseudoRpiModel extends ComputableModel {
   def key: String = "pseudo-rpi"
 
   def statistics: Map[String, Statistic] = ???
 
-  def accumulators: List[AccumulativeStatistic[_]] = List(
+  def computeSeason(data: List[ScheduleData]): ModelResult = ???
 
-  )
 }

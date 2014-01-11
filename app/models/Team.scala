@@ -6,7 +6,7 @@ import scala.slick.driver.ExtendedProfile
 import scala.slick.lifted
 
 
-case class Team(id: Long, key: String, name: String, longName: String, nickname: String, primaryColor: Option[String], secondaryColor: Option[String], logoUrl: Option[String], officialUrl: Option[String], officialTwitter: Option[String]) {
+case class Team(id: Long, key: String, name: String, longName: String, nickname: String, primaryColor: Option[String], secondaryColor: Option[String], logoUrl: Option[String], officialUrl: Option[String], officialTwitter: Option[String]) extends Ordered[Team] {
   require(StringUtils.isNotBlank(key), "Key cannot be blank")
   require(StringUtils.isNotBlank(name), "Name cannot be blank")
   require(StringUtils.isNotBlank(longName), "Long name cannot be blank")
@@ -16,6 +16,8 @@ case class Team(id: Long, key: String, name: String, longName: String, nickname:
   require(officialUrl.map(StringUtils.isNotBlank).getOrElse(true), "Official URL cannot be blank")
   require(officialTwitter.map(StringUtils.isNotBlank).getOrElse(true), "Official Twitter cannot be blank")
   require(logoUrl.map(StringUtils.isNotBlank).getOrElse(true), "Logo URL cannot be blank")
+
+  def compare(that: Team): Int = key.compare(that.key)
 }
 
 case class Alias(id: Long, teamId: Long, alias: String) {
