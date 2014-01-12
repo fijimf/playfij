@@ -2,15 +2,17 @@ package models
 
 import play.api.db.slick.Profile
 import org.joda.time.LocalDate
-import org.joda.time.LocalDate
 import models.util.Mappers._
 import securesocial.core.AuthenticationMethod
+import models.KeyedValue
 
 trait Model extends Profile {
 
   import profile.simple._
 
   object Seasons extends Table[Season]("seasons") {
+
+
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def key = column[String]("season_key")
