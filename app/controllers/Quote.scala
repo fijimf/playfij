@@ -10,7 +10,7 @@ import play.api.db.slick.Profile
 import scala.Some
 import models.QuoteDao
 import securesocial.core.SecureSocial
-
+import play.api.libs.json.Json._
 object Quote extends Controller with SecureSocial  {
 
   import play.api.Play.current
@@ -21,7 +21,6 @@ object Quote extends Controller with SecureSocial  {
   private val dao: QuoteDao = QuoteDao(model)
 
   private val logger = Logger("QuoteController")
-  private val repo: Repository = new Repository(play.api.db.slick.DB.driver)
 
   val quoteForm: Form[models.Quote] = Form(
     mapping(
@@ -78,7 +77,23 @@ object Quote extends Controller with SecureSocial  {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-        Ok(views.html.quoteForm(quoteForm.bind(Map.empty[String, String]), "New Quote"))
+          Ok(views.html.quoteForm(quoteForm.bind(Map.empty[String, String]), "New Quote"))
+      }
+  }
+
+  def random = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          dao.random.map(q=>{
+            Ok(toJson(
+              Map("quote" -> q.quote, "source"->q.source.getOrElse(""), "url"->q.url.getOrElse(""))
+            ))
+          }).getOrElse(
+              Ok(toJson(
+                Map("quote" -> "Oh crap -- something is wrong", "source"->"Server", "url"->"http://www.google.com")
+              ))
+            )
       }
   }
 

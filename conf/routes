@@ -10,6 +10,8 @@ GET  /deepfij/teams/:key/:seasonKey                     controllers.Schedule.tea
 GET  /deepfij/search                                    controllers.Schedule.search(q:String)
 GET  /deepfij/stats/:key                                controllers.Schedule.stats(key)
 
+GET  /api/quote                                         controllers.Quote.random
+
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index
 GET  /admin/seasons                             controllers.Season.list
