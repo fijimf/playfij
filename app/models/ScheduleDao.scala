@@ -6,11 +6,13 @@ import org.saddle.{Frame, Series}
 import org.saddle.scalar.Scalar
 import org.saddle.stats.RankTie
 import analysis.ModelRecord
-import java.util.IllegalFormatConversionException
+import java.util.{Date, IllegalFormatConversionException}
 import play.api.Logger
+import scala.slick.lifted
 
 case class ScheduleDao(m: Model) {
   val SCHEDULE_DATA_CACHE_KEY: String = "!game-data"
+  val STAT_DATES_CACHE_KEY: String = "!stat-date"
 
   import play.api.Play.current
   import m.profile.simple._
@@ -19,6 +21,7 @@ case class ScheduleDao(m: Model) {
   val logger = Logger("ScheduleDao")
   val seasonQuery = for (season <- m.Seasons) yield season
   val teamQuery = for (team <- m.Teams) yield team
+  val statQuery = for (stat <- m.Statistics) yield stat
   val assocQuery = for (assoc <- m.ConferenceAssociations) yield assoc
   val conferenceQuery = for (conf <- m.Conferences) yield conf
   val gameQuery = for (game <- m.Games) yield game
@@ -47,7 +50,9 @@ case class ScheduleDao(m: Model) {
   }
 
   val teamStatData = for {
-    (observation, statistic, model) <- statData if statistic.targetDomain === "Team"
+    observation <- m.Observations
+    statistic <- observation.statisticFk if statistic.targetDomain === "Team"
+    model <- statistic.modelFk
     team <- m.Teams if observation.domainId === team.id
   } yield {
     (observation, statistic, model, team)
@@ -87,33 +92,21 @@ case class ScheduleDao(m: Model) {
 
 
   def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[Team, Double])] = {
-    val statDates: Map[Statistic, LocalDate] = getStatDates(date)
-    statDates.keys.map {
-      key => {
-        val qqq = teamStatData.filter {
-          case (observations, statistics, models, teams) => observations.date === statDates(key) && statistics.key === key.key
-        }
-        val list = qqq.list()
-        val pairs: List[(Team, Double)] = list.map {
-          case (observation, statistic, model, team) => team -> observation.value
-        }
-        logger.info("For %s on %s loaded %d records".format(key.key, statDates(key), pairs.size))
-        key -> Series(pairs: _*)
-      }
-    }.toList.sortBy(_._1.displayOrder)
+    logger.info("Starting loadStats: " + new Date().toString)
+    val statDate: LocalDate = getStatDates(date)
+    val teamMap = teamQuery.list.map(t=>t.id->t).toMap
+    val statMap = statQuery.list.map(s=>s.id->s).toMap
+    val os = (for {obs <- m.Observations if obs.date === statDate} yield obs).list
+    val stats = os.groupBy(o=>statMap(o.statisticId)).mapValues(lst=>Series(lst.map(o=>(teamMap(o.domainId),o.value)): _*)).toList
+    logger.info("Finished loadStats: " + new Date().toString)
+    stats
   }
 
+  def getStatDates(date: LocalDate)(implicit s: scala.slick.session.Session): LocalDate = {
+    Cache.getOrElse[LocalDate](STAT_DATES_CACHE_KEY, 3600) {
+      Query(m.Observations.map(_.date).max).first().getOrElse(new LocalDate())
+    }
 
-  def getStatDates(date: LocalDate)(implicit s: scala.slick.session.Session): Map[Statistic, LocalDate] = {
-    (for {
-      o <- m.Observations if o.date <= date
-      s <- o.statisticFk
-    } yield (o, s)).groupBy(_._2).map {
-      case (key, oss) =>
-        (key, oss.map(_._1.date).max)
-    }.list().filter(_._2.isDefined).map {
-      case (key, d) => key -> d.get
-    }.toMap
   }
 
   def cleanString(x: Scalar[Double], format: String = "%5.2f"): String = {

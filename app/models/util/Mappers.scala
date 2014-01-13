@@ -8,6 +8,7 @@ import securesocial.core.OAuth2Info
 import securesocial.core.OAuth1Info
 import securesocial.core.PasswordInfo
 import scala.Some
+import models.Team
 
 object Mappers {
 
@@ -44,6 +45,7 @@ object Mappers {
       case (hasher, password, salt) => Some(PasswordInfo(hasher, password, salt))
       case _ => None
     }
+
 
   implicit def dateTimeOrdering: Ordering[LocalDate] = Ordering.fromLessThan(_ isBefore _)
 }

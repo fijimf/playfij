@@ -21,47 +21,59 @@ object Global extends GlobalSettings {
 
   override def onStart(app: Application) {
     super.onStart(app)
-    schedule()
+    schedule(new LocalDateTime())
     notifyRestart()
   }
 
-  def schedule() {
+  def schedule(now: LocalDateTime) {
     try {
-      val now: DateTime = new DateTime()
-      val clock = now.withHourOfDay(10).withMinuteOfHour(45).withSecondOfMinute(0).withMillisOfSecond(0)
-      val d = if (clock.isBefore(now)) {
-        logger.info("Scheduling job to run at " + (clock.plusDays(1)))
-        Duration.create(clock.plusDays(1).getMillis - now.getMillis, TimeUnit.MILLISECONDS)
+
+      val dateTime: DateTime = now.toDateTime
+      val clock = dateTime.withHourOfDay(10).withMinuteOfHour(45).withSecondOfMinute(0).withMillisOfSecond(0)
+      val d = if (clock.isBefore(dateTime)) {
+        logger.info("Scheduling job to run at " + clock.plusDays(1))
+        Duration.create(clock.plusDays(1).getMillis - dateTime.getMillis, TimeUnit.MILLISECONDS)
       } else {
-        logger.info("Scheduling job to run at " + clock)
-        Duration.create(clock.getMillis - now.getMillis, TimeUnit.MILLISECONDS)
+        logger.info("Scheduling job to run at " + clock.toString("yyyy-MM-dd HH:mm:ss.SS"))
+        Duration.create(clock.getMillis - dateTime.getMillis, TimeUnit.MILLISECONDS)
       }
 
       Akka.system.scheduler.scheduleOnce(d) {
-        val from: LocalDate = new LocalDate().minusDays(2)
-        val to: LocalDate = new LocalDate().plusDays(7)
-        logger.info("Running scheduled job updating games and results")
-        val req = GameUpdateRequest("", true, true, true, true, true, true, true, Some(from), Some(to))
-        val repo: Repository = new Repository(play.api.db.slick.DB.driver)
-        play.api.db.slick.DB.withSession {
-          implicit s: Session =>
-            val result = NcaaGameScraper.scrape(repo, req)
-            logger.info("Results inserted: " + result.resultsInserted.size);
-            RunModels.runModelsForDates(from, to)
-            emailAdmin("Schedule Updated") {
-              ("Schedule updated:\n\n" +
-                "Games Inserted:\n%s\nGames Updated:\n%s\nGames Deleted:\n%s\n" +
-                "Results Inserted:\n%s\nResults Updated:\n%s\nResults Deleted:\n%s\n").format(
-                  result.gamesInserted.map(_.toString).mkString("\n"),
-                  result.gamesUpdated.map(_.toString).mkString("\n"),
-                  result.gamesDeleted.map(_.toString).mkString("\n"),
-                  result.resultsInserted.map(_.toString).mkString("\n"),
-                  result.resultsUpdated.map(_.toString).mkString("\n"),
-                  result.resultsDeleted.map(_.toString).mkString("\n")
-                )
-            }
+        val now = new LocalDateTime()
+        if (now.getHourOfDay == 10) {
+          val from: LocalDate = now.toLocalDate.minusDays(2)
+          val to: LocalDate = now.toLocalDate.plusDays(7)
+          logger.info("Running scheduled job updating games and results")
+          val req = GameUpdateRequest("", doWrite = true, doGameInserts = true, doGameUpdates = true, doGameDeletes = true, doResultInserts = true, doResultUpdates = true, doResultDeletes = true, Some(from), Some(to))
+          val repo: Repository = new Repository(play.api.db.slick.DB.driver)
+          play.api.db.slick.DB.withSession {
+            implicit s: Session =>
+              val result = NcaaGameScraper.scrape(repo, req)
+              logger.info("Results inserted: " + result.resultsInserted.size);
+              RunModels.runModelsForDates(from, to)
+              emailAdmin("Schedule Updated") {
+                ("Schedule updated:\n\n" +
+                  "Games Inserted:\n%s\nGames Updated:\n%s\nGames Deleted:\n%s\n" +
+                  "Results Inserted:\n%s\nResults Updated:\n%s\nResults Deleted:\n%s\n").format(
+                    result.gamesInserted.map(_.toString).mkString("\n"),
+                    result.gamesUpdated.map(_.toString).mkString("\n"),
+                    result.gamesDeleted.map(_.toString).mkString("\n"),
+                    result.resultsInserted.map(_.toString).mkString("\n"),
+                    result.resultsUpdated.map(_.toString).mkString("\n"),
+                    result.resultsDeleted.map(_.toString).mkString("\n")
+                  )
+              }
+          }
+        } else {
+          logger.info("Skipping schedule update because the time is not right -- probably a graceful shutdown.")
         }
-        schedule(); //Schedule for next time
+
+        try {
+          schedule(now)
+        }
+        catch {
+          case e:IllegalStateException => logger.info("Caught IllegalStateException on scheduling -- probably a graceful shutdown")
+        }
       }
     } catch {
       case (e: Exception) => logger.error("", e)
@@ -86,7 +98,7 @@ object Global extends GlobalSettings {
       mail.send(f)
     }
     catch {
-      case NonFatal(e) =>  logger.error("CaughtException trying to send mail.", e)
+      case NonFatal(e) => logger.error("CaughtException trying to send mail.", e)
     }
   }
 }

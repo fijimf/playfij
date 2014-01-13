@@ -220,6 +220,8 @@ trait Model extends Profile {
 
     def indexT = index("obs_domain", (domainId), unique = false)
 
+    def indexD = index("obs_date", (date), unique = false)
+
     def * = id ~ date ~ domainId ~ statisticId ~ value <>(Observation.apply _, Observation.unapply _)
 
     def autoInc = date ~ domainId ~ statisticId ~ value returning id
