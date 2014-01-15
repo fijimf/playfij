@@ -13,6 +13,9 @@ import scala.slick.lifted
 case class ScheduleDao(m: Model) {
   val SCHEDULE_DATA_CACHE_KEY: String = "!game-data"
   val STAT_DATES_CACHE_KEY: String = "!stat-date"
+  val TEAM_MAP_CACHE_KEY: String = "!team-map"
+  val STAT_MAP_CACHE_KEY: String = "!stat-map"
+  val CONFERENCE_MAP_CACHE_KEY: String="!conf-map"
 
   import play.api.Play.current
   import m.profile.simple._
@@ -62,7 +65,7 @@ case class ScheduleDao(m: Model) {
     currentSeason.map(season => {
       val rawData: List[(Statistic, Team, LocalDate, Double)] = (
         for {
-          (observation, statistic, model, team) <- teamStatData if statistic.targetDomain === "Team" && statistic.key === statKey  && (observation.date >= season.from) && (observation.date <= season.to)
+          (observation, statistic, model, team) <- teamStatData if statistic.targetDomain === "Team" && statistic.key === statKey && (observation.date >= season.from) && (observation.date <= season.to)
         } yield {
           (statistic, team, observation.date, observation.value)
         }).list()
@@ -73,6 +76,11 @@ case class ScheduleDao(m: Model) {
       (stat, Frame.apply[LocalDate, Team, Double](series.toList: _*))
     })
   }
+
+  def teamsPage()(implicit s: scala.slick.session.Session): Option[TeamsPage] = currentSeason.map(season => {
+    val games: List[ScheduleData] = loadScheduleData
+    TeamsPage(conferenceMap.values.map(conf => loadConference(games, conf, season)).toList.sortBy(_.conference.name))
+  })
 
   def teamPage(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamPage] = currentSeason.flatMap(season => teamPage(teamKey, season.key))
 
@@ -94,12 +102,30 @@ case class ScheduleDao(m: Model) {
   def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[Team, Double])] = {
     logger.info("Starting loadStats: " + new Date().toString)
     val statDate: LocalDate = getStatDates(date)
-    val teamMap = teamQuery.list.map(t=>t.id->t).toMap
-    val statMap = statQuery.list.map(s=>s.id->s).toMap
     val os = (for {obs <- m.Observations if obs.date === statDate} yield obs).list
-    val stats = os.groupBy(o=>statMap(o.statisticId)).mapValues(lst=>Series(lst.map(o=>(teamMap(o.domainId),o.value)): _*)).toList
+    val stats = os.groupBy(o => statMap(s)(o.statisticId)).mapValues(lst => Series(lst.map(o => (teamMap(s)(o.domainId), o.value)): _*)).toList
     logger.info("Finished loadStats: " + new Date().toString)
     stats
+  }
+
+
+  def statMap(implicit s: scala.slick.session.Session): Map[Long, Statistic] = {
+    Cache.getOrElse[Map[Long, Statistic]](TEAM_MAP_CACHE_KEY, 3600) {
+      statQuery.list.map(s => s.id -> s).toMap
+    }
+  }
+
+
+  def conferenceMap(implicit s: scala.slick.session.Session): Map[Long, Conference] = {
+    Cache.getOrElse[Map[Long, Conference]](CONFERENCE_MAP_CACHE_KEY, 3600) {
+      conferenceQuery.list.map(s => s.id -> s).toMap
+    }
+  }
+
+  def teamMap(implicit s: scala.slick.session.Session): Map[Long, Team] = {
+    Cache.getOrElse[Map[Long, Team]](TEAM_MAP_CACHE_KEY, 3600) {
+      teamQuery.list.map(t => t.id -> t).toMap
+    }
   }
 
   def getStatDates(date: LocalDate)(implicit s: scala.slick.session.Session): LocalDate = {

@@ -36,7 +36,7 @@
             <tbody>
             @conferences.map { conference=>
             <tr>
-                <td><img src="@conference.logoUrl.getOrElse("")"/></td>
+                <td><img src=@conference.logoUrl.getOrElse("#")/></td>
                 <td><a class="btn btn-primary btn-small" href="@controllers.routes.Conference.edit(conference.key)">Edit</a></td>
                 <td style="overflow-x:hidden;"><a href="@controllers.routes.Conference.view(conference.key)">@conference.name</a></td>
                 <td style="overflow-x:hidden;">@conference.shortName</td>

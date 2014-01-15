@@ -27,10 +27,10 @@ object Conference extends Controller with SecureSocial  {
       "key" -> nonEmptyText,
       "name" -> nonEmptyText,
       "shortName" -> nonEmptyText,
-      "logoUrl" -> optional(text),
       "officialUrl" -> optional(text),
-      "officialTwitter" -> optional(text)
-    )(models.Conference.apply)(models.Conference.unapply)
+      "officialTwitter" -> optional(text),
+      "logoUrl" -> optional(text)
+  )(models.Conference.apply)(models.Conference.unapply)
   )
 
   def list = SecuredAction {

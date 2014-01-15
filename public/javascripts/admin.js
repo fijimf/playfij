@@ -8,7 +8,7 @@ function loadQuote() {
     var jsonUrl = "/api/quote";
     $.getJSON(jsonUrl, {},
         function (json) {
-                $("#qotd").html("<p class='quote'><a href='"+json.url+"' title='"+json.source+"' >"+json.quote+"</a></p>");
+                $("#qotd").html("<p class='quote'><a href='"+json.url+"' target='_blank' title='"+json.source+"' >"+json.quote+"</a></p>");
         }
     );
 }

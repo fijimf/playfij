@@ -1,6 +1,6 @@
 @(q: Option[models.Quote],p: (models.Statistic, org.saddle.Frame[org.joda.time.LocalDate, models.Team, Double]))
 
-@richMain("Hello stats", q.map(_.quote), None) {
+@richMain("Hello stats", None) {
 
 <div class="row-fluid team-header-row"
      style="border-top:12px solid #444;border-bottom:12px solid #444; background-color:#ddd;">

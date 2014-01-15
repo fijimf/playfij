@@ -52,6 +52,16 @@ object Schedule extends Controller with SecureSocial {
       }
   }
 
+  def teams() = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          scheduleDao.teamsPage.map(tp => {
+            Ok(views.html.teamsView(tp))
+          }).getOrElse(NotFound(views.html.resourceNotFound("team", "any of the blessed suckers")))
+      }
+  }
+
   def search(q: String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {

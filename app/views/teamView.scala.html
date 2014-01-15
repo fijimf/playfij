@@ -1,6 +1,6 @@
 @(q: Option[models.Quote],p: models.TeamPage)
 
-@richMain(p.team.name, q.map(_.quote), None) {
+@richMain(p.team.name, None) {
 
 <div class="row-fluid team-header-row"
      style="border-top:12px solid @p.team.primaryColor.getOrElse("#444");border-bottom:12px solid @p.team.primaryColor.getOrElse("#444");background-color:@p.team.secondaryColor.getOrElse("#ddd");">

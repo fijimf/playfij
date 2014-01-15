@@ -17,6 +17,8 @@ case class Team(id: Long, key: String, name: String, longName: String, nickname:
   require(officialTwitter.map(StringUtils.isNotBlank).getOrElse(true), "Official Twitter cannot be blank")
   require(logoUrl.map(StringUtils.isNotBlank).getOrElse(true), "Logo URL cannot be blank")
 
+  val logoUrlSmall = logoUrl.map(_.replaceAll("""70\.png$""", "40.png"))
+
   def compare(that: Team): Int = key.compare(that.key)
 }
 

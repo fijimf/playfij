@@ -15,6 +15,8 @@ case class Conference(id: Long,
   require(officialUrl.map(StringUtils.isNotBlank).getOrElse(true), "Official URL cannot be blank")
   require(officialTwitter.map(StringUtils.isNotBlank).getOrElse(true), "Official twitter cannot be blank")
   require(logoUrl.map(StringUtils.isNotBlank).getOrElse(true), "logo URL cannot be blank")
+
+  val logoUrlSmall = logoUrl.map(_.replaceAll("""70\.png$""", "40.png"))
 }
 
 case class ConferenceDao(model: Model) {
