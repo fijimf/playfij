@@ -101,16 +101,18 @@ case class ScheduleDao(m: Model) {
 
   def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[Team, Double])] = {
     logger.info("Starting loadStats: " + new Date().toString)
+    val sm = statMap
+    val tm = teamMap
     val statDate: LocalDate = getStatDates(date)
     val os = (for {obs <- m.Observations if obs.date === statDate} yield obs).list
-    val stats = os.groupBy(o => statMap(s)(o.statisticId)).mapValues(lst => Series(lst.map(o => (teamMap(s)(o.domainId), o.value)): _*)).toList
+    val stats = os.groupBy(o => sm(o.statisticId)).mapValues(lst => Series(lst.map(o => (tm(o.domainId), o.value)): _*)).toList
     logger.info("Finished loadStats: " + new Date().toString)
     stats
   }
 
 
   def statMap(implicit s: scala.slick.session.Session): Map[Long, Statistic] = {
-    Cache.getOrElse[Map[Long, Statistic]](TEAM_MAP_CACHE_KEY, 3600) {
+    Cache.getOrElse[Map[Long, Statistic]](STAT_MAP_CACHE_KEY, 3600) {
       statQuery.list.map(s => s.id -> s).toMap
     }
   }
