@@ -6,6 +6,11 @@ form .row {
    padding:1px 3px 1px 3px;
 }
 
+.table-packed td,.table-packed th {
+   padding:0;
+   margin:0;
+}
+
 .table-admin {
    width:auto;
    table-layout:fixed;
@@ -70,6 +75,9 @@ p.quote a {
   text-decoration: none;
 }
 
+img.grow:hover {
+    min-width: 100%;
+}
 img:hover {
     -webkit-animation-name: rotate;
     -webkit-animation-duration: 2s;
