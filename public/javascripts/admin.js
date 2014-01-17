@@ -14,13 +14,9 @@ function loadQuote() {
 }
 
 function headlineTeam(src, teamName, nickname, confName, confWins, confLosses, wins, losses) {
-    $("#headline").html("<h3><img style='height:80px; width:80px;' src='"+src+"' />"+teamName+"&nbsp;"+nickname+"</h3><h4>("+wins+"-"+losses+", "+confWins+"- "+confLosses+" "+confName+" )</h4>");
-}
-
-function headlineConf(src, confName) {
-    $("#headline").html("<h3><img style='height:80px; width:80px;' src='"+src+"' />&nbsp;</h3><h4>"+confName+"</h4>");
+    $("#headline").html("<h3><img style='height:70px; width:70px;' src='"+src+"' />"+teamName+"&nbsp;"+nickname+"</h3><h4>("+wins+"-"+losses+", "+confWins+"- "+confLosses+" "+confName+" )</h4>");
 }
 
 function dropHeadline() {
-    $("#headline").html("<h3><img style='height:80px; width:80px;' src='/assets/images/blank.png' />&nbsp;</h3><h4>&nbsp;</h4>");
+    $("#headline").html("<h3><img style='height:70px; width:70px;' src='/assets/images/blank.png' />&nbsp;</h3><h4>&nbsp;</h4>");
 }

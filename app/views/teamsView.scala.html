@@ -2,60 +2,51 @@
 
 @richMain("Teams",  None) {
 
-<div class="row-fluid team-header-row"
-     style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
+<div class="row-fluid team-header-row" style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
+    <div class="span3 offset1">
+        <h2 style="font-size:350%; padding-top:25px;">Teams</h2>
+    </div>
+
+    <div class="span8" id="headline">
+        <h3><img style='height:70px; width:70px;' src='/assets/images/blank.png' />&nbsp;</h3>
+        <h4>&nbsp;</h4>
+    </div>
+</div>
+
+<div class="row-fluid">
     <div class="span12">
-        <h3>Teams</h3>
-        <div id="headline"><h4><img style='height:80px; width:80px;' src='/assets/images/blank.png' />&nbsp;</h4><h3>&nbsp;</h3></div>
+        <div class="container-fluid">
+
+            <div class="row-fluid">
+                <div class="span10 offset1">
+                    <table class="table table-compact table-bordered table-packed ">
+                        <thead/>
+                        <tbody>
+                        @tp.conferenceStandings.map { cs =>
+                        <tr style="height:44px;">
+
+                            <th style="text-align: right">@cs.conference.name<img style=" padding-left: 10px; padding-right:10px;" src=@cs.conference.logoUrlSmall.getOrElse("/assets/images/bball40.png")/></th>
+                            @cs.records.map { rec =>
+
+                            <td style="width:44px; background-color:@rec._1.primaryColor.getOrElse("white")">
+                            <a href="@controllers.routes.Schedule.team(rec._1.key)">
+                                <img style="width:40px; height:40px"
+                                     src=@rec._1.logoUrlSmall.getOrElse("/assets/images/bball40.png")
+                                     onmouseover="headlineTeam('@rec._1.logoUrl.getOrElse("/assets/images/bball70.png")', '@rec._1.name','@rec._1.nickname', '@cs.conference.name', '@rec._2._1.wins','@rec._2._1.losses','@rec._2._2.wins','@rec._2._2.losses')"
+                                onmouseout="dropHeadline()"/>
+                            </a>
+                            </td>
+                            }
+                        </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-
 <div class="row-fluid">
-<div class="span12">
-<div class="container-fluid">
-
-<div class="row-fluid">
-<div class="span12">
-    <table class="table table-compact table-bordered table-packed ">
-        <thead>
-        <tr>
-        @tp.conferenceStandings.map { cs =>
-           <td><a href="#"><img class="grow" src=@cs.conference.logoUrlSmall.getOrElse("/assets/images/bball.png")
-                                onmouseover="headlineConf('@cs.conference.logoUrl.getOrElse("/assets/images/bball.png")', '@cs.conference.name')"
-                                onmouseout="dropHeadline()"/> </a></td>
-        }
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            @tp.conferenceStandings.map { cs=>
-            <td>
-            <table class="table-packed">
-                <thead/>
-                <tbody>
-                @cs.records.map { rec =>
-                <tr>
-                       <td style="background-color:@rec._1.primaryColor.getOrElse("white")">
-                    <a href="@controllers.routes.Schedule.team(rec._1.key)">
-                        <img class="grow" src=@rec._1.logoUrlSmall.getOrElse("/assets/images/bball.png")
-                             onmouseover="headlineTeam('@rec._1.logoUrl.getOrElse("/assets/images/bball.png")', '@rec._1.name','@rec._1.nickname', '@cs.conference.name', '@rec._2._1.wins','@rec._2._1.losses','@rec._2._2.wins','@rec._2._2.losses')"
-                             onmouseout="dropHeadline()"/></a></td>
-                   </tr>
-                }
-                </tbody>
-            </table>
-            </td>
-            }
-        </tr>
-
-        </tbody>
-    </table>
-    </div>
-    </div>
-</div>
-</div>
-
-    <div class="row-fluid">
     <div class="span12">
         <script type="text/javascript"><!--
 google_ad_client = "ca-pub-8640781414553071";
@@ -69,7 +60,7 @@ google_ad_height = 90;
                 src="//pagead2.googlesyndication.com/pagead/show_ads.js">
         </script>
     </div>
-    </div>
-    </div>
+</div>
+</div>
 
 }
