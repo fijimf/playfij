@@ -21,8 +21,8 @@ object ApplicationBuild extends Build {
     "com.typesafe.play" %% "play-slick" % "0.5.0.8" exclude("org.scala-stm", "scala-stm_2.10.0") exclude("play", "*"),
     "securesocial" %% "securesocial" % "2.1.2" exclude("org.scala-stm", "scala-stm_2.10.0") exclude("play", "*"),
     "org.scala-saddle" %% "saddle-core" % "1.3.+",
-    "org.apache.mahout" % "mahout-math" % "0.7",
-    "org.apache.mahout" % "mahout-core" % "0.7"
+    "org.apache.mahout" % "mahout-math" % "0.8",
+    "org.apache.mahout" % "mahout-core" % "0.8"
   )
 
 
