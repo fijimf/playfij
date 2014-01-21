@@ -24,10 +24,8 @@ object Schedule extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val q = quoteDao.random
-          scheduleDao.statPage(key).map(tp => {
-            Ok(views.html.statView(q, tp))
-          }).getOrElse(NotFound(views.html.resourceNotFound("stat", key)))
+
+            Ok(views.html.statView( key))
       }
   }
   def team(key: String) = UserAwareAction {

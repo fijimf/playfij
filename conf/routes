@@ -13,6 +13,7 @@ GET  /deepfij/stats/:key                                controllers.Schedule.sta
 GET  /deepfij/:yyyy/:mm/:dd                             controllers.Schedule.date(yyyy:Int,mm:Int,dd:Int)
 
 GET  /api/quote                                         controllers.Quote.random
+GET  /api/stats/:key                                    controllers.Statistics.stats(key)
 
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index
