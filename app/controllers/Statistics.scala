@@ -9,6 +9,9 @@ import org.joda.time.LocalDate
 import org.saddle.{Series, Frame}
 import play.api.libs.json.Json._
 import play.api.libs.json.{JsArray, JsObject, Json}
+import analysis.ModelRecord
+import org.saddle.scalar.Scalar
+import org.saddle.stats.RankTie
 
 
 object Statistics extends Controller with SecureSocial {
@@ -33,7 +36,9 @@ object Statistics extends Controller with SecureSocial {
                 "status" -> "ok",
                 "statistic" -> Json.obj(
                   "name" -> stat.name,
-                  "data" -> jsonData(frame)
+                  "key" -> stat.key,
+                  "shortFormat" -> stat.shortFormat,
+                  "data" -> jsonData(stat, frame)
                 )
               )
             )
@@ -43,23 +48,45 @@ object Statistics extends Controller with SecureSocial {
       }
   }
 
-  def jsonData(frame: Frame[LocalDate, Team, Double]): JsArray = {
+  def jsonData(stat:Statistic, frame: Frame[LocalDate, Team, Double]): JsArray = {
     JsArray(
       for (dt <- frame.rowIx.toSeq) yield {
-        val row: Frame[LocalDate, Team, Double] = frame.row(dt)
-        jsonByDate(dt, row)
+        val row: Series[ Team, Double] = frame.first(dt)
+        jsonByDate(stat, dt, row)
       }
     )
   }
 
-  def jsonByDate(dt: LocalDate, row: Frame[LocalDate, Team, Double]): JsObject = {
+  def jsonByDate(stat:Statistic, dt: LocalDate, row: Series[Team, Double]): JsObject = {
+    val observations: IndexedSeq[JsObject] = row.index.toSeq.map(t => {
+      val ix: Int = row.index.getFirst(t)
+      val value = row.at(ix)
+      val rank = row.rank(RankTie.Min, !stat.higherIsBetter).at(ix)
+      val z = value.map(x => (x - row.mean) / row.stdev)
+      val percentile = row.rank(RankTie.Max, !stat.higherIsBetter).at(ix).map(rk => (row.length - rk) / row.length)
+      (t, value, rank, z, percentile)
+    }).filter(tup => !(tup._2.isNA || tup._3.isNA || tup._4.isNA || tup._5.isNA)).sortBy(_._3).map {
+      case (t: Team, value: Scalar[Double], rank: Scalar[Double], z: Scalar[Double], percentile: Scalar[Double]) => {
+        val backgroundColor: String = t.secondaryColor.getOrElse("#ddd")
+        Json.obj(
+          "team" -> Json.obj("key" -> t.key, "name" -> t.name, "background" -> backgroundColor),
+          "value" -> value.get,
+          "rank" -> rank.get,
+          "z" -> z.get,
+          "percentile" -> percentile.get
+        )
+      }
+    }
+
+
     Json.obj(
       "date" -> dt,
-      "observations" -> JsArray(
-        row.toSeq.filter(!_._3.isNaN).sortBy(_._3).map(obs => Json.obj(
-          "teamKey" -> obs._2.key, "teamName" -> obs._2.name, "value" -> obs._3
-        ))
-      )
+      "mean" -> row.mean,
+      "stdDev" -> row.stdev,
+      "max" -> row.max.get,
+      "min" -> row.min.get,
+      "median" -> row.median,
+      "observations" -> JsArray(observations)
     )
   }
 }

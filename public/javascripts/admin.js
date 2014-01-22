@@ -20,26 +20,34 @@ function loadStats(key) {
             if (json["status"]=="ok") {
                 var name = json["statistic"].name;
                 $("#statDisplay").html("<h3>"+name+"</h3>");
-                var dataset = json.statistic.data[0].observations;
-//                d3.select("#statPanel").selectAll("tr").data(dataset).enter().append("tr").append( function(d) { return d.teamName+" "+ d.value;});
+                var dates = json.statistic.data.map(function(e){return e.date});
+                var dateSlider = $("#dateSlider");
+                dateSlider.attr({
+                    min: 0,
+                    max: dates.length - 1,
+                    step: 1
+                });
+                dateSlider.change(function() {
+                    $("#dateShown").text(dates[this.value]);
+                     var dataset = json.statistic.data[this.value].observations;
+                     d3.select("#statPanel")
+                        .append("table")
+                        .style("border-collapse", "collapse")
+                        .style("border", "2px black solid")
 
+                        .selectAll("tr")
+                        .data(dataset)
+                        .enter().append("tr")
 
-                d3.select("#statPanel")
-                    .append("table")
-                    .style("border-collapse", "collapse")
-                    .style("border", "2px black solid")
-
-                    .selectAll("tr")
-                    .data(dataset)
-                    .enter().append("tr")
-
-                    .selectAll("td")
-                    .data(function(d){return [d.teamName, d.teamKey, d.value];})
-                    .enter().append("td")
-                    .style("border", "1px black solid")
-                    .style("padding", "10px")
-                    .text(function(d){return d;})
-                    .style("font-size", "12px");
+                        .selectAll("td")
+                        .data(function(d){return [d.rank, d.team.name, d.value];})
+                        .enter().append("td")
+                        .style("border", "1px black solid")
+                        .style("padding", "10px")
+                        .text(function(d){return d;})
+                        .style("font-size", "12px");
+                });
+                dateSlider.attr({value : 0});
 
             } else {
                 $("#statDisplay").html("<p>There was an error loading stats for the key "+key+"</p>");

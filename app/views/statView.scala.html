@@ -1,16 +1,19 @@
 @(p:String)
 
 @richMain(p, None) {
-
 <div class="row-fluid team-header-row"
-     style="border-top:12px solid #444;border-bottom:12px solid #444; background-color:#ddd;">
-    <div class="span12">
-        <div id="statDisplay"></div>
-
+     style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
+    <div class="span12" id="statDisplay"><h3>&nbsp;</h3></div>
+</div>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2"><h3 id="dateShown">2013-12-12</h3></div>
+        <div class="span10"><input id="dateSlider" type="range" /></div>
     </div>
-    <div class="span12">
-        <div id="statPanel"></div>
-
+    <div class="row-fluid">
+        <div class="span12">
+            <div id="statPanel"></div>
+        </div>
     </div>
 </div>
 <script>loadStats('@p')</script>
