@@ -50,7 +50,7 @@ object Statistics extends Controller with SecureSocial {
 
   def jsonData(stat:Statistic, frame: Frame[LocalDate, Team, Double]): JsArray = {
     JsArray(
-      for (dt <- frame.rowIx.toSeq) yield {
+      for (dt <- frame.rowIx.toSeq.reverse) yield {
         val row: Series[ Team, Double] = frame.first(dt)
         jsonByDate(stat, dt, row)
       }

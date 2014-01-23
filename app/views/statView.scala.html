@@ -1,6 +1,7 @@
 @(p:String)
 
 @richMain(p, None) {
+<script src='@routes.Assets.at("javascripts/statistics.js")' type='text/javascript'></script>
 <div class="row-fluid team-header-row"
      style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
     <div class="span12" id="statDisplay"><h3>&nbsp;</h3></div>
@@ -12,7 +13,9 @@
     </div>
     <div class="row-fluid">
         <div class="span12">
-            <div id="statPanel"></div>
+            <div id="statPanel">
+                <svg/>
+            </div>
         </div>
     </div>
 </div>
