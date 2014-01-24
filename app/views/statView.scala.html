@@ -8,13 +8,34 @@
 </div>
 <div class="container-fluid">
     <div class="row-fluid">
-        <div class="span2"><h3 id="dateShown">2013-12-12</h3></div>
-        <div class="span10"><input id="dateSlider" type="range" /></div>
+        <div class="span2"><h3 id="dateShown"><img src="@routes.Assets.at("images/deepfij-spinner.gif")"/>Loading</h3> </div>
+        <div class="span10"><input id="dateSlider" type="range" style="visibility:hidden;"/></div>
     </div>
     <div class="row-fluid">
         <div class="span12">
             <div id="statPanel">
-                <svg/>
+                <style>
+                    text.stathead {
+                        font-size: 14px;
+                        font-weight: bold;
+                        font-family: Helvetica,sans-serif;
+                    }
+
+                    text.stattext {
+                        font-size: 14px;
+                        font-weight: normal;
+                        font-family: Helvetica,sans-serif;
+                    }
+
+                </style>
+                <svg>
+                    <rect x="25" y="0" width="750" height="30" style="fill: rgba(64, 64, 64, 0.3);"></rect>
+                    <rect x="25" y="0" width="25" height="30" style="fill: #333;"></rect>
+                    <text x="130" y="21" class="stathead">Team</text>
+                    <text x="500" y="21" class="stathead" text-anchor="end">Value</text>
+                    <text x="600" y="21" class="stathead" text-anchor="end">Percentile</text>
+                    <text x="700" y="21" class="stathead" text-anchor="end">Z-Score</text>
+                </svg>
             </div>
         </div>
     </div>

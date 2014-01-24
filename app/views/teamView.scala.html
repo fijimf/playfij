@@ -144,7 +144,7 @@
         <tbody>
         @p.stats.sortBy(_.displayOrder).map { st =>
         <tr>
-            <td>@st.name</td>
+            <td><a href="@controllers.routes.Schedule.stats(st.key)">@st.name</a></td>
             <td class="text-right">@st.value</td>
             <td class="text-right">@st.rank</td>
             <td class="text-right">@st.z</td>

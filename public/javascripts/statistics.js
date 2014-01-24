@@ -12,8 +12,10 @@ function loadStats(key) {
                 var dates = json.statistic.data.map(function (e) {
                     return e.date
                 });
+                var teamData = json.teams;
                 var pctileFormat= d3.format("6.3f");
                 var zFormat= d3.format(" 5.3f");
+                var valueFormat = d3.format(json.statistic.shortFormat.replace("%",""));
                 var dateSlider = $("#dateSlider");
                 dateSlider.attr({
                     min: 0,
@@ -22,138 +24,96 @@ function loadStats(key) {
                 });
                 dateSlider.change(function () {
                     $("#dateShown").text(dates[this.value]);
+                    var statistic = json.statistic.data[this.value];
                     var dataset = json.statistic.data[this.value].observations;
 
                     svgContainer = d3.select("#statPanel svg")
                         .attr("width", 900)
-                        .attr("height", 4 + dataset.length * 32);
+                        .attr("height", 2 + dataset.length * 31);
 
 
-                    var boxes = svgContainer.selectAll("rect").data(dataset, function(d){return d.team.key})
-
+                    var boxes = svgContainer.selectAll("rect.statBox").data(dataset, function(d){return d.teamKey})
                     boxes.enter().append("rect")
-                        .attr("x", function () {
-                            return 25;
-                        })
-                        .attr("y", function (d, i) {
-                            return i * 32;
-                        })
-                        .attr("width", function () {
-                            return 750;
-                        })
-                        .attr("height", function () {
-                            return 30;
-                        })
-                        .style("fill", function (d) {
-                            return d.team.background;
-                        });
-
-                    boxes.attr("y", function (d, i) {
-                        return i * 32;
-                    })
+                        .attr("class","statBox")
+                        .attr("x", function () { return 25; })
+                        .attr("y", function (d, i) { return (1+i) * 32; })
+                        .attr("width", function () { return 750; })
+                        .attr("height", function () { return 30; })
+                        .style("fill", function (d) { return teamData[d.teamKey].c2; });
+                    boxes.attr("y", function (d, i) { return (1+i) * 32; })
                     boxes.exit().remove()
 
-                    var teams =  svgContainer.selectAll(".teamname").data(dataset, function(d){return d.team.key})
-                    teams.enter().append("text")
-                        .attr("x", function () {
-                            return 130;
-                        })
-                        .attr("y", function (d, i) {
-                            return 21 + i * 32;
-                        })
-                        .attr("class","teamname")
-                        .style("font-size", "16px")
-                        .style("font-weight", "bold")
-                        .text(function (d) {
-                            return d.team.name;
-                        });
+                    var highlights = svgContainer.selectAll("rect.statHiLite").data(dataset, function(d){return d.teamKey})
+                    highlights.enter().append("rect")
+                        .attr("class","statHiLite")
+                        .attr("x", function () { return 25; })
+                        .attr("y", function (d, i) { return (1+i) * 32; })
+                        .attr("width", function () { return 25; })
+                        .attr("height", function () { return 30; })
+                        .style("fill", function (d) { return teamData[d.teamKey].c1; });
+                    highlights.attr("y", function (d, i) { return (1+i) * 32; })
+                    highlights.exit().remove()
 
+                    var teams =  svgContainer.selectAll("text.statTeam").data(dataset, function(d){return d.teamKey})
+                    teams.enter().append("a")
+                        .attr("xlink:href", function(d){return "/deepfij/teams/"+ d.teamKey;})  // <-- reading the new "url" property
+                        .append("text")
+                        .attr("class","statTeam")
+                        .attr("x", function () { return 130; })
+                        .attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .text(function (d) { return teamData[d.teamKey].name; });
                     teams.exit().remove()
+                    teams.attr("y", function (d, i) { return 21 + (1+i) * 32; })
 
-                    teams.attr("y", function (d, i) {
-                        return 21 + i * 32;
-                    })
+                    var ranks =  svgContainer.selectAll("text.statRank").data(dataset, function(d){return d.teamKey})
+                    ranks.enter().append("text")
+                        .attr("class","statRank")
+                        .attr("x", function () { return 75; })
+                        .attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .attr("text-anchor","end")
+                        .text(function (d) { return d.rank; });
+                    ranks.exit().remove()
+                    ranks.attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .text(function (d) { return d.rank; });
 
-//                    var ranks =  svgContainer.selectAll(".teamrank")
-//                        .data(dataset, function(d){return d.team.key})
-//                        .enter()
-//                        .append("text");
-//
-//                    var rankAttributes = ranks
-//                        .attr("x", function () {
-//                            return 100;
-//                        })
-//                        .attr("y", function (d, i) {
-//                            return 21 + i * 32;
-//                        })
-//                        .attr("class","teamrank")
-//                        .attr("text-anchor","end")
-//                        .style("font-size", "16px")
-//                        .style("font-weight", "bold")
-//                        .text(function (d) {
-//                            return d.rank;
-//                        });
-//                  var values =  svgContainer.selectAll(".teamvalue")
-//                      .data(dataset, function(d){return d.team.key})
-//                        .enter()
-//                        .append("text");
-//
-//                    var valueAttributes = values
-//                        .attr("x", function () {
-//                            return 400;
-//                        })
-//                        .attr("y", function (d, i) {
-//                            return 21 + i * 32;
-//                        })
-//                        .attr("class","teamvalue")
-//                        .attr("text-anchor","end")
-//                        .style("font-size", "16px")
-//                        .style("font-weight", "bold")
-//                        .text(function (d) {
-//                            return d.value;
-//                        });
-//                  var pctiles =  svgContainer.selectAll(".teampct")
-//                      .data(dataset, function(d){return d.team.key})
-//                        .enter()
-//                        .append("text");
-//
-//                    var pctileAttributes = pctiles
-//                        .attr("x", function () {
-//                            return 500;
-//                        })
-//                        .attr("y", function (d, i) {
-//                            return 21 + i * 32;
-//                        })
-//                        .attr("class","teampct")
-//                        .attr("text-anchor","end")
-//                        .style("font-size", "16px")
-//                        .style("font-weight", "bold")
-//                        .text(function (d) {
-//                            return pctileFormat(100*d.percentile);
-//                        });
-//                  var zscores =  svgContainer.selectAll(".teamz")
-//                      .data(dataset, function(d){return d.team.key})
-//                        .enter()
-//                        .append("text")
-//
-//
-//                    var zAttributes = zscores
-//                        .attr("x", function () {
-//                            return 625;
-//                        })
-//                        .attr("y", function (d, i) {
-//                            return 21 + i * 32;
-//                        })
-//                        .attr("class","teamz")
-//                        .attr("text-anchor","end")
-//                        .style("font-size", "16px")
-//                        .style("font-weight", "bold")
-//                        .text(function (d) {
-//                            return zFormat(d.z);
-//                        });
+                    var values =  svgContainer.selectAll("text.statValue").data(dataset, function(d){return d.teamKey})
+                    values.enter().append("text")
+                        .attr("class","statValue")
+                        .attr("x", function () { return 500; })
+                        .attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .attr("text-anchor","end")
+                        .text(function (d) { return valueFormat(d.value); });
+                    values.exit().remove()
+                    values.attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .text(function (d) { return valueFormat(d.value); });
+
+
+                    var percentiles =  svgContainer.selectAll("text.statPctile").data(dataset, function(d){return d.teamKey})
+                    percentiles.enter().append("text")
+                        .attr("class","statPctile")
+                        .attr("x", function () { return 600; })
+                        .attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .attr("text-anchor","end")
+                        .text(function (d) { return pctileFormat((dataset.length-d.rank)/dataset.length); });
+                    percentiles.exit().remove()
+                    percentiles.attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .text(function (d) { return pctileFormat((dataset.length-d.rank)/dataset.length); });
+
+                    var zScores =  svgContainer.selectAll("text.statZScore").data(dataset, function(d){return d.teamKey})
+                    zScores.enter().append("text")
+                        .attr("class","statZScore")
+                        .attr("x", function () { return 700; })
+                        .attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .attr("text-anchor","end")
+                        .text(function (d) { return zFormat((d.value-statistic.mean)/statistic.stdDev); });
+                    zScores.exit().remove()
+                    zScores.attr("y", function (d, i) { return 21 + (1+i) * 32; })
+                        .text(function (d) { return zFormat((d.value-statistic.mean)/statistic.stdDev); });
+
                 });
                 dateSlider.attr({value: 0});
                 dateSlider.change();
+                dateSlider.css("visibility","visible");
             } else {
                 $("#statDisplay").html("<p>There was an error loading stats for the key " + key + "</p>");
             }

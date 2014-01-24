@@ -29,11 +29,13 @@ object Statistics extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val data: Option[(Statistic, Frame[LocalDate, Team, Double])] = scheduleDao.statPage(key)
-          data match {
+          val teams: List[Team] = scheduleDao.teamMap.values.toList
+          val observations: Option[(Statistic, Frame[LocalDate, Team, Double])] = scheduleDao.statPage(key)
+          observations match {
             case Some((stat, frame)) => Ok(
               Json.obj(
                 "status" -> "ok",
+                "teams" -> jsonTeamData(teams),
                 "statistic" -> Json.obj(
                   "name" -> stat.name,
                   "key" -> stat.key,
@@ -48,32 +50,37 @@ object Statistics extends Controller with SecureSocial {
       }
   }
 
-  def jsonData(stat:Statistic, frame: Frame[LocalDate, Team, Double]): JsArray = {
+  def jsonTeamData(teams: List[Team]): JsObject = {
+    val teamData: List[(String, JsValueWrapper)] = teams.map(t => {
+      val color1: String = t.primaryColor.getOrElse("#FFF")
+      val color2: String = t.secondaryColor.getOrElse("#FFF")
+      val obj: JsValueWrapper = Json.obj("name" -> t.name, "c1" -> color1, "c2" -> color2)
+      t.key -> obj
+    })
+    Json.obj(teamData.toSeq: _*)
+  }
+
+  def jsonData(stat: Statistic, frame: Frame[LocalDate, Team, Double]): JsArray = {
     JsArray(
       for (dt <- frame.rowIx.toSeq.reverse) yield {
-        val row: Series[ Team, Double] = frame.first(dt)
+        val row: Series[Team, Double] = frame.first(dt)
         jsonByDate(stat, dt, row)
       }
     )
   }
 
-  def jsonByDate(stat:Statistic, dt: LocalDate, row: Series[Team, Double]): JsObject = {
+  def jsonByDate(stat: Statistic, dt: LocalDate, row: Series[Team, Double]): JsObject = {
     val observations: IndexedSeq[JsObject] = row.index.toSeq.map(t => {
       val ix: Int = row.index.getFirst(t)
       val value = row.at(ix)
       val rank = row.rank(RankTie.Min, !stat.higherIsBetter).at(ix)
-      val z = value.map(x => (x - row.mean) / row.stdev)
-      val percentile = row.rank(RankTie.Max, !stat.higherIsBetter).at(ix).map(rk => (row.length - rk) / row.length)
-      (t, value, rank, z, percentile)
-    }).filter(tup => !(tup._2.isNA || tup._3.isNA || tup._4.isNA || tup._5.isNA)).sortBy(_._3).map {
-      case (t: Team, value: Scalar[Double], rank: Scalar[Double], z: Scalar[Double], percentile: Scalar[Double]) => {
-        val backgroundColor: String = t.secondaryColor.getOrElse("#ddd")
+      (t, value, rank)
+    }).filter(tup => !(tup._2.isNA || tup._3.isNA)).sortBy(_._3).map {
+      case (t: Team, value: Scalar[Double], rank: Scalar[Double]) => {
         Json.obj(
-          "team" -> Json.obj("key" -> t.key, "name" -> t.name, "background" -> backgroundColor),
+          "teamKey" -> t.key,
           "value" -> value.get,
-          "rank" -> rank.get,
-          "z" -> z.get,
-          "percentile" -> percentile.get
+          "rank" -> rank.get
         )
       }
     }

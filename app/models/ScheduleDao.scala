@@ -170,7 +170,7 @@ case class ScheduleDao(m: Model) {
         val value: Scalar[Double] = ser.at(ix)
         val rank: Scalar[Double] = ser.rank(RankTie.Max, !stat.higherIsBetter).at(ix)
         val z: Scalar[Double] = value.map(x => (x - ser.mean) / ser.stdev)
-        ModelRecord(stat.name, cleanString(value, stat.longFormat), cleanString(rank, "%.0f"), cleanString(z, "%4.2f"), stat.displayOrder)
+        ModelRecord(stat.name, stat.key, cleanString(value, stat.longFormat), cleanString(rank, "%.0f"), cleanString(z, "%4.2f"), stat.displayOrder)
       }
     }
     Some(TeamPage(team, conference, season, isCurrentSeason, schedule, results, standings, currentRecords, seasonRecords, stats))
