@@ -33,11 +33,19 @@ case class ObservationDao(model: Model) {
     Observations.autoInc.insert(obs.date, obs.domainId, obs.statisticId, obs.value)
   }
 
+  def insertAll(obss: Iterable[Observation])(implicit s: scala.slick.session.Session) {
+    Observations.autoInc.insertAll(obss.toSeq.map(o=>(o.date, o.domainId, o.statisticId, o.value)): _*)
+  }
+
   def delete(id: Long)(implicit s: scala.slick.session.Session) {
     Observations.where(_.id === id).delete
   }
   def deleteByDateStat(statId: Long, date:LocalDate)(implicit s: scala.slick.session.Session) {
     Observations.where(o => o.statisticId === statId && o.date === date).delete
+  }
+
+  def deleteByDatesStat(statId: Long, start:LocalDate, end:LocalDate)(implicit s: scala.slick.session.Session) {
+    Observations.where(o => o.statisticId === statId && o.date >= start && o.date <= end).delete
   }
 
   def upsert(obs:Observation) (implicit s: scala.slick.session.Session) {

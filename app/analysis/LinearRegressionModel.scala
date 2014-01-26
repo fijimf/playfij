@@ -18,9 +18,12 @@ class LinearRegressionModel extends ComputableModel {
 
   def computeSeason(data: List[ScheduleData]): ModelResult = {
     val modelResult = Map.empty[String, Map[LocalDate, Map[Long, Double]]]
-    val dates: Set[LocalDate] = data.map(_.game.date).toSet
+    val dates: List[LocalDate] = data.filter(_.result.isDefined).map(_.game.date).toSet.toList.sortBy((d:LocalDate)=>d.toDate.getTime)
     dates.foldLeft(modelResult)((result: Map[String, Map[LocalDate, Map[Long, Double]]], date: LocalDate) => {
+      logger.info("Running linear regressions for %s".format(date.toString))
       val r: Map[String, Map[Long, Double]] = processDate(data.filter(!_.game.date.isAfter(date)))
+      logger.info("Got %d results for 'win-predictor'".format(r("win-predictor").size))
+      logger.info("Got %d results for 'score-predictor'".format(r("score-predictor").size))
       Map("win-predictor" -> (result.getOrElse("win-predictor", Map.empty[LocalDate,Map[Long, Double]]) + (date -> r("win-predictor"))),
         "score-predictor" -> (result.getOrElse("score-predictor", Map.empty[LocalDate, Map[Long, Double]]) + (date -> r("score-predictor"))))
     })

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
     <logger name="scala.slick.session">
-        <level value="debug"/>
+        <level value="warn"/>
     </logger>
     <logger name="com.jolbox.bonecp">
-        <level value="debug"/>
+        <level value="warn"/>
     </logger>
     <!-- Plain Text Rolling Appender -->
     <appender name="R" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -20,7 +20,7 @@
         </rollingPolicy>
     </appender>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="R"/>
     </root>
 </configuration>

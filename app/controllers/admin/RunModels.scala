@@ -21,6 +21,7 @@ import models.StatisticalModel
 import models.ObservationDao
 import models.ScheduleDao
 import scraping.NcaaGameScraper
+import scala.collection.immutable
 
 
 object RunModels extends Controller with SecureSocial {
@@ -68,25 +69,29 @@ object RunModels extends Controller with SecureSocial {
     val obsDao: ObservationDao = ObservationDao(model)
     val models: List[StatisticalModel] = statModelDao.list
     val scheduleData: List[ScheduleData] = ScheduleDao(model).loadScheduleData
-
     models.foreach(statModel => {
       val computableModel: ComputableModel = Class.forName(statModel.className).newInstance().asInstanceOf[ComputableModel]
+      logger.info("Running model %s ".format(statModel.name))
       val result = computableModel.compute(scheduleData)
+      logger.info("Completed running %s".format(statModel.name))
       for (sk <- result.keys) {
         val stat: Statistic = statDao.findByKey(sk) match {
           case Some(statistic) => statistic
-          case None => {
+          case None =>
             computableModel.statistics.get(sk).map(_.copy(modelId = statModel.id)).foreach(st => statDao.insert(st))
             statDao.findByKey(sk).get
-          }
         }
-        val inner: Map[LocalDate, Map[Long, Double]] = result(sk)
-        for (d <- inner.keys if (!d.isBefore(from) && !d.isAfter(to))) {
-          obsDao.deleteByDateStat(stat.id, d)
-          for (id <- inner(d).keys) {
-            obsDao.insert(Observation(-1, d, id, stat.id, inner(d)(id)))
+        val ks = result(sk).keys
+        val fks = ks.filter(d => !d.isBefore(from) && !d.isAfter(to))
+        val flatObs = fks.map {
+          d => result(sk)(d).map {
+            case (id, o) => Observation(-1, d, id, stat.id, o)
           }
-        }
+        }.flatten
+
+        logger.info("Saving %d observations for '%s' from %s to %s".format(flatObs.size,stat.name, from.toString, to.toString))
+        obsDao.deleteByDatesStat(stat.id, from, to)
+        obsDao.insertAll(flatObs);
       }
     })
   }
