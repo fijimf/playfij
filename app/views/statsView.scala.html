@@ -1,4 +1,4 @@
-@(tp: models.TeamsPage)
+@(tp: List[(Statistic, List(Team, ModelRecord)))]
 
 @richMain("Teams",  None) {
 
@@ -22,22 +22,21 @@
                     <table class="table table-compact table-bordered table-packed ">
                         <thead/>
                         <tbody>
-                        @tp.conferenceStandings.map { cs =>
+                        @tp.map { tup =>
                         <tr style="height:44px;">
 
-                            <th style="width:20em; text-align: right">@cs.conference.name<img style="padding-left: 10px; padding-right:10px;" src=@cs.conference.logoUrlSmall.getOrElse("/assets/images/bball40.png")  /></th>
-                            @cs.records.map { rec =>
+                            <th style="width:20em; text-align: right">@tup._1.name</th>
+                            @cs._2.map { rec =>
 
                             <td style="width:44px; background-color:@rec._1.primaryColor.getOrElse("white")">
                             <a href="@controllers.routes.Schedule.team(rec._1.key)">
                                 <img style="width:40px; height:40px"
                                      src=@rec._1.logoUrlSmall.getOrElse("/assets/images/bball40.png")
-                                     onmouseover="headlineTeam('@rec._1.logoUrl.getOrElse("/assets/images/bball70.png")', '@rec._1.name','@rec._1.nickname', '@cs.conference.name', '@rec._2._1.wins','@rec._2._1.losses','@rec._2._2.wins','@rec._2._2.losses')"
+                                     onmouseover="headlineTeamStat('@rec._1.logoUrl.getOrElse("/assets/images/bball70.png")', '@rec._1.name','@rec._1.nickname', '@rec._2.rank','@rec._2.value')"
                                 onmouseout="dropHeadline()"/>
                             </a>
                             </td>
                             }
-                            <td colspan="@{16 - cs.records.length}">&nbsp;</td>
                         </tr>
                         }
                         </tbody>

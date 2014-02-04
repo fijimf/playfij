@@ -6,6 +6,10 @@ import play.api.Logger
 import models._
 import models.ScheduleDao
 import org.joda.time.LocalDate
+import org.saddle.Series
+import analysis.ModelRecord
+import org.saddle.scalar.Scalar
+import org.saddle.stats.RankTie
 
 object Schedule extends Controller with SecureSocial {
 
@@ -20,7 +24,7 @@ object Schedule extends Controller with SecureSocial {
   private val quoteDao = new QuoteDao(model)
 
 
-  def stats(key: String) = UserAwareAction {
+  def stat(key: String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
@@ -28,6 +32,27 @@ object Schedule extends Controller with SecureSocial {
             Ok(views.html.statView( key))
       }
   }
+
+  def stats() = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          val d = scheduleDao.getStatDates (null)
+          val ss: List[(Statistic, Series[Team, Double])] = scheduleDao.loadStats(d)
+          ss.map{case (stat: Statistic, ser: Series[Team, Double]) => {
+            val ix: Int = ser.index.getFirst(team)
+            val value: Scalar[Double] = ser.at(ix)
+            val rank: Scalar[Double] = ser.rank(RankTie.Max, !stat.higherIsBetter).at(ix)
+            val z: Scalar[Double] = value.map(x => (x - ser.mean) / ser.stdev)
+            ModelRecord(stat.name, stat.key, cleanString(value, stat.longFormat), cleanString(rank, "%.0f"), cleanString(z, "%4.2f"), stat.displayOrder)
+          }
+          }
+
+          Ok(views.html.statsView(null))
+
+      }
+  }
+
   def team(key: String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {

@@ -130,29 +130,14 @@ case class ScheduleDao(m: Model) {
     }
   }
 
-  def getStatDates(date: LocalDate)(implicit s: scala.slick.session.Session): LocalDate = {
+  def getStatDates(WhyAmINotUsed: LocalDate)(implicit s: scala.slick.session.Session): LocalDate = {
     Cache.getOrElse[LocalDate](STAT_DATES_CACHE_KEY, 3600) {
       Query(m.Observations.map(_.date).max).first().getOrElse(new LocalDate())
     }
 
   }
 
-  def cleanString(x: Scalar[Double], format: String = "%5.2f"): String = {
-    if (x.isNA) {
-      "N/A"
-    } else {
-      try {
-        format.format(x.get)
-      }
-      catch {
-        case ex: IllegalFormatConversionException => if (ex.getConversion == 'd') {
-          "%.0f".format(x.get)
-        } else {
-          "%f".format(x.get)
-        }
-      }
-    }
-  }
+
 
   def buildPage(team: Team, season: Season, conference: Conference, isCurrentSeason: Boolean)(implicit s: scala.slick.session.Session): Option[TeamPage] = {
 
@@ -167,10 +152,7 @@ case class ScheduleDao(m: Model) {
     val stats: List[ModelRecord] = seriesMap.map {
       case (stat: Statistic, ser: Series[Team, Double]) => {
         val ix: Int = ser.index.getFirst(team)
-        val value: Scalar[Double] = ser.at(ix)
-        val rank: Scalar[Double] = ser.rank(RankTie.Max, !stat.higherIsBetter).at(ix)
-        val z: Scalar[Double] = value.map(x => (x - ser.mean) / ser.stdev)
-        ModelRecord(stat.name, stat.key, cleanString(value, stat.longFormat), cleanString(rank, "%.0f"), cleanString(z, "%4.2f"), stat.displayOrder)
+        ModelRecord.fromStatValue(stat,ix,ser)
       }
     }
     Some(TeamPage(team, conference, season, isCurrentSeason, schedule, results, standings, currentRecords, seasonRecords, stats))
