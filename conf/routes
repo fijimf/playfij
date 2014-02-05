@@ -3,7 +3,8 @@
 # ~~~~
 
 # Home page
-GET  /deepfij/                                          controllers.Application.index
+GET  /deepfij/                                          controllers.Schedule.index
+GET  /deepfij/about                                     controllers.Application.about
 GET  /deepfij/analysis/spread-baseline                  controllers.Analysis.spread
 GET  /deepfij/teams                                     controllers.Schedule.teams
 GET  /deepfij/teams/:key                                controllers.Schedule.team(key)

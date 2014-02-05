@@ -7,6 +7,12 @@
         <h2 style="font-size:350%; padding-top:25px;">Baseline Spread Analysis</h2>
     </div>
 </div>
+<div class="row-fluid team-header-row" style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
+    <div class="span12">
+        <p>The following table shows descriptive statistics of the distribution of margin of victory for all games in the database, as well as the imputed margin of victory in the same sample of games where available.</p>
+        <p>The data show certain effects which we would expect to see, for instance early season games are less competitive than games in January and February on the whole, and that conference games are apt to be closer on the whole than non conference games.  Additionally comparing the distribution of the predicted spreads versus the actual spreads is a first step toward validating a a model.</p>
+    </div>
+</div>
 
 <div class="row-fluid">
     <div class="span12">
@@ -22,6 +28,7 @@
                         <th class="text-center">Mean</th>
                         <th class="text-center">StDev</th>
                         <th class="text-center">Skew</th>
+                        <th class="text-center">Kurt</th>
                         <th class="text-center">% 1pt gms</th>
                         <th class="text-center">Min</th>
                         <th class="text-center">Q1</th>
@@ -41,6 +48,7 @@
                            <td class="text-right">@{"%5.2f".format(m.mean)}</td>
                            <td class="text-right">@{"%5.2f".format(m.stDev)}</td>
                            <td class="text-right">@{"%5.2f".format(m.skew)}</td>
+                           <td class="text-right">@{"%5.2f".format(m.kurtosis)}</td>
                            <td class="text-right">@{"%5.2f".format(m.pctOnePtGames)}</td>
                            <td class="text-right">@m.min</td>
                            <td class="text-right">@{"%5.1f".format(m.q1)}</td>

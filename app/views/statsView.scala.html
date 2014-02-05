@@ -1,15 +1,15 @@
-@(tp: List[(Statistic, List(Team, ModelRecord)))]
+@(tp: List[(Statistic, List[(Team, analysis.ModelRecord)])])
 
 @richMain("Teams",  None) {
 
 <div class="row-fluid team-header-row" style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
-    <div class="span3 offset1">
-        <h2 style="font-size:350%; padding-top:25px;">Teams</h2>
+    <div class="span5">
+        <h2 id="change-title" style="font-size:350%; padding-top:25px;">Stats</h2>
     </div>
 
-    <div class="span8" id="headline">
-        <h3><img style='height:70px; width:70px;' src='/assets/images/blank.png' />&nbsp;&nbsp;</h3>
-        <h4>&nbsp;</h4>
+    <div class="span7" id="headline">
+        <h2><img style='height:70px; width:70px;' src='/assets/images/blank.png' />&nbsp;&nbsp;</h3>
+        <h3>&nbsp;</h4>
     </div>
 </div>
 
@@ -25,14 +25,14 @@
                         @tp.map { tup =>
                         <tr style="height:44px;">
 
-                            <th style="width:20em; text-align: right">@tup._1.name</th>
-                            @cs._2.map { rec =>
+                            <th style="width:20em; text-align: right"><a href="@controllers.routes.Schedule.stat(tup._1.key)">@tup._1.name</a></th>
+                            @tup._2.map { rec =>
 
                             <td style="width:44px; background-color:@rec._1.primaryColor.getOrElse("white")">
                             <a href="@controllers.routes.Schedule.team(rec._1.key)">
                                 <img style="width:40px; height:40px"
                                      src=@rec._1.logoUrlSmall.getOrElse("/assets/images/bball40.png")
-                                     onmouseover="headlineTeamStat('@rec._1.logoUrl.getOrElse("/assets/images/bball70.png")', '@rec._1.name','@rec._1.nickname', '@rec._2.rank','@rec._2.value')"
+                                     onmouseover="headlineTeamStat('@tup._1.name','@rec._1.logoUrl.getOrElse("/assets/images/bball70.png")', '@rec._1.name','@rec._1.nickname', '@rec._2.rank','@rec._2.value')"
                                 onmouseout="dropHeadline()"/>
                             </a>
                             </td>

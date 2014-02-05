@@ -3,11 +3,11 @@
     <div class="navbar-inner">
         <a class="brand" href="#"><img class="spin" style="margin-top: -7px;margin-bottom: -7px;" src="@routes.Assets.at("images/deepfij-tiny.png")"></a>
         <ul class="nav">
-            <li class="active"><a href="@routes.Application.index">Home</a></li>
+            <li class="active"><a href="@routes.Schedule.index">Home</a></li>
             <li><a href="@routes.Schedule.teams">Teams</a></li>
-            <li><a href="#">Stats</a></li>
+            <li><a href="@routes.Schedule.stats">Stats</a></li>
             <li><a href="#">Analysis</a></li>
-            <li><a href="#">About</a></li>
+            <li><a href="@routes.Application.about">About</a></li>
             <!--<li><a href="@admin.routes.Admin.index">Admin</a></li>-->
             <form class="navbar-search pull-left" action="/deepfij/search" method="GET">
                 <input id="q" name="q" type="text" class="search-query" placeholder="Teams, nicknames, conferences ...">

@@ -16,10 +16,12 @@ function loadQuote() {
 function headlineTeam(src, teamName, nickname, confName, confWins, confLosses, wins, losses) {
     $("#headline").html("<h3><img style='height:70px; width:70px;' src='"+src+"' />"+teamName+"&nbsp;"+nickname+"</h3><h4>("+wins+"-"+losses+", "+confWins+"- "+confLosses+" "+confName+" )</h4>");
 }
-function headlineTeamStat(src, teamName, nickname, rank, value) {
-    $("#headline").html("<h3><img style='height:70px; width:70px;' src='"+src+"' />"+teamName+"&nbsp;"+nickname+"</h3><h4>"+value+" ("+rank+" )</h4>");
+function headlineTeamStat(statName, src, teamName, nickname, rank, value) {
+    $("#change-title").text(statName);
+    $("#headline").html("<h2 style='font-size:350%; padding-top:25px; font-weight:bold;'><img style='height:70px; width:70px;' src='"+src+"' />"+value+" "+teamName+"&nbsp;"+nickname+"</h2>");
 }
 
 function dropHeadline() {
     $("#headline").html("<h3><img style='height:70px; width:70px;' src='/assets/images/blank.png' />&nbsp;</h3><h4>&nbsp;</h4>");
+    $("#change-title").text("Stats");
 }

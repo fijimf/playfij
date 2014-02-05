@@ -73,6 +73,7 @@ object Analysis extends Controller with SecureSocial {
         createSpreadDist(sd, month)
       }
     }.toList
+
     val spreadDists: List[SpreadDist] = all :: bySeason ++ byMonth
     spreadDists
   }
@@ -83,7 +84,7 @@ object Analysis extends Controller with SecureSocial {
     val hiCount = counts.map(_._2).max
     val mode = (counts.filter(_._2 == hiCount).map(_._1).toList, hiCount)
     val vec: Vec[Int] = Vec(spreads: _*)
-    val all = SpreadDist(name, vec.length, vec.mean, vec.stdev, vec.skew, 100.0 * counts(1) / vec.length, vec.min.get, vec.percentile(25.0, PctMethod.NIST), vec.median, vec.percentile(75.0, PctMethod.NIST), vec.percentile(95.0, PctMethod.NIST), vec.percentile(99.0, PctMethod.NIST), vec.max.get, mode)
+    val all = SpreadDist(name, vec.length, vec.mean, vec.stdev, vec.skew, vec.kurt, 100.0 * counts(1) / vec.length, vec.min.get, vec.percentile(25.0, PctMethod.NIST), vec.median, vec.percentile(75.0, PctMethod.NIST), vec.percentile(95.0, PctMethod.NIST), vec.percentile(99.0, PctMethod.NIST), vec.max.get, mode)
     all
   }
 }

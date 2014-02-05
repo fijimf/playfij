@@ -5,11 +5,12 @@ import play.mvc.Controller
 import play.api.Logger
 import models._
 import models.ScheduleDao
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.saddle.Series
 import analysis.ModelRecord
 import org.saddle.scalar.Scalar
 import org.saddle.stats.RankTie
+import scala.collection.immutable.IndexedSeq
 
 object Schedule extends Controller with SecureSocial {
 
@@ -29,7 +30,7 @@ object Schedule extends Controller with SecureSocial {
       play.api.db.slick.DB.withSession {
         implicit s =>
 
-            Ok(views.html.statView( key))
+          Ok(views.html.statView(key))
       }
   }
 
@@ -37,19 +38,15 @@ object Schedule extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val d = scheduleDao.getStatDates (null)
+          val d = scheduleDao.getStatDates(null)
           val ss: List[(Statistic, Series[Team, Double])] = scheduleDao.loadStats(d)
-          ss.map{case (stat: Statistic, ser: Series[Team, Double]) => {
-            val ix: Int = ser.index.getFirst(team)
-            val value: Scalar[Double] = ser.at(ix)
-            val rank: Scalar[Double] = ser.rank(RankTie.Max, !stat.higherIsBetter).at(ix)
-            val z: Scalar[Double] = value.map(x => (x - ser.mean) / ser.stdev)
-            ModelRecord(stat.name, stat.key, cleanString(value, stat.longFormat), cleanString(rank, "%.0f"), cleanString(z, "%4.2f"), stat.displayOrder)
-          }
-          }
-
-          Ok(views.html.statsView(null))
-
+          val data: List[(Statistic, List[(Team,ModelRecord)])] = ss.map {
+            case (stat: Statistic, ser: Series[Team, Double]) => {
+              val rankings: List[(Team, ModelRecord)] = 0.until(ser.length).map(i => (ser.index.at(i).get, ModelRecord.fromStatValue(stat, i, ser))).filter(p => p._2.rank.toInt <= 15).sortBy(p => p._2.rank.toInt).take(20).toList
+              (stat, rankings)
+            }
+          }.sortBy(_._1.displayOrder)
+          Ok(views.html.statsView(data))
       }
   }
 
@@ -108,6 +105,14 @@ object Schedule extends Controller with SecureSocial {
           Ok(views.html.dateView(q, scheduleDao.datePage(d)))
       }
   }
-
+  def index = UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+      val today: LocalDate = new LocalDate()
+      val q = quoteDao.random
+      Ok(views.html.dateView(q, scheduleDao.datePage(today)))
+  }
+  }
 }
 

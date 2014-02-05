@@ -11,7 +11,7 @@ object ModelRecord {
   def fromStatValue(stat:Statistic, index:Int, ser:Series[_,Double]):ModelRecord={
 
     val value: Scalar[Double] = ser.at(index)
-    val rank: Scalar[Double] = ser.rank(RankTie.Max, !stat.higherIsBetter).at(index)
+    val rank: Scalar[Double] = ser.rank(RankTie.Min, !stat.higherIsBetter).at(index)
     val z: Scalar[Double] = value.map(x => (x - ser.mean) / ser.stdev)
     ModelRecord(stat.name, stat.key, cleanString(value, stat.longFormat), cleanString(rank, "%.0f"), cleanString(z, "%4.2f"), stat.displayOrder)
   }
