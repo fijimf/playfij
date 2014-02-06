@@ -1,4 +1,5 @@
 1500:com.typesafe.plugin.CommonsMailerPlugin
+8000:com.kenshoo.play.metrics.MetricsPlugin
 9994:securesocial.core.DefaultAuthenticatorStore
 9995:securesocial.core.DefaultIdGenerator
 9996:securesocial.core.providers.utils.DefaultPasswordValidator

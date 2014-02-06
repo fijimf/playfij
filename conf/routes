@@ -21,6 +21,9 @@ GET  /api/games                                         controllers.Game.games
 
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index
+
+GET  /admin/metrics                             com.kenshoo.play.metrics.MetricsController.metrics
+
 GET  /admin/seasons                             controllers.Season.list
 POST /admin/seasons                             controllers.Season.submit
 GET  /admin/seasons/new                         controllers.Season.create

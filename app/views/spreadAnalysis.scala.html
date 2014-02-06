@@ -7,10 +7,25 @@
         <h2 style="font-size:350%; padding-top:25px;">Baseline Spread Analysis</h2>
     </div>
 </div>
-<div class="row-fluid team-header-row" style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
-    <div class="span12">
+<div class="row-fluid " style="padding-top:25px;border-top:0px ;border-bottom:12px solid  #444;background-color:#ddd">
+    <div class="span10 offset1">
         <p>The following table shows descriptive statistics of the distribution of margin of victory for all games in the database, as well as the imputed margin of victory in the same sample of games where available.</p>
         <p>The data show certain effects which we would expect to see, for instance early season games are less competitive than games in January and February on the whole, and that conference games are apt to be closer on the whole than non conference games.  Additionally comparing the distribution of the predicted spreads versus the actual spreads is a first step toward validating a a model.</p>
+        <h5>Interpreting the table</h5>
+        <dl>
+            <dt>N,Mean,StdDev</dt>
+            <dd>Count, average and standard deviation of game observations in that group</dd>
+            <dt>Skewness</dt>
+            <dd>Third moment of the distribution, a measure of the symmetry of the distribution.  A skewness near 0 implies a distribution clustered around the mean.  A neagtive skewness implies clustering above the mean with extreme values below, and a positive skewness the opposite. </dd>
+            <dt>Kurtosis</dt>
+            <dd>Fourth moment of the distribution, a measure of the peakedness and tail weight of the distribution.  A kurtosis > 3  is leptokurtic and implies more extreme values than would be expected from a normal distribution.  A kurtosis < 3 is platykurtic and implies fewer extreme values than would be expected from a normal distribution.</dd>
+            <dt>Min,Q1,Med,Q3,95th,99th,Max</dt>
+            <dd>Minimum, maximum and standard quantiles describing the distribution of the observations.</dd>
+            <dt>% 1pt</dt>
+            <dd>The percentage of games decide by one point.</dd>
+            <dt>Mode</dt>
+            <dd>The margin of victory observed the most times, and the percentage of times it was observed.</dd>
+        </dl>
     </div>
 </div>
 
@@ -24,20 +39,20 @@
                         <thead>
                         <tr>
                         <th></th>
-                        <th class="text-center">N</th>
-                        <th class="text-center">Mean</th>
-                        <th class="text-center">StDev</th>
-                        <th class="text-center">Skew</th>
-                        <th class="text-center">Kurt</th>
-                        <th class="text-center">% 1pt gms</th>
-                        <th class="text-center">Min</th>
-                        <th class="text-center">Q1</th>
-                        <th class="text-center">Med</th>
-                        <th class="text-center">Q3</th>
-                        <th class="text-center">95th</th>
-                        <th class="text-center">99th</th>
-                        <th class="text-center">Max</th>
-                        <th class="text-center">Mode</th>
+                        <th class="text-center" style="width: 4em;">N</th>
+                        <th class="text-center" style="width: 4em;">Mean</th>
+                        <th class="text-center" style="width: 4em;">StDev</th>
+                        <th class="text-center" style="width: 4em;">Skew</th>
+                        <th class="text-center" style="width: 4em;">Kurt</th>
+                        <th class="text-center" style="width: 4em;">% 1pt gms</th>
+                        <th class="text-center" style="width: 3em;">Min</th>
+                        <th class="text-center" style="width: 3em;">Q1</th>
+                        <th class="text-center" style="width: 3em;">Med</th>
+                        <th class="text-center" style="width: 3em;">Q3</th>
+                        <th class="text-center" style="width: 3em;">95th</th>
+                        <th class="text-center" style="width: 3em;">99th</th>
+                        <th class="text-center" style="width: 3em;">Max</th>
+                        <th class="text-center" style="width: 7em;">Mode</th>
 
                         </tr>
                         <tbody>

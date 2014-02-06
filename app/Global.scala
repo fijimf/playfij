@@ -6,6 +6,7 @@ import models.Repository
 import org.joda.time.{LocalDateTime, LocalDate, DateTime}
 import play.api._
 import play.api.libs.concurrent.Akka
+import play.api.mvc.WithFilters
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.slick.session.Session
@@ -13,7 +14,11 @@ import scala.util.control.NonFatal
 import scraping.control.GameUpdateRequest
 import scraping.NcaaGameScraper
 
-object Global extends GlobalSettings {
+import com.kenshoo.play.metrics.MetricsFilter
+import play.api.mvc._
+
+
+object Global extends WithFilters(MetricsFilter){
   val logger = Logger(Global.getClass)
 
   import play.api.Play.current

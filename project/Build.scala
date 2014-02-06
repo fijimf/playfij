@@ -12,7 +12,8 @@ object ApplicationBuild extends Build {
     jdbc,
     cache,
     anorm,
-    "com.typesafe.slick" %% "slick" % "1.0.1",
+  "com.kenshoo" %% "metrics-play" % "0.1.3",
+  "com.typesafe.slick" %% "slick" % "1.0.1",
     "org.slf4j" % "slf4j-nop" % "1.6.4",
     "com.h2database" % "h2" % "1.3.166",
     "mysql" % "mysql-connector-java" % "5.1.5",
@@ -23,6 +24,7 @@ object ApplicationBuild extends Build {
     "org.scala-saddle" %% "saddle-core" % "1.3.+",
     "org.apache.mahout" % "mahout-math" % "0.8",
     "org.apache.mahout" % "mahout-core" % "0.8"
+
   )
 
 
