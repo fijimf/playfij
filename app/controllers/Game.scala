@@ -36,19 +36,22 @@ object Game extends Controller with SecureSocial {
       }
   }
 
+  def scatter = UserAwareAction {
+    implicit request =>
+      Ok(views.html.gamesScatter("blah"))
+  }
+
   def jsonGameData(games: List[ScheduleData]): JsArray = {
-    JsArray(games.groupBy(_.game.date).map {
-      case (d, lst) => {
-        Json.obj(d.toString -> Json.arr(lst.map(sd =>
+    JsArray(games.map { sd=>
           Json.obj(
+            "dt" -> sd.game.date.toString,
             "ht" -> sd.homeTeam.key,
             "hs" -> sd.result.get.homeScore,
             "at" -> sd.awayTeam.key,
             "as" -> sd.result.get.awayScore
-          )
-        )))
-      }
-    }.toSeq)
+          )}
+        )
+
   }
 
   def list = TODO

@@ -18,6 +18,7 @@ GET  /deepfij/:yyyy/:mm/:dd                             controllers.Schedule.dat
 GET  /api/quote                                         controllers.Quote.random
 GET  /api/stats/:key                                    controllers.Statistics.stats(key)
 GET  /api/games                                         controllers.Game.games
+GET  /api/scatter-games                                 controllers.Game.scatter
 
 ### SECURED PAGES ###
 GET  /admin                                     controllers.admin.Admin.index

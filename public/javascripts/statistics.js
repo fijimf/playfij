@@ -121,3 +121,45 @@ function loadStats(key) {
         }
     );
 }
+
+function loadGamesScatter(key) {
+    var jsonUrl = "/api/games";
+    $.getJSON(jsonUrl, {},
+        function (json) {
+            if (json["status"] == "ok") {
+
+                var teamData = json.games;
+                var svgContainer = d3.select("#scatter").append("svg")
+                    .attr("width", 900)
+                    .attr("height", 900);
+
+
+                var xScale = d3.scale.linear().domain([20,140]).range([20,880]);
+                var yScale = d3.scale.linear().domain([20,140]).range([880,20]);
+                var xAxis = d3.svg.axis().scale(xScale).orient("bottom").innerTickSize(3).outerTickSize(3);
+                var yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(3).outerTickSize(3);
+                var dots = svgContainer.selectAll("circle").data(teamData);
+                dots.enter().append("circle")
+                    .attr("cx", function (d) {
+                        return xScale(d.hs);
+                    })
+                    .attr("cy", function (d) {
+                        return yScale(d.as);
+                    })
+                    .attr("r", 3)
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 0)
+                    .attr("fill", "rgba(32,255,32,0.5)");
+                svgContainer.append("g")
+                    .attr("class", "xAxis")
+                    .attr("transform", "translate(0,880)")
+                    .call(xAxis);
+                svgContainer.append("g")
+                    .attr("class", "yAxis")
+                    .attr("transform", "translate(20,0)")
+                    .call(yAxis);
+
+            }
+
+        });
+}
