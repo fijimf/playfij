@@ -138,6 +138,15 @@ function loadGamesScatter(key) {
                 var yScale = d3.scale.linear().domain([20,140]).range([880,20]);
                 var xAxis = d3.svg.axis().scale(xScale).orient("bottom").innerTickSize(3).outerTickSize(3);
                 var yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(3).outerTickSize(3);
+
+                svgContainer.append("polygon")
+                    .attr("points",
+                        xScale(20)+","+yScale(20) +" " +
+                            xScale(20)+","+yScale(140) +" " +
+                            xScale(140)+","+yScale(140) +" " +
+                            xScale(140)+","+yScale(20) +" ")
+                    .attr("fill","#ddd");
+
                 var dots = svgContainer.selectAll("circle").data(teamData);
                 dots.enter().append("circle")
                     .attr("cx", function (d) {
@@ -149,7 +158,8 @@ function loadGamesScatter(key) {
                     .attr("r", 3)
                     .attr("stroke", "black")
                     .attr("stroke-width", 0)
-                    .attr("fill", "rgba(32,255,32,0.5)");
+                    .attr("fill", "rgba(16 ,192,16,0.33)");
+
                 svgContainer.append("g")
                     .attr("class", "xAxis")
                     .attr("transform", "translate(0,880)")
@@ -158,7 +168,6 @@ function loadGamesScatter(key) {
                     .attr("class", "yAxis")
                     .attr("transform", "translate(20,0)")
                     .call(yAxis);
-
             }
 
         });
