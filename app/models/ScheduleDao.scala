@@ -3,12 +3,8 @@ package models
 import org.joda.time.LocalDate
 import play.api.cache.Cache
 import org.saddle.{Frame, Series}
-import org.saddle.scalar.Scalar
-import org.saddle.stats.RankTie
-import analysis.ModelRecord
-import java.util.{Date, IllegalFormatConversionException}
+import java.util.Date
 import play.api.Logger
-import scala.slick.lifted
 
 case class ScheduleDao(m: Model) {
   val SCHEDULE_DATA_CACHE_KEY: String = "!game-data"
@@ -79,7 +75,6 @@ case class ScheduleDao(m: Model) {
   }
 
 
-
   def statPage(statKey: String)(implicit s: scala.slick.session.Session): Option[(Statistic, Frame[LocalDate, Team, Double])] = {
     currentSeason.map(season => {
       val rawData: List[(Statistic, Team, LocalDate, Double)] = (
@@ -96,12 +91,9 @@ case class ScheduleDao(m: Model) {
     })
   }
 
-  def teamsPage()(implicit s: scala.slick.session.Session): Option[TeamsPage] = currentSeason.map(season => {
-    TeamsPage( season, conferenceMap,teamsForConference, loadScheduleData)
-    })
+  def teamsPage()(implicit s: scala.slick.session.Session): Option[SeasonStandings] = currentSeason.map(season => SeasonStandings(season, conferenceMap, teamsForConference, loadScheduleData))
 
-  def teamSummary(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] =
-    currentSeason.flatMap(season => teamSummary(teamKey, season.key))
+  def teamSummary(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] = currentSeason.flatMap(season => teamSummary(teamKey, season.key))
 
   def teamSummary(teamKey: String, seasonKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] = {
     Cache.getOrElse[Option[TeamSummary]](teamKey + ":" + seasonKey, 900) {
@@ -112,15 +104,12 @@ case class ScheduleDao(m: Model) {
       } yield {
         (team, season, conference)
       }).firstOption.flatMap {
-        case (team, season, conference) => {
+        case (team, season, conference) =>
           val isCurrent = currentSeason.exists(_.key == seasonKey)
           TeamSummary(season, isCurrent, team, conference, teamsForConference(season, conference), loadScheduleData, loadStats(season.to))
-        }
       }
     }
   }
-
-
 
   def statMap(implicit s: scala.slick.session.Session): Map[Long, Statistic] = {
     Cache.getOrElse[Map[Long, Statistic]](STAT_MAP_CACHE_KEY, 3600) {
@@ -168,12 +157,11 @@ case class ScheduleDao(m: Model) {
       } yield {
         (team, conference)
       }).list.filter {
-        case (team: Team, conference: Conference) => {
+        case (team: Team, conference: Conference) =>
           team.name.toLowerCase.contains(q.toLowerCase) ||
             team.longName.toLowerCase.contains(q.toLowerCase) ||
             team.nickname.toLowerCase.contains(q.toLowerCase) ||
             conference.name.toLowerCase.contains(q.toLowerCase)
-        }
       }
     }).getOrElse(List.empty[(Team, Conference)])
   }
