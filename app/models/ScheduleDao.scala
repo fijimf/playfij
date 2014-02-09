@@ -97,11 +97,8 @@ case class ScheduleDao(m: Model) {
   }
 
   def teamsPage()(implicit s: scala.slick.session.Session): Option[TeamsPage] = currentSeason.map(season => {
-    val games: List[ScheduleData] = loadScheduleData
-    TeamsPage(conferenceMap.values.map(conf => {
-      ConferenceStandings.createConferenceStandings(season, conf, teamsForConference(season, conf), games)
-    }).toList.sortBy(_.conference.name))
-  })
+    TeamsPage( season, conferenceMap,teamsForConference, loadScheduleData)
+    })
 
   def teamSummary(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] =
     currentSeason.flatMap(season => teamSummary(teamKey, season.key))
@@ -131,7 +128,6 @@ case class ScheduleDao(m: Model) {
     }
   }
 
-
   def conferenceMap(implicit s: scala.slick.session.Session): Map[Long, Conference] = {
     Cache.getOrElse[Map[Long, Conference]](CONFERENCE_MAP_CACHE_KEY, 3600) {
       conferenceQuery.list.map(s => s.id -> s).toMap
@@ -148,10 +144,7 @@ case class ScheduleDao(m: Model) {
     Cache.getOrElse[LocalDate](STAT_DATES_CACHE_KEY, 3600) {
       Query(m.Observations.map(_.date).max).first().getOrElse(new LocalDate())
     }
-
   }
-
-
 
   def season(d: LocalDate)(implicit s: scala.slick.session.Session): Option[Season] = {
     seasonQuery.list().find(season => season.from.isBefore(d) && season.to.isAfter(d))
@@ -160,7 +153,6 @@ case class ScheduleDao(m: Model) {
   def currentSeason(implicit s: scala.slick.session.Session): Option[Season] = {
     season(new LocalDate).orElse(seasonQuery.list().sortBy(_.to.toDate).reverse.headOption)
   }
-
 
   def teamsForConference(season: Season, conference: Conference)(implicit s: scala.slick.session.Session): List[Team] = {
     (for {assoc <- assocQuery if assoc.seasonId === season.id && assoc.conferenceId === conference.id
