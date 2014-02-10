@@ -72,14 +72,27 @@ class WonLostModel extends DerivedModel {
     )
 
     def statistics: Map[String, Statistic] = List(
-      Statistic(-1, "wins", "Wins", -1, "Team", "%d", "%d", higherIsBetter = true, 1),
-      Statistic(-1, "losses", "Losses", -1, "Team", "%d", "%d", higherIsBetter = false, 2),
-      Statistic(-1, "streak", "Streak", -1, "Team", "%d", "%d", higherIsBetter = true, 3)
+      Statistic(-1, "wins", "Wins", -1, "Team", "%d", "%d", higherIsBetter = true, 1, Some("#d3d"), Some(
+        """
+          |Number of wins versus DI opponents this season.
+        """.stripMargin)),
+      Statistic(-1, "losses", "Losses", -1, "Team", "%d", "%d", higherIsBetter = false, 2, Some("#d3d"), Some(
+        """
+          |Number of losses versus DI opponents this season.
+        """.stripMargin)),
+      Statistic(-1, "streak", "Streak", -1, "Team", "%d", "%d", higherIsBetter = true, 3, Some("#d3d"), Some(
+        """
+          |Number of wins (losses) in a row without a loss (win). Positive numbers represent a winning streak, negative
+          |numbers a losing streak.
+        """.stripMargin))
 
     ).map(s => s.key -> s).toMap
   }
 
   def statistics: Map[String, Statistic] = baseModel.statistics++List(
-    Statistic(-1, "wp", "Winning Pct", -1, "Team", "%0.3f", "%0.5f", higherIsBetter = true, 4)
+    Statistic(-1, "wp", "Winning Pct", -1, "Team", "%0.3f", "%0.5f", higherIsBetter = true, 4, Some("#d3d"), Some(
+      """
+        |Winning percentage versus DI opponents this season.
+      """.stripMargin))
   ).map(s => s.key -> s).toMap
 }

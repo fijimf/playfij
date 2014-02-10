@@ -1,0 +1,73 @@
+@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow])
+
+@richMain(s.name, None) {
+
+<div class="row-fluid team-header-row"
+     style="border-top:12px solid @s.color.getOrElse("#555"); border-bottom:12px solid @s.color.getOrElse("#555"); background-color:#ddd;">
+<div class="span4">
+    <h3>@s.name</h3>
+</div>
+<div class="span8" style="padding:12px; font-size:11px">
+    @s.description.map{d=>
+    <p>@d</p>
+    }
+</div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
+        <div class="container-fluid">
+
+            <div class="row-fluid">
+                <div class="span12">
+                    <p style="padding-top: 20px;">
+                        <span style="font-weight:bold;">Date:</span><span style="padding:0 35px 0 5px;"> @dt.toString("dd-MMM-yyyy")</span>
+                        <span style="font-weight:bold">N:</span><span style="padding:0 35px 0 5px;">@ds.n</span>
+                        <span style="font-weight:bold">Mean:</span><span style="padding:0 35px 0 5px;"> @ds.mean.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">Std. Deviation:</span> <span style="padding:0 35px 0 5px;">@ds.stdDev.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">Skewness:</span><span style="padding:0 35px 0 5px;">@ds.skew.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">Kurtosis:</span><span style="padding:0 35px 0 5px;">@ds.kurt.formatted("%12.4f")</span>
+                    </p>
+
+                    <p>
+                        <span style="font-weight:bold">Minimum:</span><span style="padding:0 35px 0 5px;"> @ds.min.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">1st Quartile:</span><span style="padding:0 35px 0 5px;"> @ds.q1.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">Median:</span> <span style="padding:0 35px 0 5px;">@ds.min.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">2nd Quartile:</span><span style="padding:0 35px 0 5px;">@ds.q3.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">Maximum:</span><span style="padding:0 35px 0 5px;">@ds.max.formatted("%12.4f")</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row-fluid">
+    <div class="span12">
+        <div class="container-fluid">
+
+            <div class="row-fluid">
+                <div class="span5">
+                    <table class="table table-compact table-bordered table-subcompact">
+                        <thead>
+                        <tr><th style="width:1.5em;">Rank</th><th>Team</th><th style="width:5em;">Value</th><th style="width:5em;">Percentile</th><th style="width:5em;">Z-score</th></tr>
+                        </thead>
+                        <tbody>
+                        @ms.map{ m=>
+                        <tr>
+                            <td class="text-right">@m.rank</td>
+                            <td><a href="#">@m.team.name</a></td>
+                            <td class="text-right">@m.value.formatted(s.longFormat)</td>
+                            <td class="text-right">@m.percentile.formatted("%5.2f")</td>
+                            <td class="text-right">@m.zScore.formatted("%5.3f")</td>
+                        </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+}
+

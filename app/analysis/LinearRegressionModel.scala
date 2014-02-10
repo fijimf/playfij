@@ -12,8 +12,27 @@ class LinearRegressionModel extends ComputableModel {
   def key = "naive-linear-regression"
 
   def statistics: Map[String, Statistic] = List(
-    new Statistic(0, "win-predictor", "Win Predictor", 0, "Team", "%5.3f", "%5.3f", true, 101),
-    new Statistic(0, "score-predictor", "Win Predictor", 0, "Team", "%5.3f", "%5.3f", true, 101)
+    new Statistic(0, "win-predictor", "Win Predictor", 0, "Team", "%5.3f", "%5.3f", true, 101, Some("#3ef"),
+      Some("""
+        |Win predictor is a linear regression on the results of games.  Each observation is the result of a game.
+        |The independent variables are represneted by vector with an entries for the universe of teams.  For a given
+        |game the vector is filled with zeroes for all teams except those two in the game.
+        |The home team is set to 1, and the away team to -1, and the dependent variable is the result of the game which
+        |is set to 1 if the home team wins and -1 if the away team wins.  Home teams at neutral sites are set
+        |arbitrarily. There is no intercept value calculated for the regression.  While this model is reasonably well
+        |behaved, and can be exppected to capture some strength of schedule effects, it is a naive model with a number of
+        |theoretical issues.
+      """.stripMargin)),
+    new Statistic(0, "score-predictor", "Win Predictor", 0, "Team", "%5.3f", "%5.3f", true, 101 , Some("#3ef"),
+      Some("""
+             |Score predictor is a linear regression on the results of games.  Each observation is the result of a game.
+             |The independent variables are represneted by vector with an entries for the universe of teams.  For a given
+             |game the vector is filled with zeroes for all teams except those two in the game.
+             |The home team is set to 1, and the away team to -1, and the dependent variable is based on result of the
+             |game - the difference between the home team's score and the away teams score.  Home teams at neutral sites are set
+             |arbitrarily. There is no intercept value calculated for the regression.  While this model has
+             |fewer difficulties than "Win Predictor", it too is a fairly naive model.
+           """.stripMargin))
   ).map(s => s.key -> s).toMap
 
   def computeSeason(data: List[ScheduleData]): ModelResult = {

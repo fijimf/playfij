@@ -8,22 +8,70 @@ class ScoringModel extends AccumulatorModel {
   def key = "scoring"
 
   def statistics: Map[String, Statistic] = List(
-    Statistic(-1, "mean-points-for", "Mean Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 1),
-    Statistic(-1, "mean-points-against", "Mean Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 2),
-    Statistic(-1, "mean-points-margin", "Mean Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 3),
-    Statistic(-1, "mean-points-total", "Mean Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 4),
-    Statistic(-1, "stddev-points-for", "Std Dev Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 5),
-    Statistic(-1, "stddev-points-against", "Std Dev Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 6),
-    Statistic(-1, "stddev-points-margin", "Std Dev Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 7),
-    Statistic(-1, "stddev-points-total", "Std Dev Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 8),
-    Statistic(-1, "max-points-for", "Max Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 9),
-    Statistic(-1, "max-points-against", "Max Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 10),
-    Statistic(-1, "max-points-margin", "Max Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 11),
-    Statistic(-1, "max-points-total", "Max Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 12),
-    Statistic(-1, "min-points-for", "Min Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 13),
-    Statistic(-1, "min-points-against", "Min Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 14),
-    Statistic(-1, "min-points-margin", "Min Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 15),
-    Statistic(-1, "min-points-total", "Min Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 16)
+    Statistic(-1, "mean-points-for", "Mean Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 1, Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "mean-points-against", "Mean Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 2, Some("#d3d"), Some(
+      """
+        |Mean number of points per game allowed versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "mean-points-margin", "Mean Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 3, Some("#d3d"), Some(
+      """
+        |Mean winning (losing) margin versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "mean-points-total", "Mean Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 4,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "stddev-points-for", "Std Dev Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 5,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "stddev-points-against", "Std Dev Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 6,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "stddev-points-margin", "Std Dev Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 7,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "stddev-points-total", "Std Dev Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 8,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "max-points-for", "Max Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 9,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "max-points-against", "Max Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 10,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "max-points-margin", "Max Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 11,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "max-points-total", "Max Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 12,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "min-points-for", "Min Points For", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 13,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "min-points-against", "Min Points Against", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 14,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "min-points-margin", "Min Points Margin", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 15,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin)),
+    Statistic(-1, "min-points-total", "Min Points Total", -1, "Team", "%6.3f", "%6.3f", higherIsBetter = true, 16,Some("#d3d"), Some(
+      """
+        |Mean number of points per game scored versus DI opponents this season.
+      """.stripMargin))
   ).map(s => s.key -> s).toMap
 
   def mean(ds: DescriptiveStatistics): Double = ds.getMean

@@ -4,7 +4,6 @@ import play.api.db.slick.Profile
 import org.joda.time.LocalDate
 import models.util.Mappers._
 import securesocial.core.AuthenticationMethod
-import models.KeyedValue
 
 trait Model extends Profile {
 
@@ -262,15 +261,19 @@ trait Model extends Profile {
 
     def displayOrder = column[Int]("display_order")
 
+    def color = column[Option[String]]("color")
+
+    def description = column[Option[String]]("description", O.DBType("TEXT"))
+
     def modelFk = foreignKey("stat_mod_fk", modelId, StatisticalModels)(_.id)
 
     def indexStatKey = index("idx_stat_key", key, unique = true)
 
     def indexStatName = index("idx_stat_name", name, unique = true)
 
-    def * = id ~ key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter ~ displayOrder <>(Statistic.apply _, Statistic.unapply _)
+    def * = id ~ key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter ~ displayOrder ~ color ~ description  <>(Statistic.apply _, Statistic.unapply _)
 
-    def autoInc = key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter ~ displayOrder returning id
+    def autoInc = key ~ name ~ modelId ~ targetDomain ~ shortFormat ~ longFormat ~ higherIsBetter ~ displayOrder ~ color ~ description returning id
   }
 
   object StatisticalModels extends Table[StatisticalModel]("models") {
