@@ -172,3 +172,149 @@ function loadGamesScatter(key) {
 
         });
 }
+
+function loadHistBox() {
+    var dataCells = d3.selectAll("td.statvalue")[0];
+    var dd = dataCells.map(function(d){return d.innerText;});
+    var formatCount = d3.format(",.0f");
+    var svg = d3.select("#histBox").append("svg")
+        .attr("width", 680)
+        .attr("height", 400)
+        .append("g")
+        .attr("transform", "translate(" + 20 + "," + 20 + ")");
+
+    var x = d3.scale.linear()
+        .domain([d3.min(dd), d3.max(dd)])
+        .range([0, 680]);
+
+    var data = d3.layout.histogram()
+        .bins(x.ticks(20))
+        (dd);
+
+    var y = d3.scale.linear()
+        .domain([0, d3.max(data, function(d) { return d.y; })])
+        .range([400, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+
+    var bar = svg.selectAll(".bar")
+        .data(data)
+        .enter().append("g")
+        .attr("class", "bar")
+        .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
+
+    bar.append("rect")
+        .attr("x", 1)
+        .attr("width", x(data[0].dx) - 1)
+        .attr("height", function(d) { return 400 - y(d.y); });
+
+    bar.append("text")
+        .attr("dy", ".75em")
+        .attr("y", 6)
+        .attr("x", x(data[0].dx) / 2)
+        .attr("text-anchor", "middle")
+        .text(function(d) { return formatCount(d.y); });
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + 400 + ")")
+        .call(xAxis);
+}
+
+function loadSeriesBox(data) {
+    var svgContainer = d3.select("#seriesBox").append("svg")
+        .attr("width", 680)
+        .attr("height", 400);
+    var minDate = d3.time.format("%Y-%m-%d").parse(series.series[0].date);
+    var maxDate = d3.time.format("%Y-%m-%d").parse(series.series[series.series.length - 1].date);
+    var minValue = d3.min(series.series, function (d) {
+        return d.min;
+    });
+    var maxValue = d3.max(series.series, function (d) {
+        return d.max;
+    });
+    var margin = (maxValue - minValue) / 20;
+    var xScale = d3.time.scale().domain([minDate, maxDate]).range([30, 660]);
+    var yScale = d3.scale.linear().domain([minValue - margin, maxValue + margin]).range([380, 20]);
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").innerTickSize(1).outerTickSize(1);
+    var yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(1).outerTickSize(1);
+
+    var area1 = d3.svg.area()
+        .x(function (d) {
+            return xScale(d3.time.format("%Y-%m-%d").parse(d.date));
+        })
+        .y0(function (d) {
+            return yScale(d.mean - d.stdDev);
+        })
+        .y1(function (d) {
+            return yScale(d.mean + d.stdDev);
+        });
+    var area2 = d3.svg.area()
+        .x(function (d) {
+            return xScale(d3.time.format("%Y-%m-%d").parse(d.date));
+        })
+        .y0(function (d) {
+            return yScale(d.mean - 2 * d.stdDev);
+        })
+        .y1(function (d) {
+            return yScale(d.mean + 2 * d.stdDev);
+        });
+    var min = d3.svg.line()
+        .x(function (d) {
+            return xScale(d3.time.format("%Y-%m-%d").parse(d.date));
+        })
+        .y(function (d) {
+            return yScale(d.min);
+        });
+    var median = d3.svg.line()
+        .x(function (d) {
+            return xScale(d3.time.format("%Y-%m-%d").parse(d.date));
+        })
+        .y(function (d) {
+            return yScale(d.med);
+        });
+    var max = d3.svg.line()
+        .x(function (d) {
+            return xScale(d3.time.format("%Y-%m-%d").parse(d.date));
+        })
+        .y(function (d) {
+            return yScale(d.max);
+        });
+    svgContainer.append("svg:path")
+        .data([series.series])
+        .attr("d", area1)
+        .style("fill", "rgba(64, 64, 232, 0.2)");
+    svgContainer.append("svg:path")
+        .data([series.series])
+        .attr("d", area2)
+        .style("fill", "rgba(64, 64, 232, 0.2)");
+    svgContainer.append("svg:path")
+        .data([series.series])
+        .attr("d", min)
+        .style("stroke", "red")
+        .style("stroke-width", "1")
+        .style("fill","none");
+    svgContainer.append("svg:path")
+        .data([series.series])
+        .attr("d", median)
+        .style("stroke", "yellow")
+        .style("stroke-width", "1")
+        .style("fill","none");
+    svgContainer.append("svg:path")
+        .data([series.series])
+        .attr("d", max)
+        .style("stroke", "green")
+        .style("stroke-width", "1")
+        .style("fill","none");
+    svgContainer.append("g")
+        .attr("class", "xAxis")
+        .attr("transform", "translate(0,380)")
+        .call(xAxis);
+    svgContainer.append("g")
+        .attr("class", "yAxis")
+        .attr("transform", "translate(30,0)")
+        .call(yAxis);
+}

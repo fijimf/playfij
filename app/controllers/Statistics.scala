@@ -32,6 +32,20 @@ object Statistics extends Controller with SecureSocial {
           val teams: List[Team] = scheduleDao.teamMap.values.toList
           scheduleDao.statPage(key).map{case (statistic: Statistic, frame: Frame[LocalDate, Team, Double]) => {
             val date=frame.rowIx.last.get
+            val t: Frame[Team, LocalDate, Double] = frame.T
+            val jsonSeries = Json.obj("series" -> JsArray(frame.rowIx.toSeq.map {
+              date =>
+                val descriptiveStats: DescriptiveStats = DescriptiveStats(frame.first(date))
+                Json.obj(
+                  "date" -> date.toString("yyyy-MM-dd"),
+                  "mean" -> descriptiveStats.mean,
+                  "stdDev" -> descriptiveStats.stdDev,
+                  "min" -> descriptiveStats.min,
+                  "med" -> descriptiveStats.med,
+                  "max" -> descriptiveStats.max
+                )
+            }.toList)).toString()
+
             val values: Series[Team, Double] = frame.rowAt(frame.rowIx.length-1)
             val table: List[StatRow] = values.toSeq.zipWithIndex.map {
               case ((team, value), i) =>
@@ -40,7 +54,7 @@ object Statistics extends Controller with SecureSocial {
                 val pctile = 100.0 * (values.length - rank) / values.length
                 StatRow(team, rank, value, pctile, zScore)
             }.toList.sortBy(_.rank)
-            Ok(views.html.statEg(statistic, date, DescriptiveStats(values),table) )
+            Ok(views.html.statEg(statistic, date, DescriptiveStats(values),table, jsonSeries) )
           }}.getOrElse(Ok(views.html.resourceNotFound("X","X")))
 
       }

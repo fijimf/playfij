@@ -1,4 +1,4 @@
-@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow])
+@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String)
 
 @richMain(s.name, None) {
 
@@ -43,12 +43,17 @@
 <div class="row-fluid">
     <div class="span12">
         <div class="container-fluid">
-
             <div class="row-fluid">
                 <div class="span5">
                     <table class="table table-compact table-bordered table-subcompact">
                         <thead>
-                        <tr><th style="width:1.5em;">Rank</th><th>Team</th><th style="width:5em;">Value</th><th style="width:5em;">Percentile</th><th style="width:5em;">Z-score</th></tr>
+                        <tr>
+                            <th style="width:1.5em;">Rank</th>
+                            <th>Team</th>
+                            <th style="width:5em;">Value</th>
+                            <th style="width:5em;">Percentile</th>
+                            <th style="width:5em;">Z-score</th>
+                        </tr>
                         </thead>
                         <tbody>
                         @ms.map{ m=>
@@ -57,7 +62,7 @@
                         <tr>
                             <td class="text-right">@m.rank</td>
                             <td><a href="#">@m.team.name</a></td>
-                            <td class="text-right">@m.value.formatted(s.longFormat)</td>
+                            <td class="statvalue text-right">@m.value.formatted(s.longFormat)</td>
                             <td class="text-right">@m.percentile.formatted("%5.2f")</td>
                             <td class="text-right">@m.zScore.formatted("%5.3f")</td>
                         </tr>
@@ -65,11 +70,30 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="span7">
+                    <p style="text-align: center; font-size: 12px; font-weight:bold;">Evolution of the population:
+                        &nbsp;
+                        Min/Med/Max | &mu; &plusmn; 2 &sigma;</p>
+                    <div id="seriesBox">
+                    </div>
+                    <p style="text-align: center; font-size: 12px; font-weight:bold;">Current Distribution</p>
+                    <div id="histBox">
+                    </div>
+                    <p style="text-align: center; font-size: 12px; font-weight:bold;">Game Results</p>
+                    <div id="scatterBox">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+    <style>
+        .xAxis, .yAxis {
+            font-size: 10px;
+        }
+    </style>
+    <script type="text/javascript">var series = @Html(ser); loadSeriesBox(series); loadHistBox();</script>
 
-
-}
+    }
 
