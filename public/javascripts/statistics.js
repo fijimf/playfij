@@ -175,29 +175,29 @@ function loadGamesScatter(key) {
 
 function loadHistBox() {
     var dataCells = d3.selectAll("td.statvalue")[0];
-    var dd = dataCells.map(function(d){return d.innerText;});
+    var dd = dataCells.map(function(d){return parseFloat(d.innerText);});
     var formatCount = d3.format(",.0f");
     var svg = d3.select("#histBox").append("svg")
         .attr("width", 680)
         .attr("height", 400)
         .append("g")
-        .attr("transform", "translate(" + 20 + "," + 20 + ")");
+        ;
 
     var x = d3.scale.linear()
         .domain([d3.min(dd), d3.max(dd)])
-        .range([0, 680]);
+        .range([30, 660]);
 
     var data = d3.layout.histogram()
-        .bins(x.ticks(20))
+        .bins(x.nice().ticks(20))
         (dd);
 
     var y = d3.scale.linear()
         .domain([0, d3.max(data, function(d) { return d.y; })])
-        .range([400, 0]);
+        .range([380, 20]);
 
     var xAxis = d3.svg.axis()
         .scale(x)
-        .orient("bottom");
+        .orient("bottom").innerTickSize(1).outerTickSize(1);
 
 
     var bar = svg.selectAll(".bar")
@@ -208,19 +208,21 @@ function loadHistBox() {
 
     bar.append("rect")
         .attr("x", 1)
-        .attr("width", x(data[0].dx) - 1)
-        .attr("height", function(d) { return 400 - y(d.y); });
+        .attr("width", x(data[1].x) - x(data[0].x))
+        .attr("height", function(d) { return 380 - y(d.y); })
+        .style("fill", "rgba(64, 64, 232, 0.6)");
 
     bar.append("text")
-        .attr("dy", ".75em")
+        .attr("dy", "-0.75em")
         .attr("y", 6)
-        .attr("x", x(data[0].dx) / 2)
+        .attr("x", (x(data[1].x) - x(data[0].x)) / 2)
         .attr("text-anchor", "middle")
+        .attr("class", "xAxis")
         .text(function(d) { return formatCount(d.y); });
 
     svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + 400 + ")")
+        .attr("class", "xAxis")
+        .attr("transform", "translate(0,380)")
         .call(xAxis);
 }
 
