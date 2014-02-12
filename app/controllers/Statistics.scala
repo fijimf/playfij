@@ -6,7 +6,7 @@ import play.api.Logger
 import models._
 import models.ScheduleDao
 import org.joda.time.LocalDate
-import org.saddle.{Vec, Series, Frame}
+import org.saddle.{Index, Vec, Series, Frame}
 import play.api.libs.json.Json._
 import play.api.libs.json.{JsArray, JsObject, Json}
 import analysis.ModelRecord
@@ -25,39 +25,66 @@ object Statistics extends Controller with SecureSocial {
 
   private val scheduleDao: ScheduleDao = ScheduleDao(model)
 
-  def stat(key:String) = UserAwareAction {
+  def createScatterData(data: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): String = {
+    JsArray(data.filter(_.result.isDefined).map(d => {
+      if (frame.rowIx.contains(d.game.date)) {
+        val series: Series[Team, Double] = frame.rowAt(frame.rowIx.getFirst(d.game.date.plusDays(-1)))
+        if (series.index.contains(d.homeTeam) && series.index.contains(d.awayTeam)) {
+          val hv: Scalar[Double] = series.at(series.index.getFirst(d.homeTeam))
+          val av: Scalar[Double] = series.at(series.index.getFirst(d.awayTeam))
+          val mg = d.result.get.homeScore - d.result.get.homeScore
+          Some(hv.get, av.get, mg)
+        } else {
+          None
+        }
+      } else {
+        None
+      }
+    }).flatten.map(tup=>Json.obj("hv"->tup._1, "av"->tup._2, "mg"->tup._3)).toList).toString
+
+  }
+
+  def stat(key: String) = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
           val teams: List[Team] = scheduleDao.teamMap.values.toList
-          scheduleDao.statPage(key).map{case (statistic: Statistic, frame: Frame[LocalDate, Team, Double]) => {
-            val date=frame.rowIx.last.get
-            val t: Frame[Team, LocalDate, Double] = frame.T
-            val jsonSeries = Json.obj("series" -> JsArray(frame.rowIx.toSeq.map {
-              date =>
-                val descriptiveStats: DescriptiveStats = DescriptiveStats(frame.first(date))
-                Json.obj(
-                  "date" -> date.toString("yyyy-MM-dd"),
-                  "mean" -> descriptiveStats.mean,
-                  "stdDev" -> descriptiveStats.stdDev,
-                  "min" -> descriptiveStats.min,
-                  "med" -> descriptiveStats.med,
-                  "max" -> descriptiveStats.max
-                )
-            }.toList)).toString()
+          val scheduleData: List[ScheduleData] = scheduleDao.loadScheduleData
 
-            val values: Series[Team, Double] = frame.rowAt(frame.rowIx.length-1)
-            val table: List[StatRow] = values.toSeq.zipWithIndex.map {
-              case ((team, value), i) =>
-                val rank = values.rank(RankTie.Min, !statistic.higherIsBetter).at(i).get.toInt
-                val zScore = (value - values.mean) / values.stdev
-                val pctile = 100.0 * (values.length - rank) / values.length
-                StatRow(team, rank, value, pctile, zScore)
-            }.toList.sortBy(_.rank)
-            Ok(views.html.statEg(statistic, date, DescriptiveStats(values),table, jsonSeries) )
-          }}.getOrElse(Ok(views.html.resourceNotFound("X","X")))
+          scheduleDao.statPage(key).map {
+            case (statistic: Statistic, frame: Frame[LocalDate, Team, Double]) => {
+              val date = frame.rowIx.last.get
+              val jsonSeries = createDescriptiveSeries(frame)
+              val gameScatter = createScatterData(scheduleData, frame)
+              val values: Series[Team, Double] = frame.rowAt(frame.rowIx.length - 1)
+              val table: List[StatRow] = values.toSeq.zipWithIndex.map {
+                case ((team, value), i) =>
+                  val rank = values.rank(RankTie.Min, !statistic.higherIsBetter).at(i).get.toInt
+                  val zScore = (value - values.mean) / values.stdev
+                  val pctile = 100.0 * (values.length - rank) / values.length
+                  StatRow(team, rank, value, pctile, zScore)
+              }.toList.sortBy(_.rank)
+              Ok(views.html.statEg(statistic, date, DescriptiveStats(values), table, jsonSeries, gameScatter))
+            }
+          }.getOrElse(Ok(views.html.resourceNotFound("X", "X")))
 
       }
+  }
+
+
+  def createDescriptiveSeries(frame: Frame[LocalDate, Team, Double]):String = {
+    val jsonSeries = Json.obj("series" -> JsArray(frame.rowIx.toSeq.map {
+      date =>
+        val descriptiveStats: DescriptiveStats = DescriptiveStats(frame.first(date))
+        Json.obj(
+          "date" -> date.toString("yyyy-MM-dd"),
+          "mean" -> descriptiveStats.mean,
+          "stdDev" -> descriptiveStats.stdDev,
+          "min" -> descriptiveStats.min,
+          "med" -> descriptiveStats.med,
+          "max" -> descriptiveStats.max
+        )
+    }.toList)).toString()
   }
 
   def stats(key: String) = UserAwareAction {

@@ -122,16 +122,10 @@ function loadStats(key) {
     );
 }
 
-function loadGamesScatter(key) {
-    var jsonUrl = "/api/games";
-    $.getJSON(jsonUrl, {},
-        function (json) {
-            if (json["status"] == "ok") {
-
-                var teamData = json.games;
-                var svgContainer = d3.select("#scatter").append("svg")
-                    .attr("width", 900)
-                    .attr("height", 900);
+function loadGamesScatter(data) {
+                var svgContainer = d3.select("#scatterBoox").append("svg")
+                    .attr("width", 680)
+                    .attr("height", 680);
 
 
                 var xScale = d3.scale.linear().domain([20,140]).range([20,880]);
