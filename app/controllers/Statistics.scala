@@ -28,12 +28,21 @@ object Statistics extends Controller with SecureSocial {
   def createScatterData(data: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): String = {
     JsArray(data.filter(_.result.isDefined).map(d => {
       if (frame.rowIx.contains(d.game.date)) {
-        val series: Series[Team, Double] = frame.rowAt(frame.rowIx.getFirst(d.game.date.plusDays(-1)))
-        if (series.index.contains(d.homeTeam) && series.index.contains(d.awayTeam)) {
-          val hv: Scalar[Double] = series.at(series.index.getFirst(d.homeTeam))
-          val av: Scalar[Double] = series.at(series.index.getFirst(d.awayTeam))
-          val mg = d.result.get.homeScore - d.result.get.homeScore
-          Some(hv.get, av.get, mg)
+        val i: Int = frame.rowIx.getFirst(d.game.date.plusDays(-1))
+        if (i > 0) {
+          val series: Series[Team, Double] = frame.rowAt(i)
+          if (series.index.contains(d.homeTeam) && series.index.contains(d.awayTeam)) {
+            val hv: Scalar[Double] = series.at(series.index.getFirst(d.homeTeam))
+            val av: Scalar[Double] = series.at(series.index.getFirst(d.awayTeam))
+            val mg = d.result.get.homeScore - d.result.get.awayScore
+            if (hv.isNA || av.isNA) {
+              None
+            } else {
+              Some(hv.get, av.get, mg)
+            }
+          } else {
+            None
+          }
         } else {
           None
         }
@@ -73,7 +82,7 @@ object Statistics extends Controller with SecureSocial {
 
 
   def createDescriptiveSeries(frame: Frame[LocalDate, Team, Double]):String = {
-    val jsonSeries = Json.obj("series" -> JsArray(frame.rowIx.toSeq.map {
+    Json.obj("series" -> JsArray(frame.rowIx.toSeq.map {
       date =>
         val descriptiveStats: DescriptiveStats = DescriptiveStats(frame.first(date))
         Json.obj(

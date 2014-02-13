@@ -123,48 +123,38 @@ function loadStats(key) {
 }
 
 function loadGamesScatter(data) {
-                var svgContainer = d3.select("#scatterBoox").append("svg")
-                    .attr("width", 680)
-                    .attr("height", 680);
+    var svgContainer = d3.select("#scatterBox").append("svg")
+        .attr("width", 680)
+        .attr("height", 680);
+    var mx = d3.max([d3.max(data, function(d){return d.hv;}),d3.max(data, function(d){return d.av;})]);
+    var mn = d3.min([d3.min(data, function(d){return d.hv;}),d3.min(data, function(d){return d.av;})]);
+    var xScale = d3.scale.linear().domain([mn, mx]).range([20, 660]);
+    var yScale = d3.scale.linear().domain([mn, mx]).range([660, 20]);
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").innerTickSize(1).outerTickSize(1);
+    var yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(1).outerTickSize(1);
 
+    var dots = svgContainer.selectAll("circle").data(data);
+    var jitter = d3.random.normal(0, 3);
+    dots.enter().append("circle")
+        .attr("cx", function (d) {
+            return xScale(d.av)+jitter();
+        })
+        .attr("cy", function (d) {
+            return yScale(d.hv)+jitter();
+        })
+        .attr("r", 3)
+        .attr("stroke", "black")
+        .attr("stroke-width", 0)
+        .attr("fill", function(d) {if (d.mg<0) { return "rgba(192, 32, 32, 0.5)" } else {return "rgba(32,192,32,0.5)";}});
 
-                var xScale = d3.scale.linear().domain([20,140]).range([20,880]);
-                var yScale = d3.scale.linear().domain([20,140]).range([880,20]);
-                var xAxis = d3.svg.axis().scale(xScale).orient("bottom").innerTickSize(3).outerTickSize(3);
-                var yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(3).outerTickSize(3);
-
-                svgContainer.append("polygon")
-                    .attr("points",
-                        xScale(20)+","+yScale(20) +" " +
-                            xScale(20)+","+yScale(140) +" " +
-                            xScale(140)+","+yScale(140) +" " +
-                            xScale(140)+","+yScale(20) +" ")
-                    .attr("fill","#ddd");
-
-                var dots = svgContainer.selectAll("circle").data(teamData);
-                dots.enter().append("circle")
-                    .attr("cx", function (d) {
-                        return xScale(d.hs);
-                    })
-                    .attr("cy", function (d) {
-                        return yScale(d.as);
-                    })
-                    .attr("r", 3)
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 0)
-                    .attr("fill", "rgba(16 ,192,16,0.33)");
-
-                svgContainer.append("g")
-                    .attr("class", "xAxis")
-                    .attr("transform", "translate(0,880)")
-                    .call(xAxis);
-                svgContainer.append("g")
-                    .attr("class", "yAxis")
-                    .attr("transform", "translate(20,0)")
-                    .call(yAxis);
-            }
-
-        });
+    svgContainer.append("g")
+        .attr("class", "xAxis")
+        .attr("transform", "translate(0,660)")
+        .call(xAxis);
+    svgContainer.append("g")
+        .attr("class", "yAxis")
+        .attr("transform", "translate(20,0)")
+        .call(yAxis);
 }
 
 function loadHistBox() {

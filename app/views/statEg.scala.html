@@ -61,7 +61,7 @@
 
                         <tr>
                             <td class="text-right">@m.rank</td>
-                            <td><a href="#">@m.team.name</a></td>
+                            <td><a href="@controllers.routes.Schedule.team(m.team.key)">@m.team.name</a></td>
                             <td class="statvalue text-right">@m.value.formatted(s.longFormat)</td>
                             <td class="text-right">@m.percentile.formatted("%5.2f")</td>
                             <td class="text-right">@m.zScore.formatted("%5.3f")</td>
@@ -72,15 +72,15 @@
                 </div>
 
                 <div class="span7">
-                    <p style="text-align: center; font-size: 12px; font-weight:bold;">Evolution of the population:
+                    <p style="text-align: center; font-size: 14px; font-weight:bold;">Evolution of the population:
                         &nbsp;
                         Min/Med/Max | &mu; &plusmn; 2 &sigma;</p>
                     <div id="seriesBox">
                     </div>
-                    <p style="text-align: center; font-size: 12px; font-weight:bold;">Current Distribution</p>
+                    <p style="text-align: center; font-size: 14px; font-weight:bold;">Current Distribution</p>
                     <div id="histBox">
                     </div>
-                    <p style="text-align: center; font-size: 12px; font-weight:bold;">Game Results</p>
+                    <p style="text-align: center; font-size: 14px; font-weight:bold;">Game Results <span style="color:rgba(32, 192, 32, 0.85)">Wins</span> | <span style="color:rgba(192,32,32,0.85);">Losses</span></p>
                     <div id="scatterBox">
                     </div>
                 </div>
