@@ -25,7 +25,7 @@
                         @tp.map { tup =>
                         <tr style="height:44px;">
 
-                            <th style="width:20em; text-align: right"><a href="@controllers.routes.Schedule.stat(tup._1.key)">@tup._1.name</a></th>
+                            <th style="width:20em; text-align: right"><a href="@controllers.routes.Statistics.stat(tup._1.key)">@tup._1.name</a></th>
                             @tup._2.map { rec =>
 
                             <td style="width:44px; background-color:@rec._1.primaryColor.getOrElse("white")">

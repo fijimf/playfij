@@ -11,8 +11,7 @@ GET  /deepfij/teams/:key                                controllers.Schedule.tea
 GET  /deepfij/teams/:key/:seasonKey                     controllers.Schedule.teamSeason(key, seasonKey)
 GET  /deepfij/search                                    controllers.Schedule.search(q:String)
 GET  /deepfij/stats                                     controllers.Schedule.stats
-GET  /deepfij/stats/:key                                controllers.Schedule.stat(key)
-GET  /deepfij/stats2/:key                               controllers.Statistics.stat(key)
+GET  /deepfij/stats/:key                               controllers.Statistics.stat(key)
 #TODO Regex this shit
 GET  /deepfij/:yyyy/:mm/:dd                             controllers.Schedule.date(yyyy:Int,mm:Int,dd:Int)
 
