@@ -23,7 +23,10 @@ object ApplicationBuild extends Build {
     "securesocial" %% "securesocial" % "2.1.2" exclude("org.scala-stm", "scala-stm_2.10.0") exclude("play", "*"),
     "org.scala-saddle" %% "saddle-core" % "1.3.+",
     "org.apache.mahout" % "mahout-math" % "0.8",
-    "org.apache.mahout" % "mahout-core" % "0.8"
+    "org.apache.mahout" % "mahout-core" % "0.8",
+    "org.apache.mahout.hadoop" % "hadoop-core" % "0.20.1"
+
+
 
   )
 

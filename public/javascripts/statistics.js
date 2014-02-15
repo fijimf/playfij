@@ -155,6 +155,39 @@ function loadGamesScatter(data) {
         .attr("class", "yAxis")
         .attr("transform", "translate(20,0)")
         .call(yAxis);
+
+    var zContainer = d3.select("#zBox").append("svg")
+        .attr("width", 680)
+        .attr("height", 680);
+    var zmx = d3.max([d3.max(data, function(d){return d.hz;}),d3.max(data, function(d){return d.az;})]);
+    var zmn = d3.min([d3.min(data, function(d){return d.hz;}),d3.min(data, function(d){return d.az;})]);
+    var zxScale = d3.scale.linear().domain([zmn, zmx]).range([20, 660]);
+    var zyScale = d3.scale.linear().domain([zmn, zmx]).range([660, 20]);
+    var zxAxis = d3.svg.axis().scale(zxScale).orient("bottom").innerTickSize(1).outerTickSize(1);
+    var zyAxis = d3.svg.axis().scale(zyScale).orient("left").innerTickSize(1).outerTickSize(1);
+
+    var zdots = zContainer.selectAll("circle").data(data);
+    var zjitter = d3.random.normal(0, 3);
+    zdots.enter().append("circle")
+        .attr("cx", function (d) {
+            return zxScale(d.az)+jitter();
+        })
+        .attr("cy", function (d) {
+            return zyScale(d.hz)+jitter();
+        })
+        .attr("r", 3)
+        .attr("stroke", "black")
+        .attr("stroke-width", 0)
+        .attr("fill", function(d) {if (d.mg<0) { return "rgba(192, 32, 32, 0.5)" } else {return "rgba(32,192,32,0.5)";}});
+
+    zContainer.append("g")
+        .attr("class", "xAxis")
+        .attr("transform", "translate(0,660)")
+        .call(zxAxis);
+    zContainer.append("g")
+        .attr("class", "yAxis")
+        .attr("transform", "translate(20,0)")
+        .call(zyAxis);
 }
 
 function loadHistBox() {
@@ -303,4 +336,8 @@ function loadSeriesBox(data) {
         .attr("class", "yAxis")
         .attr("transform", "translate(30,0)")
         .call(yAxis);
+}
+
+function loadLogGraph(b1,b2) {
+
 }

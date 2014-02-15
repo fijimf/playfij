@@ -1,4 +1,4 @@
-@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String, scat:String)
+@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String, scat:String, betas:List[(Int,((Double,Double),(Double, Double)))])
 
 @richMain(s.name, None) {
 
@@ -80,9 +80,27 @@
                     <p style="text-align: center; font-size: 14px; font-weight:bold;">Current Distribution</p>
                     <div id="histBox">
                     </div>
-                    <p style="text-align: center; font-size: 14px; font-weight:bold;">Game Results <span style="color:rgba(32, 192, 32, 0.85)">Wins</span> | <span style="color:rgba(192,32,32,0.85);">Losses</span></p>
+                    <p style="text-align: center; font-size: 14px; font-weight:bold;">Game Results (Axes are values)<span style="color:rgba(32, 192, 32, 0.85)">Wins</span> | <span style="color:rgba(192,32,32,0.85);">Losses</span></p>
                     <div id="scatterBox">
                     </div>
+                    <p style="text-align: center; font-size: 14px; font-weight:bold;">Game Results (Axes are Z-scores)<span style="color:rgba(32, 192, 32, 0.85)">Wins</span> | <span style="color:rgba(192,32,32,0.85);">Losses</span></p>
+                    <div id="zBox">
+                    </div>
+
+                    <div>
+                        <p style="text-align: center; font-size: 14px; font-weight:bold;">Logistic Regression on Spread [P(w)= 1/1-exp(-&beta; (x<sub>1</sub>-x<sub>0</sub>))]</p>
+                        <table>
+                        <tr><th>Spread</th><th>&beta;-coefficient (Values)</th><th>Acc</th><th>&beta;-coefficient (z-Scores)</th><th>Acc</th></tr>
+                        @betas.map{ m=>
+                        <tr>
+                            <td class="text-right">@m._1</td>
+                            <td class="text-right">@m._2._1._1.formatted("%5.3f")</td>
+                            <td class="text-right">@m._2._1._2.formatted("%5.3f")</td>
+                            <td class="text-right">@m._2._2._1.formatted("%5.3f")</td>
+                            <td class="text-right">@m._2._2._2.formatted("%5.3f")</td>
+                        </tr>
+                        }
+                    </table></div>
                 </div>
             </div>
         </div>
@@ -93,7 +111,7 @@
             font-size: 10px;
         }
     </style>
-    <script type="text/javascript">var series = @Html(ser); loadSeriesBox(series); loadHistBox(); var points = @Html(scat); loadGamesScatter(points);</script>
+    <script type="text/javascript">var series = @Html(ser); loadSeriesBox(series); loadHistBox(); var points = @Html(scat); loadGamesScatter(points);loadLogGraph(@betas(betas.size/2)._2._1,@betas(betas.size/2)._2._1)</script>
 
     }
 

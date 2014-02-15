@@ -12,6 +12,7 @@ import play.api.libs.json.{JsArray, JsObject, Json}
 import analysis.ModelRecord
 import org.saddle.scalar.Scalar
 import org.saddle.stats.RankTie
+import analysis.predictors.Predictor
 
 
 object Statistics extends Controller with SecureSocial {
@@ -25,12 +26,20 @@ object Statistics extends Controller with SecureSocial {
 
   private val scheduleDao: ScheduleDao = ScheduleDao(model)
 
-  def createScatterData(data: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): String = {
-    JsArray(data.filter(_.result.isDefined).map(d => {
+  def createScatterData( analysisSet:List[(Double, Double, Double, Double, Int)]): String = {
+    JsArray(analysisSet.map(tup => Json.obj("hv" -> tup._1, "av" -> tup._2, "hz" -> tup._3, "az" -> tup._4, "mg" -> tup._5)).toList).toString
+
+  }
+
+
+  def createAnalysisSet(data: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): List[(Double, Double, Double, Double, Int)] = {
+    data.filter(_.result.isDefined).map(d => {
       if (frame.rowIx.contains(d.game.date)) {
         val i: Int = frame.rowIx.getFirst(d.game.date.plusDays(-1))
         if (i > 0) {
           val series: Series[Team, Double] = frame.rowAt(i)
+          val mean: Double = series.mean
+          val stdev: Double = series.stdev
           if (series.index.contains(d.homeTeam) && series.index.contains(d.awayTeam)) {
             val hv: Scalar[Double] = series.at(series.index.getFirst(d.homeTeam))
             val av: Scalar[Double] = series.at(series.index.getFirst(d.awayTeam))
@@ -38,7 +47,7 @@ object Statistics extends Controller with SecureSocial {
             if (hv.isNA || av.isNA) {
               None
             } else {
-              Some(hv.get, av.get, mg)
+              Some(hv.get, av.get, (hv.get - mean) / stdev, (av.get - mean) / stdev, mg)
             }
           } else {
             None
@@ -49,8 +58,7 @@ object Statistics extends Controller with SecureSocial {
       } else {
         None
       }
-    }).flatten.map(tup=>Json.obj("hv"->tup._1, "av"->tup._2, "mg"->tup._3)).toList).toString
-
+    }).flatten
   }
 
   def stat(key: String) = UserAwareAction {
@@ -64,7 +72,9 @@ object Statistics extends Controller with SecureSocial {
             case (statistic: Statistic, frame: Frame[LocalDate, Team, Double]) => {
               val date = frame.rowIx.last.get
               val jsonSeries = createDescriptiveSeries(frame)
-              val gameScatter = createScatterData(scheduleData, frame)
+              val analysisSet: List[(Double, Double, Double, Double, Int)] = createAnalysisSet(scheduleData, frame)
+              val gameScatter = createScatterData(analysisSet)
+              val betas: List[(Int, ((Double, Double), (Double, Double)))] = Predictor.evaluate(analysisSet.map(t=>(t._1,t._2,t._3,t._4,t._5.toDouble)))
               val values: Series[Team, Double] = frame.rowAt(frame.rowIx.length - 1)
               val table: List[StatRow] = values.toSeq.zipWithIndex.map {
                 case ((team, value), i) =>
@@ -73,7 +83,7 @@ object Statistics extends Controller with SecureSocial {
                   val pctile = 100.0 * (values.length - rank) / values.length
                   StatRow(team, rank, value, pctile, zScore)
               }.toList.sortBy(_.rank)
-              Ok(views.html.statEg(statistic, date, DescriptiveStats(values), table, jsonSeries, gameScatter))
+              Ok(views.html.statEg(statistic, date, DescriptiveStats(values), table, jsonSeries, gameScatter, betas))
             }
           }.getOrElse(Ok(views.html.resourceNotFound("X", "X")))
 
@@ -81,7 +91,7 @@ object Statistics extends Controller with SecureSocial {
   }
 
 
-  def createDescriptiveSeries(frame: Frame[LocalDate, Team, Double]):String = {
+  def createDescriptiveSeries(frame: Frame[LocalDate, Team, Double]): String = {
     Json.obj("series" -> JsArray(frame.rowIx.toSeq.map {
       date =>
         val descriptiveStats: DescriptiveStats = DescriptiveStats(frame.first(date))
