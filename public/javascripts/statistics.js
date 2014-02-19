@@ -339,5 +339,42 @@ function loadSeriesBox(data) {
 }
 
 function loadLogGraph(b1,b2) {
+    var svgContainer = d3.select("#logBox").append("svg")
+        .attr("width", 680)
+        .attr("height", 400);
+    var data = [];
+    for (var i=0;i<=240;i++){
+        data[i]=(i-120.0)/20.0;
+        console.log(i,data[i], 1.0/(1.0+Math.exp(-b1*data[i])))
+    }
+
+    var xScale = d3.scale.linear().domain([-6,6]).range([30, 660]);
+    var yScale = d3.scale.linear().domain([0,1]).range([380, 20]);
+    var xAxis = d3.svg.axis().scale(xScale).orient("bottom").innerTickSize(1).outerTickSize(1);
+    var yAxis = d3.svg.axis().scale(yScale).orient("left").innerTickSize(1).outerTickSize(1);
+
+    var area1 = d3.svg.area()
+        .x(function (d) {
+            return xScale(d);
+        })
+        .y1(function (d) {
+            return yScale(1.0/(1.0+Math.exp(-b1*d)));
+        })
+        .y0(function (d) {
+            return yScale(0);
+        });
+    svgContainer.append("svg:path")
+        .data([data])
+        .attr("d", area1)
+        .style("fill", "rgba(64, 64, 232, 0.2)");
+    svgContainer.append("g")
+        .attr("class", "xAxis")
+        .attr("transform", "translate(0,380)")
+        .call(xAxis);
+    svgContainer.append("g")
+        .attr("class", "yAxis")
+        .attr("transform", "translate(30,0)")
+        .call(yAxis);
+
 
 }

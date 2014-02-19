@@ -1,4 +1,4 @@
-@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String, scat:String, betas:List[(Int,((Double,Double),(Double, Double)))])
+@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String, scat:String, betas:List[(Double,((Double,Double),(Double, Double)))])
 
 @richMain(s.name, None) {
 
@@ -86,18 +86,32 @@
                     <p style="text-align: center; font-size: 14px; font-weight:bold;">Game Results (Axes are Z-scores)<span style="color:rgba(32, 192, 32, 0.85)">Wins</span> | <span style="color:rgba(192,32,32,0.85);">Losses</span></p>
                     <div id="zBox">
                     </div>
+                    <p style="text-align: center; font-size: 14px; font-weight:bold;">Pr[win] Based on Logistic Regression difference in Z-Scores</p>
+<div id="logBox">
+                    </div>
 
-                    <div>
-                        <p style="text-align: center; font-size: 14px; font-weight:bold;">Logistic Regression on Spread [P(w)= 1/1-exp(-&beta; (x<sub>1</sub>-x<sub>0</sub>))]</p>
-                        <table>
-                        <tr><th>Spread</th><th>&beta;-coefficient (Values)</th><th>Acc</th><th>&beta;-coefficient (z-Scores)</th><th>Acc</th></tr>
+                    <div style="padding: 1em 5em 1em 5em;">
+                        <p style="text-align: center; font-size: 14px; font-weight:bold;">Logistic Regression on Spread [Pr[cover] = 1/1-exp(-&beta; (x<sub>1</sub>-x<sub>0</sub>))]</p>
+                        <table class="table table-compact table-bordered table-subcompact" >
+                        <tr>
+                            <th></th>
+                            <th colspan="2">Values</th>
+                            <th colspan="2">Z-Scores</th>
+                        </tr>
+                        <tr>
+                            <th>Spread</th>
+                            <th style="width:8em;">&beta;</th>
+                            <th style="width:8em;">Accuracy</th>
+                            <th style="width:8em;">&beta;</th>
+                            <th style="width:8em;">Accuracy</th>
+                        </tr>
                         @betas.map{ m=>
                         <tr>
                             <td class="text-right">@m._1</td>
-                            <td class="text-right">@m._2._1._1.formatted("%5.3f")</td>
-                            <td class="text-right">@m._2._1._2.formatted("%5.3f")</td>
-                            <td class="text-right">@m._2._2._1.formatted("%5.3f")</td>
-                            <td class="text-right">@m._2._2._2.formatted("%5.3f")</td>
+                            <td class="text-right">@m._2._1._1.formatted("%6.4f")</td>
+                            <td class="text-right">@m._2._1._2.formatted("%6.4f")</td>
+                            <td class="text-right">@m._2._2._1.formatted("%6.4f")</td>
+                            <td class="text-right">@m._2._2._2.formatted("%6.4f")</td>
                         </tr>
                         }
                     </table></div>
