@@ -91,7 +91,7 @@ object Statistics extends Controller with SecureSocial {
   }
 
   def createSpreadBetas(scheduleData: List[ScheduleData],frame: Frame[LocalDate, Team, Double] )  ={
-    val spreadList = List(-12.5, -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 12.5 )
+    val spreadList = List(-15.0, -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 15.0 )
     val fm = Predictor.statFeatureMapper(frame, useZ=true)
     spreadList.map(x=>{
       val cat = Predictor.spreadCategorizer(x)

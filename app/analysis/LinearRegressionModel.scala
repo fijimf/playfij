@@ -23,7 +23,7 @@ class LinearRegressionModel extends ComputableModel {
         |behaved, and can be exppected to capture some strength of schedule effects, it is a naive model with a number of
         |theoretical issues.
       """.stripMargin)),
-    new Statistic(0, "score-predictor", "Win Predictor", 0, "Team", "%5.3f", "%5.3f", true, 101 , Some("#3ef"),
+    new Statistic(0, "score-predictor", "Score Predictor", 0, "Team", "%5.3f", "%5.3f", true, 101 , Some("#3ef"),
       Some("""
              |Score predictor is a linear regression on the results of games.  Each observation is the result of a game.
              |The independent variables are represneted by vector with an entries for the universe of teams.  For a given
