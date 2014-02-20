@@ -227,7 +227,7 @@ function loadHistBox() {
         .attr("x", 1)
         .attr("width", x(data[1].x) - x(data[0].x))
         .attr("height", function(d) { return 380 - y(d.y); })
-        .style("fill", "rgba(64, 64, 232, 0.6)");
+        .style("fill", "rgba(64, 192, 232, 0.8)");
 
     bar.append("text")
         .attr("dy", "-0.75em")
@@ -338,14 +338,14 @@ function loadSeriesBox(data) {
         .call(yAxis);
 }
 
-function loadLogGraph(b1,b2) {
+function loadLogGraph(x, b0,b1) {
     var svgContainer = d3.select("#logBox").append("svg")
         .attr("width", 680)
         .attr("height", 400);
     var data = [];
     for (var i=0;i<=240;i++){
         data[i]=(i-120.0)/20.0;
-        console.log(i,data[i], 1.0/(1.0+Math.exp(-b1*data[i])))
+        console.log(i,data[i], 1.0/(1.0+Math.exp(-(b0+b1*data[i]))))
     }
 
     var xScale = d3.scale.linear().domain([-6,6]).range([30, 660]);
@@ -366,7 +366,7 @@ function loadLogGraph(b1,b2) {
     svgContainer.append("svg:path")
         .data([data])
         .attr("d", area1)
-        .style("fill", "rgba(64, 64, 232, 0.2)");
+        .style("fill", "rgba(127, 64, 232, 0.8)");
     svgContainer.append("g")
         .attr("class", "xAxis")
         .attr("transform", "translate(0,380)")

@@ -1,4 +1,4 @@
-@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String, scat:String, betas:List[(Double,((Double,Double),(Double, Double)))])
+@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String, scat:String, betas:List[(Double,List[Double])])
 
 @richMain(s.name, None) {
 
@@ -90,28 +90,21 @@
 <div id="logBox">
                     </div>
 
-                    <div style="padding: 1em 5em 1em 5em;">
-                        <p style="text-align: center; font-size: 14px; font-weight:bold;">Logistic Regression on Spread [Pr[cover] = 1/1-exp(-&beta; (x<sub>1</sub>-x<sub>0</sub>))]</p>
+                    <div style="padding: 1em 10em 1em 10em;">
+                        <p style="text-align: center; font-size: 14px; font-weight:bold;">Logistic Regression on Home Team Covering Spread <br/>[Pr[cover] = 1/1-exp(-(&beta;<sub>0</sub> + &beta;<sub>1</sub> (z<sub>H</sub> - z<sub>A</sub>)))]</p>
                         <table class="table table-compact table-bordered table-subcompact" >
                         <tr>
-                            <th></th>
-                            <th colspan="2">Values</th>
-                            <th colspan="2">Z-Scores</th>
-                        </tr>
-                        <tr>
                             <th>Spread</th>
-                            <th style="width:8em;">&beta;</th>
-                            <th style="width:8em;">Accuracy</th>
-                            <th style="width:8em;">&beta;</th>
-                            <th style="width:8em;">Accuracy</th>
+                            <th style="width:8em;">&beta;<sub>0</sub></th>
+                            <th style="width:8em;">&beta;<sub>1</sub></th>
+                            <th style="width:8em;">Std. Dev for Fair Spread</th>
                         </tr>
                         @betas.map{ m=>
                         <tr>
                             <td class="text-right">@m._1</td>
-                            <td class="text-right">@m._2._1._1.formatted("%6.4f")</td>
-                            <td class="text-right">@m._2._1._2.formatted("%6.4f")</td>
-                            <td class="text-right">@m._2._2._1.formatted("%6.4f")</td>
-                            <td class="text-right">@m._2._2._2.formatted("%6.4f")</td>
+                            <td class="text-right">@m._2(0).formatted("%6.4f")</td>
+                            <td class="text-right">@m._2(1).formatted("%6.4f")</td>
+                            <td class="text-right">@{(-m._2(0)/m._2(1)).formatted("%6.4f")}</td>
                         </tr>
                         }
                     </table></div>
@@ -125,7 +118,12 @@
             font-size: 10px;
         }
     </style>
-    <script type="text/javascript">var series = @Html(ser); loadSeriesBox(series); loadHistBox(); var points = @Html(scat); loadGamesScatter(points);loadLogGraph(@betas(betas.size/2)._2._1,@betas(betas.size/2)._2._1)</script>
+    <script type="text/javascript">
+        var series = @Html(ser);
+        loadSeriesBox(series); loadHistBox();
+        var points = @Html(scat); loadGamesScatter(points);
+        loadLogGraph( @betas(betas.size/2)._1, @betas(betas.size/2)._2(0), @betas(betas.size/2)._2(1)) ;
+    </script>
 
     }
 
