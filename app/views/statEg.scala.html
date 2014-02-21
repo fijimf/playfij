@@ -31,8 +31,8 @@
                     <p>
                         <span style="font-weight:bold">Minimum:</span><span style="padding:0 35px 0 5px;"> @ds.min.formatted("%12.4f")</span>
                         <span style="font-weight:bold">1st Quartile:</span><span style="padding:0 35px 0 5px;"> @ds.q1.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">Median:</span> <span style="padding:0 35px 0 5px;">@ds.min.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">2nd Quartile:</span><span style="padding:0 35px 0 5px;">@ds.q3.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">Median:</span> <span style="padding:0 35px 0 5px;">@ds.med.formatted("%12.4f")</span>
+                        <span style="font-weight:bold">3rd Quartile:</span><span style="padding:0 35px 0 5px;">@ds.q3.formatted("%12.4f")</span>
                         <span style="font-weight:bold">Maximum:</span><span style="padding:0 35px 0 5px;">@ds.max.formatted("%12.4f")</span>
                     </p>
                 </div>
@@ -91,7 +91,7 @@
                     </div>
 
                     <div style="padding: 1em 10em 1em 10em;">
-                        <p style="text-align: center; font-size: 14px; font-weight:bold;">Logistic Regression on Home Team Covering Spread <br/>[Pr[cover] = 1/1-exp(-(&beta;<sub>0</sub> + &beta;<sub>1</sub> (z<sub>H</sub> - z<sub>A</sub>)))]</p>
+                        <p style="text-align: center; font-size: 14px; font-weight:bold;">Logistic Regression on Home Team Covering Spread <br/>[Pr[cover] = 1/1+exp(-(&beta;<sub>0</sub> + &beta;<sub>1</sub> (z<sub>H</sub> - z<sub>A</sub>)))]</p>
                         <table class="table table-compact table-bordered table-subcompact" >
                         <tr>
                             <th>Spread</th>
