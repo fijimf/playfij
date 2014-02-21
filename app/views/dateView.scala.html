@@ -1,5 +1,7 @@
 @(q: Option[models.Quote],p: models.DatePage)
 
+@import tags._
+
 @richMain(p.date.toString("MMM d, yyyy"),  None) {
 
 <div class="row-fluid team-header-row">
@@ -55,34 +57,17 @@
             <div class="row-fluid">
                 <div class="span12">
                     <h3>Schedule</h3>
-                    <table class="table table-compact table-bordered table-subcompact">
-                        <thead>
-                        <tr>
-                            <th colspan="2">Results</th>
-                            <th colspan="6">Predictions</th>
-                        </tr>
-                        <tr>
-                            <th>Home</th>
-                            <th>Away</th>
-                            <th>Prob</th>
-                            <th>Margin</th>
-                            <th>Error</th>
-                            <th>Prob</th>
-                            <th>Margin</th>
-                            <th>Error</th>
-
-
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @p.games.map { res=>
-                        <tr>
-                            <td><a href="@routes.Schedule.team(res.homeTeam.key)">@res.homeTeam.name</a></td>
-                            <td><a href="@routes.Schedule.team(res.awayTeam.key)">@res.awayTeam.name</a></td>
-                        </tr>
+                        @p.games.map { g=>
+                    <div class="row-fluid">
+                        @defining(p.teamData(g.homeTeam)){teamSummary=>
+                            @teamMiniBox(g.homeTeam, teamSummary, "home")
                         }
-                        </tbody>
-                    </table>
+                        @defining(p.teamData(g.awayTeam)){teamSummary=>
+                            @teamMiniBox(g.awayTeam, teamSummary, "away")
+                        }
+
+                    </div>
+                        }
                 </div>
             </div>
             }

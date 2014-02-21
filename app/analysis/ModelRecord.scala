@@ -34,5 +34,16 @@ object ModelRecord {
   }
 }
 case class ModelRecord(name:String, key:String, value:String, rank:String, z:String, displayOrder:Int) {
+  def rankString={
+    rank match {
+      case s if s.endsWith("11") => s+"th"
+      case s if s.endsWith("12") => s+"th"
+      case s if s.endsWith("13") => s+"th"
+      case s if s.endsWith("1") => s+"st"
+      case s if s.endsWith("2") => s+"nd"
+      case s if s.endsWith("3") => s+"rd"
+      case s => s+"th"
+    }
+  }
 
 }

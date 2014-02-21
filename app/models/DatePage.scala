@@ -8,7 +8,8 @@ case class DatePage(
                      prevDate:  LocalDate,
                      nextDate:LocalDate,
                      results:List[ScheduleData],
-                     games:List[ScheduleData]
+                     games:List[ScheduleData],
+                     teamData:Map[Team, TeamSummary]
                      ) {
 
 }

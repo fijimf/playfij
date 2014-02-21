@@ -1,0 +1,55 @@
+@(team: models.Team, teamSummary:models.TeamSummary, homeAway:String)
+<div class="span6 team-box @homeAway">
+    <div class="row-fluid">
+        <div class="span6"><h3><img src="@team.logoUrlSmall.get"/>@team.name</h3></div>
+        <div class="span3 mini-stat">
+            @teamSummary.conferenceStandings.getTeam(team.key).map{ t=>
+            <h5>Overall @t._2._2</h5>
+            <h5>Conference @t._2._1</h5>
+            }
+        </div>
+        <div class="span3 mini-stat">
+            @teamSummary.stats.filter(_.key=="streak").map { mr=>
+            @if(mr.value.trim.toInt<0) {
+            <h5>Streak - lost @mr.value.replaceAll("-","")</h5>
+            }
+            @if(mr.value.trim.toInt>0) {
+            <h5>Streak - won @mr.value</h5>
+            }
+            <h5>Last 10 - @teamSummary.currentRecords.filter(_._1=="Last 10").map(_._2)</h5>
+            }
+        </div>
+    </div>
+    <div class="row-fluid">
+        <div class="span3 mini-stat">
+            @teamSummary.stats.filter(_.key=="wp").map { mr=>
+            <h5>@mr.name</h5>
+            <h3>@mr.value</h3>
+            <h5>@mr.rankString</h5>
+            }
+        </div>
+        <div class="span3 mini-stat">
+            @teamSummary.stats.filter(_.key=="mean-points-margin").map { mr=>
+            <h5>@mr.name</h5>
+            <h3>@mr.value</h3>
+            <h5>@mr.rankString</h5>
+            }
+        </div>
+
+        <div class="span3 mini-stat">
+            @teamSummary.stats.filter(_.key=="score-predictor").map { mr=>
+            <h5>@mr.name</h5>
+            <h3>@mr.value</h3>
+            <h5>@mr.rankString</h5>
+            }
+        </div>
+        <div class="span3 mini-stat">
+            @teamSummary.stats.filter(_.key=="win-predictor").map { mr=>
+            <h5>@mr.name</h5>
+            <h3>@mr.value</h3>
+            <h5>@mr.rankString</h5>
+            }
+        </div>
+    </div>
+</div>
+                    

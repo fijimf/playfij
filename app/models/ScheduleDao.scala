@@ -167,7 +167,10 @@ case class ScheduleDao(m: Model) {
   }
 
   def datePage(date: LocalDate)(implicit s: scala.slick.session.Session): DatePage = {
-    DatePage(date, date.minusDays(1), date.plusDays(1), loadScheduleData.filter(d => d.game.date == date && d.result.isDefined), loadScheduleData.filter(d => d.game.date == date && d.result.isEmpty))
+
+    val todayData: List[ScheduleData] = loadScheduleData.filter(d => d.game.date == date)
+    val teamData: Map[Team, TeamSummary] = (todayData.map(_.homeTeam)++todayData.map(_.awayTeam)).map(t=>t->teamSummary(t.key)).filter(_._2.isDefined).map(t=>t._1->t._2.get).toMap
+    DatePage(date, date.minusDays(1), date.plusDays(1), todayData.filter(_.result.isDefined), todayData.filter(_.result.isEmpty), teamData)
   }
 }
 

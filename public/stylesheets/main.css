@@ -259,3 +259,16 @@ input[type="range"]::-ms-fill-lower {
     border: 0;
     min-height: 22px;
 }
+
+.team-box {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 2px solid #777;
+    color: #777;
+}
+
+.mini-stat h3, .mini-stat h4,.mini-stat h5 {
+    margin-top: -1px;
+    margin-bottom: 0;
+
+}
