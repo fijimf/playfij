@@ -263,7 +263,13 @@ input[type="range"]::-ms-fill-lower {
 .team-box {
     padding: 10px;
     margin-bottom: 10px;
-    border: 2px solid #777;
+    border: 1px solid #ddd;
+    color: #777;
+}
+
+.model-box td, .model-box th {
+    vertical-align: middle;
+    text-align: center;
     color: #777;
 }
 

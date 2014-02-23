@@ -13,6 +13,10 @@ import analysis.ModelRecord
 import org.saddle.scalar.Scalar
 import org.saddle.stats.RankTie
 import analysis.predictors.Predictor
+import org.apache.commons.math3.analysis.UnivariateFunction
+import org.apache.commons.math.analysis.solvers.BisectionSolver
+import org.apache.commons.math.analysis.UnivariateRealFunction
+import org.apache.commons.math.analysis.interpolation.SplineInterpolator
 
 
 object Statistics extends Controller with SecureSocial {
@@ -188,3 +192,27 @@ object Statistics extends Controller with SecureSocial {
   }
 }
 
+
+object SingleVariableLogisticModel {
+  def apply(points:List(Double, Double, Double)]):SingleVariableLogisticModel = {
+    new SplineInterpolator().interpolate(points.)
+  }
+}
+case class SingleVariableLogisticModel(b0: UnivariateFunction, b1: UnivariateFunction) {
+  def winProb(z: Double) = coverProb(z, 0.0)
+
+  def coverProb(z: Double, spread: Double) = 1.0 / (1.0 + Math.exp(b0.value(z) + b1.value(z) * z))
+
+  def spread(z: Double) = {
+
+    val solver: BisectionSolver = new BisectionSolver()
+    val function = new UnivariateRealFunction() {
+      def value(x: Double) = {
+        def value(x: Double): Double = {
+          b0.value(x) / b1.value(x)
+        }
+      }
+    }
+    solver.solve(function, -100.0, 100.0, 0.0)
+  }
+}
