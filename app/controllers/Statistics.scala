@@ -16,7 +16,7 @@ import analysis.predictors.Predictor
 import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math.analysis.solvers.BisectionSolver
 import org.apache.commons.math.analysis.UnivariateRealFunction
-import org.apache.commons.math.analysis.interpolation.SplineInterpolator
+import org.apache.commons.math.analysis.interpolation.{LinearInterpolator, SplineInterpolator}
 import org.apache.commons.math.analysis.polynomials.PolynomialSplineFunction
 
 
@@ -198,7 +198,11 @@ object SingleVariableLogisticModel {
     SingleVariableLogisticModel(
       new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(_._2).toArray),
       new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(_._3).toArray),
-      new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(t=>t._2/t._3).toArray)
+      if (points(points.size/2)._3 > 0.0) {
+         new LinearInterpolator().interpolate(points.map(_._1).toArray, points.map(t=>t._2/math.max(0.000001,t._3)).toArray)
+      } else {
+         new LinearInterpolator().interpolate(points.map(_._1).toArray, points.map(t=>t._2/math.min(-0.000001,t._3)).toArray)
+      }
     )
   }
 
@@ -218,7 +222,7 @@ object SingleVariableLogisticModel {
     }
 
     def spread(z: Double) = {
-      (-40).to(40).foreach(i=>println(i+"->"+fs.value(i.toDouble)))
+      (-40).to(40).foreach(i=>println(i+" -> "+fs.value(i.toDouble).formatted("%6.2f")))
       val solver: BisectionSolver = new BisectionSolver()
       val function = new UnivariateRealFunction() {
           def value(x: Double): Double = {
