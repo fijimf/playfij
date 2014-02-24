@@ -17,6 +17,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math.analysis.solvers.BisectionSolver
 import org.apache.commons.math.analysis.UnivariateRealFunction
 import org.apache.commons.math.analysis.interpolation.SplineInterpolator
+import org.apache.commons.math.analysis.polynomials.PolynomialSplineFunction
 
 
 object Statistics extends Controller with SecureSocial {
@@ -30,9 +31,8 @@ object Statistics extends Controller with SecureSocial {
 
   private val scheduleDao: ScheduleDao = ScheduleDao(model)
 
-  def createScatterData( analysisSet:List[(Double, Double, Double, Double, Int)]): String = {
+  def createScatterData(analysisSet: List[(Double, Double, Double, Double, Int)]): String = {
     JsArray(analysisSet.map(tup => Json.obj("hv" -> tup._1, "av" -> tup._2, "hz" -> tup._3, "az" -> tup._4, "mg" -> tup._5)).toList).toString
-
   }
 
 
@@ -94,12 +94,12 @@ object Statistics extends Controller with SecureSocial {
       }
   }
 
-  def createSpreadBetas(scheduleData: List[ScheduleData],frame: Frame[LocalDate, Team, Double] )  ={
-    val spreadList = List(-15.0, -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 15.0 )
-    val fm = Predictor.statFeatureMapper(frame, useZ=true)
-    spreadList.map(x=>{
+  def createSpreadBetas(scheduleData: List[ScheduleData], frame: Frame[LocalDate, Team, Double]) = {
+    val spreadList = List(-40, -15.0, -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 15.0, 40.0)
+    val fm = Predictor.statFeatureMapper(frame, useZ = true)
+    spreadList.map(x => {
       val cat = Predictor.spreadCategorizer(x)
-      x-> Predictor.regress(scheduleData, fm, cat)
+      x -> Predictor.regress(scheduleData, fm, cat)
     })
   }
 
@@ -194,25 +194,37 @@ object Statistics extends Controller with SecureSocial {
 
 
 object SingleVariableLogisticModel {
-  def apply(points:List(Double, Double, Double)]):SingleVariableLogisticModel = {
-    new SplineInterpolator().interpolate(points.)
+  def apply(points: List[(Double, Double, Double)]): SingleVariableLogisticModel = {
+    SingleVariableLogisticModel(
+      new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(_._2).toArray),
+      new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(_._3).toArray),
+      new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(t=>t._2/t._3).toArray)
+    )
+  }
+
+  def apply(scheduleData: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): SingleVariableLogisticModel = {
+    val betas: List[(Double, Double, Double)] = Statistics.createSpreadBetas(scheduleData, frame).map(t => (t._1, t._2(0), t._2(1)))
+    this.apply(betas)
   }
 }
-case class SingleVariableLogisticModel(b0: UnivariateFunction, b1: UnivariateFunction) {
-  def winProb(z: Double) = coverProb(z, 0.0)
+  case class SingleVariableLogisticModel(b0: UnivariateRealFunction, b1: UnivariateRealFunction, fs: UnivariateRealFunction) {
+    def winProb(z: Double) = coverProb(z, 0.0)
 
-  def coverProb(z: Double, spread: Double) = 1.0 / (1.0 + Math.exp(b0.value(z) + b1.value(z) * z))
-
-  def spread(z: Double) = {
-
-    val solver: BisectionSolver = new BisectionSolver()
-    val function = new UnivariateRealFunction() {
-      def value(x: Double) = {
-        def value(x: Double): Double = {
-          b0.value(x) / b1.value(x)
-        }
-      }
+    def coverProb(z: Double, spread: Double) = {
+      val bb0: Double = b0.value(spread)
+      val bb1: Double = b1.value(spread)
+      val d: Double = bb0 + bb1 * z
+      100*(1.0 / (1.0 + Math.exp(-d)))
     }
-    solver.solve(function, -100.0, 100.0, 0.0)
+
+    def spread(z: Double) = {
+      (-40).to(40).foreach(i=>println(i+"->"+fs.value(i.toDouble)))
+      val solver: BisectionSolver = new BisectionSolver()
+      val function = new UnivariateRealFunction() {
+          def value(x: Double): Double = {
+            fs.value(x) - z
+          }
+      }
+      solver.solve(100, function, -40.0, 40.0, 0.0)
+    }
   }
-}

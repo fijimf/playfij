@@ -69,32 +69,7 @@
                     </div>
                     <div class="row-fluid">
                         <div class="span10">
-                         <table class="table table-bordered table-subcompact model-box">
-                             <thead>
-                             <tr><th style="width:18em;">Model</th><th style="width: 4em;">Favorite</th><th style="width: 4em;">Probability</th><th style="width: 4em;">Spread</th><th></th></tr>
-                             </thead>
-                             <tbody>
-                             <tr>
-                                 <th style="text-align: left;"><h3>Naive Win Predictor</h3></th>
-                                 <td><img src="@g.homeTeam.logoUrlSmall.get" /></td>
-                                 <td></td>
-                                 <td><h3>-3.5</h3></td>
-                                 <td><div style="background-image: linear-gradient(to right, @g.homeTeam.primaryColor.get 0%, @g.homeTeam.primaryColor.get 36%, #fff 73%, @g.awayTeam.primaryColor.get 86%, @g.awayTeam.primaryColor.get 100%);"></div></td>
-                             </tr>
-                             <tr>
-                                 <th>Naive Win Predictor</th>
-                                 <td><img src="@g.homeTeam.logoUrlSmall.get" /></td>
-                                 <td><h3>64.1%</h3></td>
-                                 <td><h3>-3.5</h3></td>
-                             </tr>
-                             <tr>
-                                 <th>Logistic: Win Predictor</h5></th>
-                                 <td><img src="@g.homeTeam.logoUrlSmall.get" /></td>
-                                 <td><h3>61.5%</h3></td>
-                                 <td><h3>-3.5</h3></td>
-                             </tr>
-                             </tbody>
-                         </table>
+                         @modelBox(p.teamData(g.homeTeam), p.teamData(g.awayTeam),p.predictors)
                         </div>
                     </div>
                     }

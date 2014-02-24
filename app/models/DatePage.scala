@@ -2,6 +2,7 @@ package models
 
 import analysis.ModelRecord
 import org.joda.time.LocalDate
+import controllers.SingleVariableLogisticModel
 
 case class DatePage(
                      date: LocalDate,
@@ -9,7 +10,8 @@ case class DatePage(
                      nextDate:LocalDate,
                      results:List[ScheduleData],
                      games:List[ScheduleData],
-                     teamData:Map[Team, TeamSummary]
+                     teamData:Map[Team, TeamSummary],
+                     predictors:List[(Statistic, SingleVariableLogisticModel)]
                      ) {
 
 }
