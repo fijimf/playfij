@@ -7,30 +7,30 @@
     @predictors.map { p=>
        <tr>
            @defining(homeTeamSummary.stats.filter(_.name==p._1.name).head.z.toDouble - awayTeamSummary.stats.filter(_.name==p._1.name).head.z.toDouble){x=>
-           <th style="text-align: left;"><h3>@p._1.name</h3></th>
+           <th style="text-align: left;"><h4>@p._1.name</h4></th>
            @if(p._2.winProb(x)>50.0){
            <td>
               <img src="@homeTeamSummary.team.logoUrlSmall.get">
            </td>
-           <td><h3>@p._2.winProb(x).formatted("%5.1f") %</h3></td>
-           <td><h3>@p._2.spread(x).formatted("%+5.1f")</h3></td>
+           <td><h4>@p._2.winProb(x).formatted("%5.1f") %</h4></td>
+           <td><h4>@p._2.spread(x).formatted("%+5.1f")</h4></td>
 
            }
            @if(p._2.winProb(x)<50.0){
            <td>
                <img src="@awayTeamSummary.team.logoUrlSmall.get">
            </td>
-           <td><h3>@((100.0-p._2.winProb(x)).formatted("%5.1f")) %</h3></td>
-           <td><h3>@((-p._2.spread(x)).formatted("%+5.1f"))</h3></td>
+           <td><h4>@((100.0-p._2.winProb(x)).formatted("%5.1f")) %</h4></td>
+           <td><h4>@((-p._2.spread(x)).formatted("%+5.1f"))</h4></td>
                }
            @if(p._2.winProb(x)==50.0){
            <td>
-              <h3>PUSH</h3>
+              <h4>PUSH</h4>
            </td>
-           <td><h3>@p._2.winProb(x).formatted("%5.1f") %</h3></td>
-           <td><h3>+ @p._2.spread(x).formatted("%+5.1f")</h3></td>
+           <td><h4>@p._2.winProb(x).formatted("%5.1f") %</h4></td>
+           <td><h4>+ @p._2.spread(x).formatted("%+5.1f")</h4></td>
            }
-           <td><div style="margin-left:5%; width:90%; height:3em; background-image: linear-gradient(to right, @homeTeamSummary.team.primaryColor.get 0%, #fff @p._2.winProb(x)%, @awayTeamSummary.team.primaryColor.get 100%);">   </div></td>
+           <td style=" background-image: linear-gradient(to right, @homeTeamSummary.team.primaryColor.get 0%, #fff @p._2.winProb(x)%, @awayTeamSummary.team.primaryColor.get 100%);"></td>
        }
        </tr>
     }

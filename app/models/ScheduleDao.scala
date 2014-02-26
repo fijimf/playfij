@@ -13,6 +13,7 @@ case class ScheduleDao(m: Model) {
   val TEAM_MAP_CACHE_KEY: String = "!team-map"
   val STAT_MAP_CACHE_KEY: String = "!stat-map"
   val CONFERENCE_MAP_CACHE_KEY: String = "!conf-map"
+  val PREDICTORS_CACHE_KEY: String = "!predictors"
 
   import play.api.Play.current
   import m.profile.simple._
@@ -136,6 +137,14 @@ case class ScheduleDao(m: Model) {
     }
   }
 
+  def predictors(implicit s: scala.slick.session.Session): List[(Statistic, SingleVariableLogisticModel)] = {
+    Cache.getOrElse[List[(Statistic, SingleVariableLogisticModel)]](PREDICTORS_CACHE_KEY, 7200) {
+      List("wins", "losses", "wp", "streak", "mean-points-for", "mean-points-against", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
+        statPage(k).map(sp => sp._1 -> SingleVariableLogisticModel(loadScheduleData, sp._2))
+      }).flatten
+    }
+  }
+
   def season(d: LocalDate)(implicit s: scala.slick.session.Session): Option[Season] = {
     seasonQuery.list().find(season => season.from.isBefore(d) && season.to.isAfter(d))
   }
@@ -168,13 +177,8 @@ case class ScheduleDao(m: Model) {
   }
 
   def datePage(date: LocalDate)(implicit s: scala.slick.session.Session): DatePage = {
-
     val todayData: List[ScheduleData] = loadScheduleData.filter(d => d.game.date == date)
     val teamData: Map[Team, TeamSummary] = (todayData.map(_.homeTeam) ++ todayData.map(_.awayTeam)).map(t => t -> teamSummary(t.key)).filter(_._2.isDefined).map(t => t._1 -> t._2.get).toMap
-
-    val predictors = List("wins", "win-predictor").map(k => {
-      statPage(k).map(sp => sp._1 -> SingleVariableLogisticModel(loadScheduleData, sp._2))
-    }).flatten
     DatePage(date, date.minusDays(1), date.plusDays(1), todayData.filter(_.result.isDefined), todayData.filter(_.result.isEmpty), teamData, predictors)
   }
 }

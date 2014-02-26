@@ -15,9 +15,12 @@ import org.saddle.stats.RankTie
 import analysis.predictors.Predictor
 import org.apache.commons.math3.analysis.UnivariateFunction
 import org.apache.commons.math.analysis.solvers.BisectionSolver
-import org.apache.commons.math.analysis.UnivariateRealFunction
+import org.apache.commons.math.analysis.{DifferentiableMultivariateVectorialFunction, UnivariateRealFunction}
 import org.apache.commons.math.analysis.interpolation.{LinearInterpolator, SplineInterpolator}
-import org.apache.commons.math.analysis.polynomials.PolynomialSplineFunction
+import org.apache.commons.math.analysis.polynomials.{PolynomialFunction, PolynomialSplineFunction}
+import org.apache.commons.math.optimization.fitting.PolynomialFitter
+import org.apache.commons.math.optimization.{VectorialPointValuePair, VectorialConvergenceChecker, DifferentiableMultivariateVectorialOptimizer}
+import org.apache.commons.math.optimization.general.GaussNewtonOptimizer
 
 
 object Statistics extends Controller with SecureSocial {
@@ -95,7 +98,7 @@ object Statistics extends Controller with SecureSocial {
   }
 
   def createSpreadBetas(scheduleData: List[ScheduleData], frame: Frame[LocalDate, Team, Double]) = {
-    val spreadList = List(-40, -15.0, -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 15.0, 40.0)
+    val spreadList = List( -15.0, -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 15.0)
     val fm = Predictor.statFeatureMapper(frame, useZ = true)
     spreadList.map(x => {
       val cat = Predictor.spreadCategorizer(x)
@@ -195,14 +198,42 @@ object Statistics extends Controller with SecureSocial {
 
 object SingleVariableLogisticModel {
   def apply(points: List[(Double, Double, Double)]): SingleVariableLogisticModel = {
+    val ordinates: Array[Double] = points.map(_._1).toArray
+    val b0: Array[Double] = points.map(_._2).toArray
+    val b1: Array[Double] = points.map(_._3).toArray
+
+    val fitterB0: PolynomialFitter = new PolynomialFitter(1, new GaussNewtonOptimizer(true))
+    ordinates.zip(b0).foreach(t => fitterB0.addObservedPoint(1.0, t._1, t._2))
+    val curveB0: PolynomialFunction = fitterB0.fit()
+
+    ordinates.zip(b0).foreach(t => println("%5.1f  Fitted %5.1f    Actual %5.1f".format(t._1,curveB0.value(t._1), t._2 )))
+
+    val fitterB1: PolynomialFitter = new PolynomialFitter(2, new GaussNewtonOptimizer(true))
+    ordinates.zip(b1).foreach(t => fitterB1.addObservedPoint(1.0, t._1, t._2))
+    val curveB1: PolynomialFunction = fitterB1.fit()
+
+    ordinates.zip(b1).foreach(t => println("%5.1f  Fitted %5.1f    Actual %5.1f".format(t._1,curveB1.value(t._1), t._2 )))
+
+    val coefficients = curveB1.getCoefficients
+    val a = coefficients(2)
+    val b = coefficients(1)
+    val c = coefficients(0)
+
+    val roots = ((-b + math.sqrt(b * b - 4 * a * c)) / (2 * a), (-b - math.sqrt(b * b - 4 * a * c)) / (2 * a))
+    val curveFS = new UnivariateRealFunction {
+      override def value(x: Double): Double = -curveB0.value(x) / curveB1.value(x)
+    }
+
+    ordinates.zip(b1).foreach(t => println("%5.1f  Z-Diff %5.1f ".format(t._1,curveFS.value(t._1))))
+    println("%5.1f  Z-Diff %5.1f ".format(roots._1,curveFS.value(math.ceil(roots._1))))
+    println("%5.1f  Z-Diff %5.1f ".format(roots._2,curveFS.value(math.floor(roots._2))))
+
+
     SingleVariableLogisticModel(
-      new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(_._2).toArray),
-      new SplineInterpolator().interpolate(points.map(_._1).toArray, points.map(_._3).toArray),
-      if (points(points.size/2)._3 > 0.0) {
-         new LinearInterpolator().interpolate(points.map(_._1).toArray, points.map(t=>t._2/math.max(0.000001,t._3)).toArray)
-      } else {
-         new LinearInterpolator().interpolate(points.map(_._1).toArray, points.map(t=>t._2/math.min(-0.000001,t._3)).toArray)
-      }
+      curveB0,
+      curveB1,
+      curveFS,
+      (math.ceil(math.min(roots._1, roots._2)),math.floor(math.max(roots._1,roots._2)))
     )
   }
 
@@ -211,24 +242,28 @@ object SingleVariableLogisticModel {
     this.apply(betas)
   }
 }
-  case class SingleVariableLogisticModel(b0: UnivariateRealFunction, b1: UnivariateRealFunction, fs: UnivariateRealFunction) {
-    def winProb(z: Double) = coverProb(z, 0.0)
 
-    def coverProb(z: Double, spread: Double) = {
-      val bb0: Double = b0.value(spread)
-      val bb1: Double = b1.value(spread)
-      val d: Double = bb0 + bb1 * z
-      100*(1.0 / (1.0 + Math.exp(-d)))
-    }
+case class SingleVariableLogisticModel(b0: UnivariateRealFunction, b1: UnivariateRealFunction, fs: UnivariateRealFunction, bracket:(Double,Double)) {
+  def winProb(z: Double) = coverProb(z, 0.0)
 
-    def spread(z: Double) = {
-      (-40).to(40).foreach(i=>println(i+" -> "+fs.value(i.toDouble).formatted("%6.2f")))
-      val solver: BisectionSolver = new BisectionSolver()
-      val function = new UnivariateRealFunction() {
-          def value(x: Double): Double = {
-            fs.value(x) - z
-          }
-      }
-      solver.solve(100, function, -40.0, 40.0, 0.0)
-    }
+  def coverProb(z: Double, spread: Double) = {
+    val bb0: Double = b0.value(spread)
+    val bb1: Double = b1.value(spread)
+    val d: Double = bb0 + bb1 * z
+    100 * (1.0 / (1.0 + Math.exp(-d)))
   }
+
+  def spread(z: Double) = {
+    (bracket._1).to(bracket._2,1.0).foreach(zzz=>println("%6.2f => %6.2f  %6.3f".format(zzz, fs.value(zzz), 1.0/(1+math.exp(-(b0.value(0)+b1.value(0)*fs.value(zzz)))))))
+    val solver: BisectionSolver = new BisectionSolver()
+    val function = new UnivariateRealFunction() {
+      def value(x: Double): Double = {
+        fs.value(x) - z
+      }
+    }
+    val solve: Double = solver.solve(100, function, bracket._1, bracket._2, 0.0)
+
+    println(z+"  "+solve)
+    solve
+  }
+}
