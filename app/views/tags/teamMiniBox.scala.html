@@ -4,19 +4,19 @@
         <div class="span6"><h3><a href="@controllers.routes.Schedule.team(team.key)"><img src="@team.logoUrlSmall.get"/>@team.name</a></h3></div>
         <div class="span3 mini-stat">
             @teamSummary.conferenceStandings.getTeam(team.key).map{ t=>
-            <h5>Overall @t._2._2</h5>
-            <h5>Conference @t._2._1</h5>
+            <h5>Overall: @t._2._2</h5>
+            <h5>Conference: @t._2._1</h5>
             }
         </div>
         <div class="span3 mini-stat">
             @teamSummary.stats.filter(_.key=="streak").map { mr=>
             @if(mr.value.trim.toInt<0) {
-            <h5>Streak - lost @mr.value.replaceAll("-","")</h5>
+            <h5>Streak: lost @mr.value.replaceAll("-","")</h5>
             }
             @if(mr.value.trim.toInt>0) {
-            <h5>Streak - won @mr.value</h5>
+            <h5>Streak: won @mr.value</h5>
             }
-            <h5>Last 10 - @teamSummary.currentRecords.filter(_._1=="Last 10").map(_._2)</h5>
+            <h5>Last 10: @teamSummary.currentRecords.filter(_._1=="Last 10").map(_._2)</h5>
             }
         </div>
     </div>
