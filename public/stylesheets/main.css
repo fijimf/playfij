@@ -264,13 +264,23 @@ input[type="range"]::-ms-fill-lower {
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ddd;
-    color: #777;
+    color: #333;
+}
+
+.team-box a, .team-box a:hover {
+    color: #333;
+    text-decoration: none;
 }
 
 .model-box td, .model-box th {
     vertical-align: middle;
     text-align: center;
-    color: #777;
+    color: #333;
+}
+
+.model-box a, .model-box a:hover {
+    color: #333;
+    text-decoration: none;
 }
 
 .mini-stat h3, .mini-stat h4,.mini-stat h5 {

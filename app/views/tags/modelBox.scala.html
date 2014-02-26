@@ -7,10 +7,10 @@
     @predictors.map { p=>
        <tr>
            @defining(homeTeamSummary.stats.filter(_.name==p._1.name).head.z.toDouble - awayTeamSummary.stats.filter(_.name==p._1.name).head.z.toDouble){x=>
-           <th style="text-align: left;"><h4>@p._1.name</h4></th>
+           <th style="text-align: left;"><h4><a href="@controllers.routes.Statistics.stat(p._1.key)">@p._1.name<a></a></h4></th>
            @if(p._2.winProb(x)>50.0){
            <td>
-              <img src="@homeTeamSummary.team.logoUrlSmall.get">
+              <a href="@controllers.routes.Schedule.team(homeTeamSummary.team.key)"><img src="@homeTeamSummary.team.logoUrlSmall.get"></a>
            </td>
            <td><h4>@p._2.winProb(x).formatted("%5.1f") %</h4></td>
            <td><h4>@p._2.spread(x).formatted("%+5.1f")</h4></td>
@@ -18,7 +18,7 @@
            }
            @if(p._2.winProb(x)<50.0){
            <td>
-               <img src="@awayTeamSummary.team.logoUrlSmall.get">
+               <a href="@controllers.routes.Schedule.team(awayTeamSummary.team.key)"><img src="@awayTeamSummary.team.logoUrlSmall.get"></a>
            </td>
            <td><h4>@((100.0-p._2.winProb(x)).formatted("%5.1f")) %</h4></td>
            <td><h4>@((-p._2.spread(x)).formatted("%+5.1f"))</h4></td>
