@@ -1,7 +1,7 @@
 @(team: models.Team, teamSummary:models.TeamSummary, homeAway:String)
 <div class="span6 team-box @homeAway">
     <div class="row-fluid">
-        <div class="span6"><h3><a href="@controllers.routes.Schedule.team(team.key)"><img src="@team.logoUrlSmall.get"/>@team.name</a></h3></div>
+        <div class="span6"><h3><a href="@controllers.routes.Schedule.team(team.key)"><img src="@team.logoUrlSmall.getOrElse("#")"/>@team.name</a></h3></div>
         <div class="span3 mini-stat">
             @teamSummary.conferenceStandings.getTeam(team.key).map{ t=>
             <h5>Overall: @t._2._2</h5>

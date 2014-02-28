@@ -99,6 +99,7 @@ case class ScheduleDao(m: Model) {
 
   def teamSummary(teamKey: String, seasonKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] = {
     Cache.getOrElse[Option[TeamSummary]](teamKey + ":" + seasonKey, 900) {
+      logger.info("teamSummary cache miss for "+teamKey + ":" + seasonKey)
       (for {team <- teamQuery if team.key === teamKey
             season <- seasonQuery if season.key === seasonKey
             assoc <- assocQuery if assoc.seasonId === season.id && assoc.teamId === team.id
