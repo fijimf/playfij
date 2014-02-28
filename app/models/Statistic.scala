@@ -1,5 +1,9 @@
 package models
 
+import org.joda.time.{DateTime, LocalDate}
+import play.api.Logger
+import org.saddle.Series
+
 case class Statistic(
                       id: Long,
                       key: String,
@@ -19,7 +23,9 @@ case class StatisticDao(model: Model) {
 
   import model._
   import model.profile.simple._
+  import models.util.Mappers._
 
+  val logger = Logger("StatisticDao")
   def list(implicit s: scala.slick.session.Session): List[Statistic] = {
     Query(Statistics).sortBy(_.id).to[List]
   }
@@ -44,5 +50,18 @@ case class StatisticDao(model: Model) {
     Statistics.where(_.id === id).delete
   }
 
+    def loadStats(date: LocalDate,sm:Map[Long, Statistic], tm:Map[Long, Team])(implicit s: scala.slick.session.Session): List[(Statistic, Series[Team, Double])] = {
+      logger.info("Starting loadStats: " + new DateTime().toString("HH:mm:ss"))
+      val statDate: LocalDate = getStatDates(date)
+      val os = (for {obs <- model.Observations if obs.date === statDate} yield obs).list
+      val stats = os.groupBy(o => sm(o.statisticId)).mapValues(lst => Series(lst.map(o => (tm(o.domainId), o.value)): _*)).toList
+      logger.info("Finished loadStats: " + new DateTime().toString("HH:mm:ss"))
+      stats
+    }
 
+    def getStatDates(d: LocalDate)(implicit s: scala.slick.session.Session): LocalDate = {
+        Query(model.Observations.map(_.date).max).first().getOrElse(new LocalDate())
+    }
+
+    val q = for (stat <- model.Statistics) yield stat
 }

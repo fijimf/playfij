@@ -8,6 +8,7 @@ import scraping.DateRange
 
 case class Season(id: Long, key: String, season: String, from: LocalDate, to: LocalDate) {
   val range = DateRange(from,to)
+  def has(d:LocalDate) = !from.isAfter(d) && !to.isBefore(d)
 }
 
 case class SeasonDao(model: Model) {
@@ -33,5 +34,16 @@ case class SeasonDao(model: Model) {
 
   def delete(id: String)(implicit s: scala.slick.session.Session) {
     Seasons.where(_.id === id.toLong).delete
+  }
+
+  val q = for (season <- model.Seasons) yield season
+
+  def season(d: LocalDate)(implicit s: scala.slick.session.Session): Option[Season] = {
+    val seasons: List[Season] = q.list()
+    seasons.find(_.has(d)).orElse(seasons.sortBy(_.to.toDate).reverse.headOption)
+  }
+
+  def currentSeason(implicit s: scala.slick.session.Session): Option[Season] = {
+    season(new LocalDate).orElse(q.list().sortBy(_.to.toDate).reverse.headOption)
   }
 }

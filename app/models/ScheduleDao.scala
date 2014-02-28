@@ -19,6 +19,7 @@ case class ScheduleDao(m: Model) {
   import m.profile.simple._
   import models.util.Mappers._
 
+  val teamDao=new TeamScheduleDao(m)
   val logger = Logger("ScheduleDao")
   val seasonQuery = for (season <- m.Seasons) yield season
   val teamQuery = for (team <- m.Teams) yield team
@@ -95,24 +96,10 @@ case class ScheduleDao(m: Model) {
 
   def teamsPage()(implicit s: scala.slick.session.Session): Option[SeasonStandings] = currentSeason.map(season => SeasonStandings(season, conferenceMap, teamsForConference, loadScheduleData))
 
-  def teamSummary(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] = currentSeason.flatMap(season => teamSummary(teamKey, season.key))
+  def teamSummary(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] = teamDao.teamSummary(teamKey)
 
-  def teamSummary(teamKey: String, seasonKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] = {
-    Cache.getOrElse[Option[TeamSummary]](teamKey + ":" + seasonKey, 900) {
-      logger.info("teamSummary cache miss for "+teamKey + ":" + seasonKey)
-      (for {team <- teamQuery if team.key === teamKey
-            season <- seasonQuery if season.key === seasonKey
-            assoc <- assocQuery if assoc.seasonId === season.id && assoc.teamId === team.id
-            conference <- conferenceQuery if conference.id === assoc.conferenceId
-      } yield {
-        (team, season, conference)
-      }).firstOption.flatMap {
-        case (team, season, conference) =>
-          val isCurrent = currentSeason.exists(_.key == seasonKey)
-          TeamSummary(season, isCurrent, team, conference, teamsForConference(season, conference), loadScheduleData, loadStats(season.to))
-      }
-    }
-  }
+  def teamSummary(teamKey: String, seasonKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary]  = teamDao.teamSummary(teamKey, seasonKey)
+
 
   def statMap(implicit s: scala.slick.session.Session): Map[Long, Statistic] = {
     Cache.getOrElse[Map[Long, Statistic]](STAT_MAP_CACHE_KEY, 3600) {

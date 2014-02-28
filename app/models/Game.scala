@@ -26,4 +26,22 @@ case class GameDao(model: Model) {
   def findGameBySchedule(homeTeamKey: String, awayTeamKey: String, date: LocalDate)(implicit s: scala.slick.session.Session):Option[Game] = {
     gameBySchedule(homeTeamKey, awayTeamKey, date).map(_._1).firstOption
   }
+
+  val gameResultQuery = for {(game, result) <- model.Games leftJoin model.Results on (_.id === _.gameId)} yield (game, result.maybe)
+
+  val assocQuery = for (assoc <- model.ConferenceAssociations) yield assoc
+
+  val scheduleQuery = for {
+    (game, result) <- gameResultQuery
+    season <- game.seasonFk
+    homeTeam <- game.homeTeamFk
+    awayTeam <- game.awayTeamFk
+    homeAssoc <- assocQuery if homeAssoc.teamId === homeTeam.id && homeAssoc.seasonId === season.id
+    awayAssoc <- assocQuery if awayAssoc.teamId === awayTeam.id && awayAssoc.seasonId === season.id
+    homeConf <- homeAssoc.conferenceFk
+    awayConf <- awayAssoc.conferenceFk
+  } yield {
+    (season, game, homeTeam, awayTeam, homeConf, awayConf, result)
+  }
+
 }

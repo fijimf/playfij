@@ -45,4 +45,7 @@ case class ConferenceDao(model: Model) {
     Conferences.where(_.id === id.toLong).delete
   }
 
+  val assocQ = for (assoc <- model.ConferenceAssociations) yield assoc
+  val confQ = for (conf <- model.Conferences) yield conf
+
 }
