@@ -18,7 +18,6 @@ case class TeamScheduleDao(m: Model) {
 
   import play.api.Play.current
   import m.profile.simple._
-  import models.util.Mappers._
 
   val logger = Logger("TeamScheduleDao")
   val teamQuery = for (team <- m.Teams) yield team

@@ -22,6 +22,7 @@ object Schedule extends Controller with SecureSocial {
   }
 
   private val scheduleDao: ScheduleDao = ScheduleDao(model)
+  private val teamDao = TeamScheduleDao(model)
   private val quoteDao = new QuoteDao(model)
 
 
@@ -54,9 +55,8 @@ object Schedule extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val q = quoteDao.random
-          scheduleDao.teamSummary(key).map(tp => {
-            Ok(views.html.teamView(q, tp))
+          teamDao.teamSummary(key).map(tp => {
+            Ok(views.html.teamView( tp))
           }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
@@ -65,9 +65,8 @@ object Schedule extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val q = quoteDao.random
-          scheduleDao.teamSummary(key, seasonKey).map(tp => {
-            Ok(views.html.teamView(q, tp))
+          teamDao.teamSummary(key, seasonKey).map(tp => {
+            Ok(views.html.teamView( tp))
           }).getOrElse(NotFound(views.html.resourceNotFound("team", key)))
       }
   }
