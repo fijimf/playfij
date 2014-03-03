@@ -11,6 +11,7 @@ import analysis.ModelRecord
 import org.saddle.scalar.Scalar
 import org.saddle.stats.RankTie
 import scala.collection.immutable.IndexedSeq
+import play.api.cache.Cached
 
 object Schedule extends Controller with SecureSocial {
 
@@ -95,15 +96,18 @@ object Schedule extends Controller with SecureSocial {
       }
   }
 
-  def date(yyyy: Int, mm: Int, dd: Int) = UserAwareAction {
-    implicit request =>
-      play.api.db.slick.DB.withSession {
-        implicit s =>
-          val d = new LocalDate(yyyy, mm, dd)
-          val q = quoteDao.random
-          Ok(views.html.dateView(q, scheduleDao.datePage(d)))
-      }
+  def date(yyyy: Int, mm: Int, dd: Int) = Cached("date%d-%d-%d".format(yyyy, mm, dd)) {
+    UserAwareAction {
+      implicit request =>
+        play.api.db.slick.DB.withSession {
+          implicit s =>
+            val d = new LocalDate(yyyy, mm, dd)
+
+            Ok(views.html.dateView(null, scheduleDao.datePage(d)))
+        }
+    }
   }
+
   def index = UserAwareAction {
     implicit request =>
       play.api.db.slick.DB.withSession {

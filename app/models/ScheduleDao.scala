@@ -18,8 +18,9 @@ case class ScheduleDao(m: Model) {
   import play.api.Play.current
   import m.profile.simple._
   import models.util.Mappers._
+  import controllers.Util.timed
 
-  val teamDao=new TeamScheduleDao(m)
+  val teamDao = new TeamScheduleDao(m)
   val logger = Logger("ScheduleDao")
   val seasonQuery = for (season <- m.Seasons) yield season
   val teamQuery = for (team <- m.Teams) yield team
@@ -67,14 +68,16 @@ case class ScheduleDao(m: Model) {
   }
 
   def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[Team, Double])] = {
-    logger.info("Starting loadStats: " + new Date().toString)
-    val sm = statMap
-    val tm = teamMap
-    val statDate: LocalDate = getStatDates(date)
-    val os = (for {obs <- m.Observations if obs.date === statDate} yield obs).list
-    val stats = os.groupBy(o => sm(o.statisticId)).mapValues(lst => Series(lst.map(o => (tm(o.domainId), o.value)): _*)).toList
-    logger.info("Finished loadStats: " + new Date().toString)
-    stats
+    Cache.getOrElse[List[(Statistic, Series[Team, Double])]]("stats:" + date.toString("yyyy-MM-dd"), 3600) {
+      logger.info("Starting loadStats: cache miss on  stats:" + date.toString("yyyy-MM-dd"))
+      val sm = statMap
+      val tm = teamDao.teamMap
+      val statDate: LocalDate = getStatDates(date)
+      val os = (for {obs <- m.Observations if obs.date === statDate} yield obs).list
+      val stats = os.groupBy(o => sm(o.statisticId)).mapValues(lst => Series(lst.map(o => (tm(o.domainId), o.value)): _*)).toList
+      logger.info("Finished loadStats: " + new Date().toString)
+      stats
+    }
   }
 
 
@@ -96,11 +99,6 @@ case class ScheduleDao(m: Model) {
 
   def teamsPage()(implicit s: scala.slick.session.Session): Option[SeasonStandings] = currentSeason.map(season => SeasonStandings(season, conferenceMap, teamsForConference, loadScheduleData))
 
-  def teamSummary(teamKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary] = teamDao.teamSummary(teamKey)
-
-  def teamSummary(teamKey: String, seasonKey: String)(implicit s: scala.slick.session.Session): Option[TeamSummary]  = teamDao.teamSummary(teamKey, seasonKey)
-
-
   def statMap(implicit s: scala.slick.session.Session): Map[Long, Statistic] = {
     Cache.getOrElse[Map[Long, Statistic]](STAT_MAP_CACHE_KEY, 3600) {
       statQuery.list.map(s => s.id -> s).toMap
@@ -113,12 +111,6 @@ case class ScheduleDao(m: Model) {
     }
   }
 
-  def teamMap(implicit s: scala.slick.session.Session): Map[Long, Team] = {
-    Cache.getOrElse[Map[Long, Team]](TEAM_MAP_CACHE_KEY, 3600) {
-      teamQuery.list.map(t => t.id -> t).toMap
-    }
-  }
-
   def getStatDates(WhyAmINotUsed: LocalDate)(implicit s: scala.slick.session.Session): LocalDate = {
     Cache.getOrElse[LocalDate](STAT_DATES_CACHE_KEY, 3600) {
       Query(m.Observations.map(_.date).max).first().getOrElse(new LocalDate())
@@ -127,9 +119,12 @@ case class ScheduleDao(m: Model) {
 
   def predictors(implicit s: scala.slick.session.Session): List[(Statistic, SingleVariableLogisticModel)] = {
     Cache.getOrElse[List[(Statistic, SingleVariableLogisticModel)]](PREDICTORS_CACHE_KEY, 7200) {
-      List("wins", "losses", "wp", "streak", "mean-points-for", "mean-points-against", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
+      logger.info("Cache miss on 'predictors'")
+      val predictors: List[(Statistic, SingleVariableLogisticModel)] = List("wins", "losses", "wp", "streak", "mean-points-for", "mean-points-against", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
         statPage(k).map(sp => sp._1 -> SingleVariableLogisticModel(loadScheduleData, sp._2))
       }).flatten
+      logger.info("Predictors now cached for 2 hours")
+      predictors
     }
   }
 
@@ -165,9 +160,20 @@ case class ScheduleDao(m: Model) {
   }
 
   def datePage(date: LocalDate)(implicit s: scala.slick.session.Session): DatePage = {
-    val todayData: List[ScheduleData] = loadScheduleData.filter(d => d.game.date == date)
-    val teamData: Map[Team, TeamSummary] = (todayData.map(_.homeTeam) ++ todayData.map(_.awayTeam)).map(t => t -> teamSummary(t.key)).filter(_._2.isDefined).map(t => t._1 -> t._2.get).toMap
-    DatePage(date, date.minusDays(1), date.plusDays(1), todayData.filter(_.result.isDefined), todayData.filter(_.result.isEmpty), teamData, predictors)
+    logger.info("Building date page")
+    val todayData: List[ScheduleData] = timed("loadScheduleData") {
+      loadScheduleData.filter(d => d.game.date == date)
+    }
+    val teams: List[Team] = timed("teams") {
+      todayData.map(_.homeTeam) ++ todayData.map(_.awayTeam)
+    }
+    val teamData: Map[Team, TeamSummary] = timed("teamSummaries") {
+      teamDao.teamSummary(teams.map(_.key))
+    }
+    val (results, upcoming) = todayData.partition(_.result.isDefined)
+    val page: DatePage = DatePage(date, date.minusDays(1), date.plusDays(1), results, upcoming, teamData, predictors)
+    logger.info("Done building date page")
+    page
   }
 }
 

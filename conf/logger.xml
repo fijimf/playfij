@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
-    <logger name="scala.slick.session">
-        <level value="warn"/>
+    <logger name="scala.slick.session.BaseSession">
+        <level value="debug"/>
     </logger>
     <logger name="com.jolbox.bonecp">
         <level value="warn"/>

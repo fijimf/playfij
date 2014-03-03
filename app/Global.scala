@@ -1,8 +1,9 @@
 
 import _root_.controllers.admin.RunModels
+import controllers.Schedule
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
-import models.Repository
+import models.{ScheduleDao, Repository}
 import org.joda.time.{LocalDateTime, LocalDate, DateTime}
 import play.api._
 import play.api.libs.concurrent.Akka
@@ -27,7 +28,24 @@ object Global extends WithFilters(MetricsFilter){
   override def onStart(app: Application) {
     super.onStart(app)
     schedule(new LocalDateTime())
+    warmCache()
     notifyRestart()
+  }
+
+  def warmCache() {
+    Akka.system.scheduler.schedule(Duration.create(15, TimeUnit.SECONDS), Duration.create(1, TimeUnit.HOURS)){
+      val today = new LocalDate()
+      (-5).to(3).map(i=>today.plusDays(i)).foreach(d=>{
+        try {
+          logger.info("BEGIN Warming cache for date %s".format(d.toString("yyyy-MM-dd")))
+          Schedule.date(d.getYear, d.getMonthOfYear, d.getDayOfMonth)
+          logger.info("END Warming cache for date %s".format(d.toString("yyyy-MM-dd")))
+        }
+        catch {
+          case ex:Exception => logger.error("Caught exception warming the cache "+ex.getMessage)
+        }
+      })
+    }
   }
 
   def schedule(now: LocalDateTime) {
@@ -54,7 +72,7 @@ object Global extends WithFilters(MetricsFilter){
           play.api.db.slick.DB.withSession {
             implicit s: Session =>
               val result = NcaaGameScraper.scrape(repo, req)
-              logger.info("Results inserted: " + result.resultsInserted.size);
+              logger.info("Results inserted: " + result.resultsInserted.size)
               RunModels.runModelsForDates(from, to)
               emailAdmin("Schedule Updated") {
                 ("Schedule updated:\n\n" +

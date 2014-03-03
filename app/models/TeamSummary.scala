@@ -20,16 +20,19 @@ case class TeamSummary(
 
 object TeamSummary {
 
+  import controllers.Util.timed
   def apply( season: Season, isCurrentSeason: Boolean, team: Team, conference: Conference, confTeams:List[Team], games: List[ScheduleData], seriesMap: List[(Statistic, Series[Team, Double])]): Some[TeamSummary] = {
-    val results = ResultLine(games.filter(sd => sd.isSameSeason(season)), team)
-    val schedule = ScheduleLine(games.filter(sd => sd.isSameSeason(season)), team)
-    val standings = ConferenceStandings.createConferenceStandings(season, conference, confTeams, games)
-    val currentRecords = TeamSummary.currentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))
-    val seasonRecords = TeamSummary.seasonRecords(team, games)
-    val stats: List[ModelRecord] = seriesMap.map {
-      case (stat: Statistic, ser: Series[Team, Double]) => {
-        val ix: Int = ser.index.getFirst(team)
-        ModelRecord.fromStatValue(stat, ix, ser)
+    val results = timed("results"){ResultLine(games.filter(sd => sd.isSameSeason(season)), team)}
+    val schedule = timed("schedule"){ScheduleLine(games.filter(sd => sd.isSameSeason(season)), team)}
+    val standings = timed("standings"){ConferenceStandings.createConferenceStandings(season, conference, confTeams, games)}
+    val currentRecords = timed("currentRecords"){TeamSummary.currentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))}
+    val seasonRecords = timed("seasonRecords"){TeamSummary.seasonRecords(team, games)}
+    val stats: List[ModelRecord] = timed("stats") {
+      seriesMap.map {
+        case (stat: Statistic, ser: Series[Team, Double]) => {
+          val ix: Int = ser.index.getFirst(team)
+          ModelRecord.fromStatValue(stat, ix, ser)
+        }
       }
     }
     Some(TeamSummary(team, conference, season, isCurrentSeason, schedule, results, standings, currentRecords, seasonRecords, stats))

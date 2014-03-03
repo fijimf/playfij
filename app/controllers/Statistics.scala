@@ -72,7 +72,7 @@ object Statistics extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val teams: List[Team] = scheduleDao.teamMap.values.toList
+          val teams: List[Team] = scheduleDao.teamDao.teamMap.values.toList
           val scheduleData: List[ScheduleData] = scheduleDao.loadScheduleData
 
           scheduleDao.statPage(key).map {
@@ -126,7 +126,7 @@ object Statistics extends Controller with SecureSocial {
     implicit request =>
       play.api.db.slick.DB.withSession {
         implicit s =>
-          val teams: List[Team] = scheduleDao.teamMap.values.toList
+          val teams: List[Team] = scheduleDao.teamDao.teamMap.values.toList
           val observations: Option[(Statistic, Frame[LocalDate, Team, Double])] = scheduleDao.statPage(key)
           observations match {
             case Some((stat, frame)) => Ok(
