@@ -1,0 +1,55 @@
+@(p: models.DatePage)
+
+@import tags._
+
+<style>
+    table td {
+        font-size:16px;
+        font-weight:bold;
+    }
+</style>
+<table style="width: 80%;">
+    <tr><td>Games</td></tr>
+    <tr><td>
+        <table style="width:100%;">
+            @p.games.map { g=>
+            <tr>
+               @defining(p.teamData(g.awayTeam)){teamSummary=>
+                 <td rowspan="2"><img src='@g.awayTeam.logoUrlSmall.getOrElse("#")'/></td>
+                 <td>@g.awayTeam.name</td>
+               }
+               <td rowspan="2">@@</td>
+               @defining(p.teamData(g.homeTeam)){teamSummary=>
+                <td rowspan="2"><img src='@g.homeTeam.logoUrlSmall.getOrElse("#")'/></td>
+                <td>@g.homeTeam.name</td>
+               }
+            </tr>
+            <tr>
+                @defining(p.teamData(g.awayTeam)){teamSummary=>
+                @teamSummary.conferenceStandings.getTeam(g.awayTeam.key).map{ t=>
+                <td>@t._2._2, @t._2._1</td>
+                }
+                }
+                @defining(p.teamData(g.homeTeam)){teamSummary=>
+                @teamSummary.conferenceStandings.getTeam(g.homeTeam.key).map{ t=>
+                <td>@t._2._2, @t._2._1</td>
+                }
+                }
+            </tr>
+            <tr><td colspan="5">
+
+                    @modelTable(p.teamData(g.homeTeam), p.teamData(g.awayTeam),p.predictors)
+            </td></tr>
+                    }
+
+                </table>
+            </td></tr>
+        </table>
+    </td></tr>
+    <tr><td>
+            <p>You are getting this mail because that fat fuck Fridge put your goddamn email in one of his idiotic
+                databases, and there ain't thing one you can do about it, compadre.  So try to get your hand out of your
+                pants for one blessed second, crack a cold one and enjoy.</p>
+ </td>
+        </tr>
+</table>

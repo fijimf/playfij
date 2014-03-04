@@ -120,7 +120,7 @@ case class ScheduleDao(m: Model) {
   def predictors(implicit s: scala.slick.session.Session): List[(Statistic, SingleVariableLogisticModel)] = {
     Cache.getOrElse[List[(Statistic, SingleVariableLogisticModel)]](PREDICTORS_CACHE_KEY, 7200) {
       logger.info("Cache miss on 'predictors'")
-      val predictors: List[(Statistic, SingleVariableLogisticModel)] = List("wins", "losses", "wp", "streak", "mean-points-for", "mean-points-against", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
+      val predictors: List[(Statistic, SingleVariableLogisticModel)] = List( "wp", "streak", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
         statPage(k).map(sp => sp._1 -> SingleVariableLogisticModel(loadScheduleData, sp._2))
       }).flatten
       logger.info("Predictors now cached for 2 hours")

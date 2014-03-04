@@ -1,17 +1,28 @@
 
 import _root_.controllers.admin.RunModels
+import com.typesafe.plugin._
 import controllers.Schedule
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
-import models.{ScheduleDao, Repository}
+import models.DatePage
+import models.DatePage
+import models.ScheduleDao
+import models.ScheduleDao
+import models.{DatePage, Model, ScheduleDao, Repository}
 import org.joda.time.{LocalDateTime, LocalDate, DateTime}
 import play.api._
 import play.api.libs.concurrent.Akka
+import play.api.libs.ws.WS
 import play.api.mvc.WithFilters
+import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.slick.session.Session
+import scala.Some
+import scala.Some
 import scala.util.control.NonFatal
+import scraping.control.GameUpdateRequest
+import scraping.control.GameUpdateRequest
 import scraping.control.GameUpdateRequest
 import scraping.NcaaGameScraper
 
@@ -19,7 +30,7 @@ import com.kenshoo.play.metrics.MetricsFilter
 import play.api.mvc._
 
 
-object Global extends WithFilters(MetricsFilter){
+object Global extends WithFilters(MetricsFilter) {
   val logger = Logger(Global.getClass)
 
   import play.api.Play.current
@@ -33,18 +44,41 @@ object Global extends WithFilters(MetricsFilter){
   }
 
   def warmCache() {
-    Akka.system.scheduler.schedule(Duration.create(15, TimeUnit.SECONDS), Duration.create(1, TimeUnit.HOURS)){
+    Akka.system.scheduler.schedule(Duration.create(15, TimeUnit.SECONDS), Duration.create(1, TimeUnit.HOURS)) {
+      val model = new Model() {
+        val profile = play.api.db.slick.DB.driver
+      }
+      val scheduleDao = ScheduleDao(model)
       val today = new LocalDate()
-      (-5).to(3).map(i=>today.plusDays(i)).foreach(d=>{
-        try {
-          logger.info("BEGIN Warming cache for date %s".format(d.toString("yyyy-MM-dd")))
-          Schedule.date(d.getYear, d.getMonthOfYear, d.getDayOfMonth)
-          logger.info("END Warming cache for date %s".format(d.toString("yyyy-MM-dd")))
-        }
-        catch {
-          case ex:Exception => logger.error("Caught exception warming the cache "+ex.getMessage)
-        }
-      })
+      play.api.db.slick.DB.withSession {
+        implicit s: Session =>
+          val data: Map[LocalDate, Option[DatePage]] = (-1).to(1).map(i => today.plusDays(i)).map(d => {
+            try {
+              logger.info("BEGIN Warming cache for date %s".format(d.toString("yyyy-MM-dd")))
+              val p: DatePage = scheduleDao.datePage(d)
+              logger.info("END Warming cache for date %s".format(d.toString("yyyy-MM-dd")))
+              d -> Some(p)
+            }
+            catch {
+              case ex: Exception =>
+                logger.error("Caught exception warming the cache " + ex.getMessage)
+                d -> None
+            }
+          }).toMap
+
+          try {
+            data(today).foreach{dp=>
+            val mail = use[MailerPlugin].email
+            mail.setSubject("Morning Line - %s".format(today.toString("yyyy-MM-dd")))
+            mail.setRecipient("fijimf@gmail.com")
+            mail.setFrom("Deep Fij <deepfij@gmail.com>")
+            mail.sendHtml(views.html.morningLine(dp).body)
+            }
+          }
+          catch {
+            case NonFatal(e) => logger.error("CaughtException trying to send mail.", e)
+          }
+      }
     }
   }
 
@@ -95,7 +129,7 @@ object Global extends WithFilters(MetricsFilter){
           schedule(now)
         }
         catch {
-          case e:IllegalStateException => logger.info("Caught IllegalStateException on scheduling -- probably a graceful shutdown")
+          case e: IllegalStateException => logger.info("Caught IllegalStateException on scheduling -- probably a graceful shutdown")
         }
       }
     } catch {
