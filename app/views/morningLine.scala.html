@@ -9,8 +9,8 @@
     }
 </style>
 <table style="width: 90%;">
-    <tr><td style="font-size: 2em">Today's Games</td></tr>
-    <tr><td style="color:#666; font-size: 90%; font-style: italic;"><p ><strong>How to read this chart:</strong>Today's
+    <tr><td style="font-size: 2em"><a href="http://www.fijimf.com/deepfij/">Today's Games</a></td></tr>
+    <tr><td style="color:#666; font-size: 80%; font-style: italic;"><p ><strong>How to read this chart:</strong>Today's
         games are listed in alphabetical order by away team. Overall and conference records are listed for each team.
     </p>
 
@@ -38,7 +38,7 @@
             <tr>
                @defining(p.teamData(g.awayTeam)){teamSummary=>
                  @teamSummary.conferenceStandings.getTeam(g.homeTeam.key).map{ t=>
-                    <td style="font-size:16px; font-weight:bold; text-align:right; padding: 15px;"><a href="http://fijimf.com/teams/@g.awayTeam.key">@g.awayTeam.name</a> <span style="font-size:14px; font-weight:normal;">@t._2._2, @t._2._1</span></td>
+                    <td style="font-size:16px; font-weight:bold; text-align:right; padding: 15px;"><a href="http://fijimf.com/deepfij/teams/@g.awayTeam.key">@g.awayTeam.name</a> <span style="font-size:14px; font-weight:normal;">@t._2._2, @t._2._1</span></td>
                  }
                 <td><img src='@g.awayTeam.logoUrlSmall.getOrElse("#")'/></td>
                 }
@@ -46,7 +46,7 @@
                @defining(p.teamData(g.homeTeam)){teamSummary=>
                  <td><img src='@g.homeTeam.logoUrlSmall.getOrElse("#")'/></td>
                  @teamSummary.conferenceStandings.getTeam(g.awayTeam.key).map{ t=>
-                    <td style="font-size:16px; font-weight:bold; padding: 15px;"><a href="http://fijimf.com/teams/@g.homeTeam.key">@g.homeTeam.name</a> <span style="font-size:14px; font-weight:normal;">@t._2._2, @t._2._1</span></td>
+                    <td style="font-size:16px; font-weight:bold; padding: 15px;"><a href="http://fijimf.com/deepfij/teams/@g.homeTeam.key">@g.homeTeam.name</a> <span style="font-size:14px; font-weight:normal;">@t._2._2, @t._2._1</span></td>
                  }
                }
             </tr>

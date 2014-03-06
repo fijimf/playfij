@@ -1,28 +1,16 @@
 
 import _root_.controllers.admin.RunModels
 import com.typesafe.plugin._
-import controllers.Schedule
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
-import models.DatePage
-import models.DatePage
-import models.ScheduleDao
-import models.ScheduleDao
 import models.{DatePage, Model, ScheduleDao, Repository}
 import org.joda.time.{LocalDateTime, LocalDate, DateTime}
 import play.api._
 import play.api.libs.concurrent.Akka
-import play.api.libs.ws.WS
-import play.api.mvc.WithFilters
-import scala.collection.immutable.IndexedSeq
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.slick.session.Session
-import scala.Some
-import scala.Some
 import scala.util.control.NonFatal
-import scraping.control.GameUpdateRequest
-import scraping.control.GameUpdateRequest
 import scraping.control.GameUpdateRequest
 import scraping.NcaaGameScraper
 
@@ -65,19 +53,29 @@ object Global extends WithFilters(MetricsFilter) {
                 d -> None
             }
           }).toMap
-
+           val emailRecipients: Map[String, Option[Int]] = scheduleDao.emailRecipients("morning-line")
+           val h = new DateTime().getHourOfDay
+           logger.info("HOUR OF DAY is "+h)
           try {
-            data(today).foreach{dp=>
-            val mail = use[MailerPlugin].email
-            mail.setSubject("Morning Line - %s".format(today.toString("yyyy-MM-dd")))
-            mail.setRecipient("fijimf@gmail.com")
-            mail.setFrom("Deep Fij <deepfij@gmail.com>")
-            mail.sendHtml(views.html.morningLine(dp).body)
+            data(today).foreach {
+              dp =>
+                emailRecipients.keys.foreach {
+                  rcpt =>
+                    if (emailRecipients(rcpt).isDefined && h == emailRecipients(rcpt).get) {
+                      logger.info("SENDING MAIL TO "+rcpt)
+                      val mail = use[MailerPlugin].email
+                      mail.setSubject("Morning Line - %s".format(today.toString("yyyy-MM-dd")))
+                      mail.setRecipient(rcpt)
+                      mail.setFrom("Deep Fij <deepfij@gmail.com>")
+                      mail.sendHtml(views.html.morningLine(dp).body)
+                    }
+                }
             }
           }
           catch {
             case NonFatal(e) => logger.error("CaughtException trying to send mail.", e)
           }
+          logger.info("DONE SENDING MAIL ")
       }
     }
   }

@@ -175,6 +175,13 @@ case class ScheduleDao(m: Model) {
     logger.info("Done building date page")
     page
   }
+
+  def emailRecipients(key:String)(implicit s: scala.slick.session.Session): Map[String, Option[Int]] = {
+    logger.info("Retrieving emails")
+    val raw: List[(Option[String], Option[Double])] = (for (k<-m.KeyedValues if k.key===key) yield k.textValue -> k.numericValue).list()
+    raw.filter(_._1.isDefined).map(t=> t._1.get -> t._2.map(_.toInt)).toMap
+  }
+
 }
 
 
