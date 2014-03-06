@@ -1,8 +1,8 @@
 @(homeTeamSummary:models.TeamSummary, awayTeamSummary:models.TeamSummary, predictors:List[(Statistic, controllers.SingleVariableLogisticModel)])
-<table>
+<table style="width: 100%; padding-bottom:25px; border-bottom:3px solid aliceblue;">
     <thead>
     <tr>
-        @predictors.map { p=> <th colspan="2">@p._1.name</th> }
+        @predictors.map { p=> <th colspan="2" style="font-style: italic; color:#999;">@p._1.name</th> }
     </tr>
     </thead>
     <tbody>
@@ -13,19 +13,19 @@
                <td rowspan="2">
                  <a href="@controllers.routes.Schedule.team(homeTeamSummary.team.key)"><img src="@homeTeamSummary.team.logoUrlSmall.getOrElse("#")"></a>
                </td>
-               <td>@p._2.winProb(x).formatted("%5.1f") %</td>
+               <td style="font-size:16px;">@p._2.winProb(x).formatted("%5.1f") %</td>
              }
              @if(p._2.winProb(x)<50.0){
                <td rowspan="2">
                  <a href="@controllers.routes.Schedule.team(awayTeamSummary.team.key)"><img src="@awayTeamSummary.team.logoUrlSmall.getOrElse("#")"></a>
                </td>
-               <td>@((100.0-p._2.winProb(x)).formatted("%5.1f")) %</td>
+               <td style="font-size:16px;">@((100.0-p._2.winProb(x)).formatted("%5.1f")) %</td>
              }
              @if(p._2.winProb(x)==50.0){
                <td rowspan="2">
                  PUSH
                </td>
-               <td>@p._2.winProb(x).formatted("%5.1f") %</td>
+               <td style="font-size:16px;">@p._2.winProb(x).formatted("%5.1f") %</td>
              }
            }
          }
@@ -34,13 +34,13 @@
     @predictors.map { p=>
            @defining(homeTeamSummary.stats.filter(_.name==p._1.name).head.z.toDouble - awayTeamSummary.stats.filter(_.name==p._1.name).head.z.toDouble){x=>
              @if(p._2.winProb(x)>50.0){
-               <td>@((p._2.spread(x)).formatted("%+5.1f"))</td>
+               <td style="font-size:16px;">@((p._2.spread(x)).formatted("%+5.1f"))</td>
              }
              @if(p._2.winProb(x)<50.0){
-               <td>@((-p._2.spread(x)).formatted("%+5.1f"))</td>
+               <td style="font-size:16px;">@((-p._2.spread(x)).formatted("%+5.1f"))</td>
              }
              @if(p._2.winProb(x)==50.0){
-               <td>@((p._2.spread(x)).formatted("%+5.1f"))</td>
+               <td style="font-size:16px;">@((p._2.spread(x)).formatted("%+5.1f"))</td>
              }
            }
          }

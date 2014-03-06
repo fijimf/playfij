@@ -8,36 +8,49 @@
         font-weight:bold;
     }
 </style>
-<table style="width: 80%;">
-    <tr><td>Games</td></tr>
+<table style="width: 90%;">
+    <tr><td style="font-size: 2em">Today's Games</td></tr>
+    <tr><td style="color:#666; font-size: 90%; font-style: italic;"><p ><strong>How to read this chart:</strong>Today's
+        games are listed in alphabetical order by away team. Overall and conference records are listed for each team.
+    </p>
+
+        <p>Below each game are predicted results. The predictions are computed through a modified
+            logistic regression on the statistic listed in the heading. The predictions
+            are shown by the favorite's logo, the probability that the favorite would be expected to win and a
+            calculated fair point spread (that is, the spread at which there is an  equal likelihood of the favorite or underdog covering.)</p>
+
+        <p>The model takes at a statistic, for example wins, and compares the value between the two teams of all games
+            played, at the date the game was played, after normalizing the value for the population of teams at the date
+            the game was played,
+            and then fits a logistic regression which can be used to model the probability of any team beating
+            another. The point spread estimator is a slight variation on this.</p>
+
+        <p>To be clear, ultimately, this is a univariate linear regression which is a fairly naive model. However, a
+            model of this sort can be based of any statistical observation of the teams,
+            and the five models chosen offer some information rich statistics to use. At this point I have not
+            backtested them extensively so I cannot conclusively say which is best,
+            but in practice 'Win Predictor' and 'Score Predictor' are the results of prior linear regressions estimating
+            team strength, and only ones which account for strength of schedule. Anecdotally 'Win Predictor' appears to
+            perform best (if you must choose one.)</p></td></tr>
     <tr><td>
         <table style="width:100%;">
             @p.games.map { g=>
             <tr>
                @defining(p.teamData(g.awayTeam)){teamSummary=>
-                 <td rowspan="2"><img src='@g.awayTeam.logoUrlSmall.getOrElse("#")'/></td>
-                 <td>@g.awayTeam.name</td>
-               }
-               <td rowspan="2">@@</td>
+                 @teamSummary.conferenceStandings.getTeam(g.homeTeam.key).map{ t=>
+                    <td style="font-size:16px; font-weight:bold; text-align:right; padding: 15px;"><a href="http://fijimf.com/teams/@g.awayTeam.key">@g.awayTeam.name</a> <span style="font-size:14px; font-weight:normal;">@t._2._2, @t._2._1</span></td>
+                 }
+                <td><img src='@g.awayTeam.logoUrlSmall.getOrElse("#")'/></td>
+                }
+               <td style="font-size:16px; font-weight:bold;">@@</td>
                @defining(p.teamData(g.homeTeam)){teamSummary=>
-                <td rowspan="2"><img src='@g.homeTeam.logoUrlSmall.getOrElse("#")'/></td>
-                <td>@g.homeTeam.name</td>
+                 <td><img src='@g.homeTeam.logoUrlSmall.getOrElse("#")'/></td>
+                 @teamSummary.conferenceStandings.getTeam(g.awayTeam.key).map{ t=>
+                    <td style="font-size:16px; font-weight:bold; padding: 15px;"><a href="http://fijimf.com/teams/@g.homeTeam.key">@g.homeTeam.name</a> <span style="font-size:14px; font-weight:normal;">@t._2._2, @t._2._1</span></td>
+                 }
                }
-            </tr>
-            <tr>
-                @defining(p.teamData(g.awayTeam)){teamSummary=>
-                @teamSummary.conferenceStandings.getTeam(g.awayTeam.key).map{ t=>
-                <td>@t._2._2, @t._2._1</td>
-                }
-                }
-                @defining(p.teamData(g.homeTeam)){teamSummary=>
-                @teamSummary.conferenceStandings.getTeam(g.homeTeam.key).map{ t=>
-                <td>@t._2._2, @t._2._1</td>
-                }
-                }
             </tr>
             <tr><td colspan="5">
-
                     @modelTable(p.teamData(g.homeTeam), p.teamData(g.awayTeam),p.predictors)
             </td></tr>
                     }
@@ -46,10 +59,13 @@
             </td></tr>
         </table>
     </td></tr>
-    <tr><td>
-            <p>You are getting this mail because that fat fuck Fridge put your goddamn email in one of his idiotic
-                databases, and there ain't thing one you can do about it, compadre.  So try to get your hand out of your
-                pants for one blessed second, crack a cold one and enjoy.</p>
+    <tr><td style="color:#666; font-size: 90%; font-style: italic; padding: 10px 100px;">
+            <p >You are getting this mail because that fat loser Fridge put your email address in one of his idiotic
+                databases and there ain't thing one you can do to stop it, compadre.  So try to get your hand out of your
+                pants for one blessed second, crack a cold Budweiser and sit back and enjoy it.</p>
+            <p>If you really don't want to get this email, and you're the kind of person who thinks putting a Post-it on
+                a beer in the fridge that says "Don't drink" will work, by all means send an email with "Unsubscribe" in the
+                subject to <a href="mailto:deepfij@@gmail.com">deepfij@@gmail.com</a></p>
  </td>
         </tr>
 </table>
