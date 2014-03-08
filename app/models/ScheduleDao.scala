@@ -171,7 +171,7 @@ case class ScheduleDao(m: Model) {
       teamDao.teamSummary(teams.map(_.key))
     }
     val (results, upcoming) = todayData.partition(_.result.isDefined)
-    val page: DatePage = DatePage(date, date.minusDays(1), date.plusDays(1), results, upcoming, teamData, predictors)
+    val page: DatePage = DatePage(date, date.minusDays(1), date.plusDays(1), results.sortBy(_.awayTeam.name), upcoming.sortBy(_.awayTeam.name), teamData, predictors)
     logger.info("Done building date page")
     page
   }
