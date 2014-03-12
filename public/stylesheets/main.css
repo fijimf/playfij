@@ -288,3 +288,26 @@ input[type="range"]::-ms-fill-lower {
     margin-bottom: 0;
 
 }
+
+.date-header-row {
+    color: #333;
+    border-top: 12px solid #44f;
+    border-bottom: 12px solid #44f;
+    background-color: #ccf;
+}
+
+.date-link-left {
+    padding-top: 10px;
+}
+
+.date-link-right {
+    padding-top: 10px;
+}
+
+.date-header-row a {
+    color: #333;
+}
+
+.date-header-row a {
+    color: #333;
+}

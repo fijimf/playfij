@@ -5,7 +5,7 @@ import play.api.cache.Cache
 import org.saddle.{Frame, Series}
 import java.util.Date
 import play.api.Logger
-import controllers.{SingleVariableLogisticModel, Statistics}
+import analysis.predictors.SingleStatConditioner
 
 case class ScheduleDao(m: Model) {
   val SCHEDULE_DATA_CACHE_KEY: String = "!game-data"
@@ -117,11 +117,11 @@ case class ScheduleDao(m: Model) {
     }
   }
 
-  def predictors(implicit s: scala.slick.session.Session): List[(Statistic, SingleVariableLogisticModel)] = {
-    Cache.getOrElse[List[(Statistic, SingleVariableLogisticModel)]](PREDICTORS_CACHE_KEY, 7200) {
+  def predictors(implicit s: scala.slick.session.Session): List[(Statistic, SingleStatConditioner)] = {
+    Cache.getOrElse[List[(Statistic, SingleStatConditioner)]](PREDICTORS_CACHE_KEY, 7200) {
       logger.info("Cache miss on 'predictors'")
-      val predictors: List[(Statistic, SingleVariableLogisticModel)] = List( "wp", "streak", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
-        statPage(k).map(sp => sp._1 -> SingleVariableLogisticModel(loadScheduleData, sp._2))
+      val predictors: List[(Statistic, SingleStatConditioner)] = List( "wp", "streak", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
+        statPage(k).map(sp => sp._1 -> SingleStatConditioner(loadScheduleData, sp._2))
       }).flatten
       logger.info("Predictors now cached for 2 hours")
       predictors

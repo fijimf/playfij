@@ -1,8 +1,8 @@
 package models
 
-import analysis.ModelRecord
 import org.joda.time.LocalDate
-import controllers.SingleVariableLogisticModel
+import analysis.predictors.SingleStatConditioner
+import controllers.routes
 
 case class DatePage(
                      date: LocalDate,
@@ -11,7 +11,8 @@ case class DatePage(
                      results:List[ScheduleData],
                      games:List[ScheduleData],
                      teamData:Map[Team, TeamSummary],
-                     predictors:List[(Statistic, SingleVariableLogisticModel)]
+                     predictors:List[(Statistic, SingleStatConditioner)]
                      ) {
-
+             def nextLink = routes.Schedule.date(nextDate.getYear, nextDate.getMonthOfYear, nextDate.getDayOfMonth)
+             def prevLink = routes.Schedule.date(prevDate.getYear, prevDate.getMonthOfYear, prevDate.getDayOfMonth)
 }

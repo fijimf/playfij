@@ -4,78 +4,22 @@
 
 @richMain(p.date.toString("MMM d, yyyy"),  None) {
 
-<div class="row-fluid team-header-row" style="color: #333; border-top:12px solid #44f;border-bottom:12px solid #44f;background-color:#ccf;">
+<div class="row-fluid team-header-row date-header-row">
     <div class="span2">
-        <h4 class="text-left" style="padding-top:10px;"><a style="color:#333;" href="@routes.Schedule.date(p.prevDate.getYear, p.prevDate.getMonthOfYear, p.prevDate.getDayOfMonth)">&lt; @p.prevDate.toString("MMM d, yyyy")</a></h4>
+        <h4 class="text-left date-link-left"><a href="@p.prevLink">&lt; @p.prevDate.toString("MMM d, yyyy")</a></h4>
     </div>
     <div class="span8">
         <h3 class="text-center">@p.date.toString("MMMM d, yyyy")</h3>
     </div>
     <div class="span2">
-        <h4 class="text-right" style="padding-top:10px;"><a  style="color:#333;" href="@routes.Schedule.date(p.nextDate.getYear, p.nextDate.getMonthOfYear, p.nextDate.getDayOfMonth)">@p.nextDate.toString("MMM d, yyyy") &gt;</a></h4>
+        <h4 class="text-right date-link-right"><a href="@p.nextLink">@p.nextDate.toString("MMM d, yyyy") &gt;</a></h4>
     </div>
 </div>
 <div class="row-fluid">
     <div class="span12">
         <div class="container-fluid">
-            @if(!p.results.isEmpty) {
-            <div class="row-fluid">
-                <div class="span12">
-                    <h3>Results</h3>
-                    <table class="table table-compact table-bordered table-subcompact">
-                        <thead>
-                        <tr>
-                            <th colspan="4">Results</th>
-                            <th colspan="4">Postdictions</th>
-                        </tr>
-                        <tr>
-                            <th>Home</th>
-                            <th></th>
-                            <th>Away</th>
-                            <th></th>
-                            <th>Margin</th>
-                            <th>Error</th>
-                            <th>Margin</th>
-                            <th>Error</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        @p.results.map{ res=>
-                        <tr>
-                            <td><a href="@routes.Schedule.team(res.homeTeam.key)">@res.homeTeam.name</a></td>
-                            <td>@res.result.get.homeScore</td>
-                            <td><a href="@routes.Schedule.team(res.awayTeam.key)">@res.awayTeam.name</a></td>
-                            <td>@res.result.get.awayScore</td>
-                        </tr>
-                        }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            }
-            @if(!p.games.isEmpty) {
-            <div class="row-fluid">
-                <div class="span12">
-                    <h3>Schedule</h3>
-                        @p.games.map { g=>
-                    <div class="row-fluid">
-                        @defining(p.teamData(g.homeTeam)){teamSummary=>
-                            @teamMiniBox(g.homeTeam, teamSummary, "home")
-                        }
-                        @defining(p.teamData(g.awayTeam)){teamSummary=>
-                            @teamMiniBox(g.awayTeam, teamSummary, "away")
-                        }
-
-                    </div>
-                    <div class="row-fluid">
-                        <div class="span10">
-                         @modelBox(p.teamData(g.homeTeam), p.teamData(g.awayTeam),p.predictors)
-                        </div>
-                    </div>
-                    }
-                </div>
-            </div>
-            }
+            @dateResults(p.results)
+            @dateGames(p.games, p.teamData, p.predictors)
         </div>
     </div>
     <div class="row-fluid">

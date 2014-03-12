@@ -1,0 +1,37 @@
+@(results:List[models.ScheduleData])
+
+@if(!results.isEmpty) {
+<div class="row-fluid">
+    <div class="span12">
+        <h3>Results</h3>
+        <table class="table table-compact table-bordered table-subcompact">
+            <thead>
+            <tr>
+                <th colspan="4">Results</th>
+                <th colspan="4">Postdictions</th>
+            </tr>
+            <tr>
+                <th>Home</th>
+                <th></th>
+                <th>Away</th>
+                <th></th>
+                <th>Margin</th>
+                <th>Error</th>
+                <th>Margin</th>
+                <th>Error</th>
+            </tr>
+            </thead>
+            <tbody>
+            @results.map{ res=>
+            <tr>
+                <td><a href="@routes.Schedule.team(res.homeTeam.key)">@res.homeTeam.name</a></td>
+                <td>@res.result.get.homeScore</td>
+                <td><a href="@routes.Schedule.team(res.awayTeam.key)">@res.awayTeam.name</a></td>
+                <td>@res.result.get.awayScore</td>
+            </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+}

@@ -1,4 +1,4 @@
-@(homeTeamSummary:models.TeamSummary, awayTeamSummary:models.TeamSummary, predictors:List[(Statistic, controllers.SingleVariableLogisticModel)])
+@(homeTeamSummary:models.TeamSummary, awayTeamSummary:models.TeamSummary, predictors:List[(Statistic, analysis.predictors.SingleStatConditioner)])
 <table class="table table-bordered table-subcompact model-box">
     <thead>
     <tr><th style="width:18em;">Model</th><th style="width: 4em;">Favorite</th><th style="width: 4em;">Probability</th><th style="width: 4em;">Spread</th><th></th></tr>
