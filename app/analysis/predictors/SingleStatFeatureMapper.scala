@@ -6,7 +6,7 @@ import models.{ScheduleData, Team}
 import org.apache.mahout.math.{DenseVector, Vector}
 import org.saddle.scalar.Scalar
 
-case class SingleStatFeatureMapper(frame: Frame[LocalDate, Team, Double], useZ: Boolean) extends FeatureMapper {
+case class SingleStatFeatureMapper(name:String, frame: Frame[LocalDate, Team, Double], useZ: Boolean) extends FeatureMapper {
 
   override def featureDimension: Int = 2
 
@@ -45,4 +45,6 @@ case class SingleStatFeatureMapper(frame: Frame[LocalDate, Team, Double], useZ: 
       None
     }
   }
+
+  override def featureName(i: Int): String = if (i==0) "Constant" else name
 }

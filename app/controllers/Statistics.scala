@@ -81,7 +81,7 @@ object Statistics extends Controller with SecureSocial {
               val jsonSeries = createDescriptiveSeries(frame)
               val analysisSet: List[(Double, Double, Double, Double, Int)] = createAnalysisSet(scheduleData, frame)
               val gameScatter = createScatterData(analysisSet)
-              val betas: List[(Double, List[Double])] = createSpreadBetas(scheduleData, frame)
+              val betas: List[(Double, List[Double])] = createSpreadBetas(statistic.name, scheduleData, frame)
               val values: Series[Team, Double] = frame.rowAt(frame.rowIx.length - 1)
               val table: List[StatRow] = values.toSeq.zipWithIndex.map {
                 case ((team, value), i) =>
@@ -97,9 +97,9 @@ object Statistics extends Controller with SecureSocial {
       }
   }
 
-  def createSpreadBetas(scheduleData: List[ScheduleData], frame: Frame[LocalDate, Team, Double]) = {
+  def createSpreadBetas(name:String, scheduleData: List[ScheduleData], frame: Frame[LocalDate, Team, Double]) = {
     val spreadList = List( -15.0, -10.0, -7.5, -5.0, -2.5, 0.0, 2.5, 5.0, 7.5, 10.0, 15.0)
-    val fm = SingleStatFeatureMapper(frame, useZ = true)
+    val fm = SingleStatFeatureMapper(name, frame, useZ = true)
     spreadList.map(x => {
       val cat = SpreadCategorizer(x)
       x -> Predictor.regress(scheduleData, fm, cat)

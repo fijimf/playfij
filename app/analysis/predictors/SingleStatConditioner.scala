@@ -51,8 +51,8 @@ object SingleStatConditioner {
       )
     }
 
-    def apply(scheduleData: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): SingleStatConditioner = {
-      val betas: List[(Double, Double, Double)] = Statistics.createSpreadBetas(scheduleData, frame).map(t => (t._1, t._2(0), t._2(1)))
+    def apply(name:String, scheduleData: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): SingleStatConditioner = {
+      val betas: List[(Double, Double, Double)] = Statistics.createSpreadBetas(name, scheduleData, frame).map(t => (t._1, t._2(0), t._2(1)))
       this.apply(betas)
     }
   }
