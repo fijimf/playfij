@@ -121,7 +121,7 @@ case class ScheduleDao(m: Model) {
     Cache.getOrElse[List[(Statistic, SingleStatConditioner)]](PREDICTORS_CACHE_KEY, 7200) {
       logger.info("Cache miss on 'predictors'")
       val predictors: List[(Statistic, SingleStatConditioner)] = List( "wp", "streak", "mean-points-margin", "score-predictor", "win-predictor").map(k => {
-        statPage(k).map(sp => sp._1 -> SingleStatConditioner(loadScheduleData, sp._2))
+        statPage(k).map(sp => sp._1 -> SingleStatConditioner(k,loadScheduleData, sp._2))
       }).flatten
       logger.info("Predictors now cached for 2 hours")
       predictors

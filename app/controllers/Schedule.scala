@@ -117,5 +117,14 @@ object Schedule extends Controller with SecureSocial {
       Ok(views.html.dateView(q, scheduleDao.datePage(today)))
   }
   }
+
+  def head2head(key1:String, key2:String) =UserAwareAction {
+    implicit request =>
+      play.api.db.slick.DB.withSession {
+        implicit s =>
+          val today: LocalDate = new LocalDate()
+          Ok(views.html.head2head(teamDao.teamSummary(key1).get, teamDao.teamSummary(key2).get))
+      }
+  }
 }
 
