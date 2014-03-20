@@ -1,24 +1,24 @@
 @(p: models.TeamSummary)
 
+@import structure._
+
 @richMain(p.team.name, None) {
 
-<div class="row-fluid team-header-row"
-     style="border-top:12px solid @p.team.primaryColor.getOrElse("#444");border-bottom:12px solid @p.team.primaryColor.getOrElse("#444");background-color:@p.team.secondaryColor.getOrElse("#ddd");">
-    <div class="span1">
+@sheetHeader(p.secondaryColor, p.primaryColor) {
+    <div class="span1" id="team-header-logo">
         <img class="spin" style="padding-top:15px;"
-             src="@p.team.logoUrl.getOrElse("")">
+             src="@p.logoUrl">
     </div>
     <div class="span9">
-        <h3>@p.team.name @p.team.nickname</h3>
-        <h4>(@p.conferenceStandings.getTeam(p.team.key).map(t=>t._2._2+", "+t._2._1) @p.conference.name)</h4>
+        <h3 id="team-header-name" >@p.team.name @p.team.nickname</h3>
+        <h4 id="team-header-record">(@p.conferenceStandings.getTeam(p.team.key).map(t=>t._2._2+", "+t._2._1) @p.conference.name)</h4>
     </div>
     @if(!p.isCurrentSeason) {
     <div class="span2">
         <h3 style="padding-top:20px; font-size:350%; color: rgba(64, 64, 64, .5);">@p.season.key</h3>
     </div>
     }
-
-</div>
+}
 <div class="row-fluid">
 <div class="span12">
 <div class="container-fluid">

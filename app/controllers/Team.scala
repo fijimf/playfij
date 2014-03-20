@@ -54,16 +54,6 @@ object Team extends Controller with SecureSocial  {
       "teamKey" -> seq(nonEmptyText))((alias, teamKey) => (alias, teamKey))((tup: (String, Seq[String])) => Some(tup))
   )
 
-  def test = UserAwareAction {
-    implicit request =>
-      play.api.db.slick.DB.withSession {
-        implicit s =>
-            Ok(views.html.teamEg() )
-        }
-
-  }
-
-
   def list = SecuredAction {
     implicit request =>
       play.api.db.slick.DB.withSession {

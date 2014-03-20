@@ -65,6 +65,12 @@ body.team-page {
     width: auto;
 }
 
+.sheet-header-row {
+    padding-left: 20px;
+    padding-right: 20px;
+    width: auto;
+}
+
 p.quote {
     font-size: 10px;
     font-style: italic;

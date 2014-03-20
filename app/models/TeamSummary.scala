@@ -4,29 +4,47 @@ import org.saddle.Series
 import analysis.ModelRecord
 
 case class TeamSummary(
-                     team: Team,
-                     conference: Conference,
-                     season: Season,
-                     isCurrentSeason: Boolean,
-                     schedule: List[ScheduleLine],
-                     results: List[ResultLine],
-                     conferenceStandings: ConferenceStandings,
-                     currentRecords: List[(String, Record)],
-                     seasonRecords: List[(Season, Conference, Record, Record)],
-                     stats: List[ModelRecord]
-                     ) {
+                        team: Team,
+                        conference: Conference,
+                        season: Season,
+                        isCurrentSeason: Boolean,
+                        schedule: List[ScheduleLine],
+                        results: List[ResultLine],
+                        conferenceStandings: ConferenceStandings,
+                        currentRecords: List[(String, Record)],
+                        seasonRecords: List[(Season, Conference, Record, Record)],
+                        stats: List[ModelRecord]
+                        ) {
 
+  def primaryColor: String = team.primaryColor.getOrElse("#444")
+
+  def secondaryColor: String = team.secondaryColor.getOrElse("#ddd")
+
+  def logoUrl = team.logoUrl.getOrElse("#")
+
+  def logoUrlSmall = team.logoUrlSmall.getOrElse("/assets/images/blank.png")
 }
 
 object TeamSummary {
 
   import controllers.Util.timed
-  def apply( season: Season, isCurrentSeason: Boolean, team: Team, conference: Conference, confTeams:List[Team], games: List[ScheduleData], seriesMap: List[(Statistic, Series[Team, Double])]): Some[TeamSummary] = {
-    val results = timed("results"){ResultLine(games.filter(sd => sd.isSameSeason(season)), team)}
-    val schedule = timed("schedule"){ScheduleLine(games.filter(sd => sd.isSameSeason(season)), team)}
-    val standings = timed("standings"){ConferenceStandings.createConferenceStandings(season, conference, confTeams, games)}
-    val currentRecords = timed("currentRecords"){TeamSummary.currentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))}
-    val seasonRecords = timed("seasonRecords"){TeamSummary.seasonRecords(team, games)}
+
+  def apply(season: Season, isCurrentSeason: Boolean, team: Team, conference: Conference, confTeams: List[Team], games: List[ScheduleData], seriesMap: List[(Statistic, Series[Team, Double])]): Some[TeamSummary] = {
+    val results = timed("results") {
+      ResultLine(games.filter(sd => sd.isSameSeason(season)), team)
+    }
+    val schedule = timed("schedule") {
+      ScheduleLine(games.filter(sd => sd.isSameSeason(season)), team)
+    }
+    val standings = timed("standings") {
+      ConferenceStandings.createConferenceStandings(season, conference, confTeams, games)
+    }
+    val currentRecords = timed("currentRecords") {
+      TeamSummary.currentRecords(season, team, games.filter(sd => sd.isSameSeason(season) && sd.hasTeam(team) && sd.result.isDefined))
+    }
+    val seasonRecords = timed("seasonRecords") {
+      TeamSummary.seasonRecords(team, games)
+    }
     val stats: List[ModelRecord] = timed("stats") {
       seriesMap.map {
         case (stat: Statistic, ser: Series[Team, Double]) => {

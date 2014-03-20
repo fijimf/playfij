@@ -1,17 +1,25 @@
 @(tp: models.SeasonStandings)
 
+@import structure._
+
 @richMain("Teams",  None) {
 
-<div class="row-fluid team-header-row" style="border-top:12px solid #444;border-bottom:12px solid  #444;background-color:#ddd">
-    <div class="span3 offset1">
-        <h2 style="font-size:350%; padding-top:25px;">Teams</h2>
+
+@sheetHeader("#ddd", "#444") {
+    <div class="span3">
+        <h3>Teams</h3>
     </div>
 
-    <div class="span8" id="headline">
-        <h3><img style='height:70px; width:70px;' src='/assets/images/blank.png' />&nbsp;&nbsp;</h3>
-        <h4>&nbsp;</h4>
+    <div class="span1" id="team-header-logo">
+        <img class="spin" style="padding-top:15px;"
+         src="/assets/images/blank.png">
     </div>
-</div>
+    <div class="span8">
+    <h3 id="team-header-name" >&nbsp;</h3>
+    <h4 id="team-header-record">&nbsp;</h4>
+    </div>
+
+}
 
 <div class="row-fluid">
     <div class="span12">
