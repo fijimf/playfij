@@ -19,7 +19,7 @@
            @if(p._2.winProb(x)<50.0){
            <td>
                <a href="@controllers.routes.Schedule.team(awayTeamSummary.team.key)"><img src="@awayTeamSummary.team.logoUrlSmall.getOrElse("#")"></a>
-           </td>
+            </td>
            <td><h4>@((100.0-p._2.winProb(x)).formatted("%5.1f")) %</h4></td>
            <td><h4>@((-p._2.spread(x)).formatted("%+5.1f"))</h4></td>
                }
