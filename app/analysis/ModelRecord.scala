@@ -8,7 +8,7 @@ import java.util.IllegalFormatConversionException
 
 
 object ModelRecord {
-  def fromStatValue(stat:Statistic, index:Int, ser:Series[_,Double]):ModelRecord={
+  def fromStatValue(stat:Statistic, index:Int, ser:org.saddle.Series[_,Double]):ModelRecord={
 
     val value: Scalar[Double] = ser.at(index)
     val rank: Scalar[Double] = ser.rank(RankTie.Min, !stat.higherIsBetter).at(index)

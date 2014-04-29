@@ -12,7 +12,7 @@ case object LowRank extends TieMethod
 
 case object Average extends TieMethod
 
-trait Population[U, X <: Numeric] {
+abstract class Population[U, X] {
 
   def count: Int
 
@@ -40,8 +40,15 @@ trait Population[U, X <: Numeric] {
 
 }
 
-trait Series[O, X <: Numeric] {
+trait Series[O, X] {
+
+  implicit def ord: Ordering[O]
+
   def count: Int
+
+  def minKey: List[O]
+
+  def maxKey: List[O]
 
   def firstKey: O
 
@@ -56,58 +63,81 @@ trait Series[O, X <: Numeric] {
   def values: List[X]
 
   def value(o: O)
+
+  def rank(o: O, ties: TieMethod): Option[Double]
+
+  def zScore(o: O): Option[Double]
+
+  def percentile(o: O): Option[Double]
+
 }
 
-case class Frame[O, U, X <: Numeric[X]](data: Map[O, Map[U, X]]) {
+case class Frame[O, U, X](data: Map[O, Map[U, X]] = Map.empty[O, Map[U, X]])(implicit ord: Ordering[O], num: Numeric[X]) {
+  self: Frame[O, U, X] =>
 
 
-  def population(o: O): Population[U, X] = new Population[U, X] {
-    val p = data.getOrElse(o, Map.empty[U, X])
-    val x = p.values.toList.sorted
-    val stats = new DescriptiveStatistics(x.map(xx => xx.toDouble(xx)).toArray)
+  def add(o: O, u: U, x: X): Frame[O, U, X] = Frame(data + (o -> (data.getOrElse(o, Map.empty[U, X]) + (u -> x))))
 
-    override def count: Int = p.size
+  def addAll(list: List[(O, U, X)]) = Frame(list.foldLeft(data)((d: (Map[O, Map[U, X]]), tup: (O, U, X)) => d + (tup._1 -> (data.getOrElse(tup._1, Map.empty[U, X]) + (tup._2 -> tup._3)))))
 
-    override def skewness: Double = stats.getSkewness
+  val ordering: List[O] = data.keySet.toList.sorted
+  val ids: Set[U] = data.values.foldLeft(Set.empty[U])((set: Set[U], map: Map[U, X]) => set ++ map.keySet)
+  val rankedSets: Map[O, List[X]] = ordering.map(k => k -> data.getOrElse(k, Map.empty[U, X]).values.toList.sortBy(x => num.toDouble(x))).toMap
+  val stats: Map[O, DescriptiveStatistics] = ordering.map(k => k -> new DescriptiveStatistics(rankedSets(k).map(x => num.toDouble(x)).toArray)).toMap
 
+  def population(o: O): Population[U, X] = {
+    require(!data.isEmpty)
+    new Population[U, X] {
 
-    override def median: Double = stats.getPercentile(0.50)
+      override def count: Int = rankedSets(o).size
 
-    override def mean: Double = stats.getMean
+      override def skewness: Double = stats(o).getSkewness
 
-    override def kurtosis: Double = stats.getKurtosis
+      override def median: Double = stats(o).getPercentile(0.50)
 
-    override def minimum: Double = stats.getMin
+      override def mean: Double = stats(o).getMean
 
-    override def maximum: Double = stats.getMax
+      override def kurtosis: Double = stats(o).getKurtosis
 
-    override def stdDev: Double = stats.getStandardDeviation
+      override def minimum: Double = stats(o).getMin
 
-    override def rank(u: U, ties: TieMethod): Option[Double] = value(u).map((v: X) => {
-      val first = x.indexWhere(_ == v)
-      val last = x.indexWhere(_ != v, first) - 1
-      ties match {
-        case HighRank => first
-        case LowRank => last
-        case Average => (first + last) / 2
+      override def maximum: Double = stats(o).getMax
+
+      override def stdDev: Double = stats(o).getStandardDeviation
+
+      override def rank(u: U, ties: TieMethod): Option[Double] = value(u).map((v: X) => {
+        val first = rankedSets(o).indexWhere(_ == v)
+        val last = rankedSets(o).indexWhere(_ != v, first) - 1
+        ties match {
+          case HighRank => first
+          case LowRank => last
+          case Average => (first + last) / 2
+        }
+
       }
+      )
 
+      override def percentile(u: U): Option[Double] = rank(u, Average).map(rk => (count - rk) / count)
+
+      override def value(u: U): Option[X] = data(o).get(u)
+
+      override def zScore(u: U): Option[Double] = value(u).map(v => (num.toDouble(v) - mean) / stdDev)
     }
-    )
-
-    override def percentile(u: U): Option[Double] = rank(u, Average).map(rk => (count - rk) / count)
-
-    override def value(u: U): Option[X] = p.get(u)
-
-    override def zScore(u: U): Option[Double] = value(u).map(v => (v.toDouble(v) - mean) / stdDev)
   }
 
-  def series(u: U): Series[O, X] = new Series[O,X]{
-    override def count: Int = ???
+  def series(u: U): Series[O, X] = new Series[O, X] {
+    require(!data.isEmpty)
+    val subKeyList = ordering.filter(k => data(k).contains(u))
 
-    override def firstKey: O = ???
+    override def count: Int = subKeyList.size
 
-    override def lastKey: O = ???
+    override def firstKey: O = subKeyList.head
+
+    override def lastKey: O = subKeyList.last
+
+    override def maxKey: List[O] = ???
+
+    override def minKey: List[O] = ???
 
     override def values: List[X] = ???
 
@@ -118,6 +148,14 @@ case class Frame[O, U, X <: Numeric[X]](data: Map[O, Map[U, X]]) {
     override def keys: List[O] = ???
 
     override def first: X = ???
+
+    override def rank(o: O, ties: TieMethod): Option[Double] = ???
+
+    override def percentile(o: O): Option[Double] = ???
+
+    override def zScore(o: O): Option[Double] = ???
+
+    override implicit def ord: Ordering[O] = self.ord
   }
 
 }
