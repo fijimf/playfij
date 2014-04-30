@@ -1,8 +1,6 @@
 package analysis
 
-import org.joda.time.LocalDate
-import models.Team
-import org.apache.commons.math.stat.descriptive.{DescriptiveStatistics, UnivariateStatistic}
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics
 
 sealed trait TieMethod
 
@@ -50,19 +48,17 @@ trait Series[O, X] {
 
   def maxKey: List[O]
 
-  def firstKey: O
+  def firstKey: Option[O]
 
-  def lastKey: O
+  def lastKey: Option[O]
 
-  def first: X
+  def first: Option[X]
 
-  def last: X
+  def last: Option[X]
 
   def keys: List[O]
 
-  def values: List[X]
-
-  def value(o: O)
+  def value(o: O):Option[X]
 
   def rank(o: O, ties: TieMethod): Option[Double]
 
@@ -131,29 +127,27 @@ case class Frame[O, U, X](data: Map[O, Map[U, X]] = Map.empty[O, Map[U, X]])(imp
 
     override def count: Int = subKeyList.size
 
-    override def firstKey: O = subKeyList.head
+    override def firstKey: Option[O] = subKeyList.headOption
 
-    override def lastKey: O = subKeyList.last
+    override def lastKey: Option[O]= subKeyList.lastOption
 
-    override def maxKey: List[O] = ???
+    override def maxKey: List[O] = subKeyList.filter(k => data(k)(u) == subKeyList.flatMap(d => value(d)).max)
 
-    override def minKey: List[O] = ???
+    override def minKey: List[O] = subKeyList.filter(k => data(k)(u) == subKeyList.flatMap(d => value(d)).min)
 
-    override def values: List[X] = ???
+    override def last: Option[X] = lastKey.flatMap(k=>value(k))
 
-    override def last: X = ???
+    override def value(o: O): Option[X] = data.get(o).flatMap(_.get(u))
 
-    override def value(o: O): Unit = ???
+    override def keys: List[O] = subKeyList
 
-    override def keys: List[O] = ???
+    override def first: Option[X] = firstKey.flatMap(k=>value(k))
 
-    override def first: X = ???
+    override def rank(o: O, ties: TieMethod): Option[Double] = population(o).rank(u, ties)
 
-    override def rank(o: O, ties: TieMethod): Option[Double] = ???
+    override def percentile(o: O): Option[Double] = population(o).percentile(u)
 
-    override def percentile(o: O): Option[Double] = ???
-
-    override def zScore(o: O): Option[Double] = ???
+    override def zScore(o: O): Option[Double] = population(o).zScore(u)
 
     override implicit def ord: Ordering[O] = self.ord
   }
