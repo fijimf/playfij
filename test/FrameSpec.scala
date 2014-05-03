@@ -1,4 +1,4 @@
-import analysis.Frame
+import analysis.frame.Frame
 import org.joda.time.LocalDate
 import org.specs2.mutable.Specification
 

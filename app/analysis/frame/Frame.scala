@@ -1,72 +1,7 @@
-package analysis
+package analysis.frame
 
 import org.apache.commons.math.stat.descriptive.DescriptiveStatistics
-
-sealed trait TieMethod
-
-case object HighRank extends TieMethod
-
-case object LowRank extends TieMethod
-
-case object Average extends TieMethod
-
-abstract class Population[U, X] {
-
-  def count: Int
-
-  def minimum: Double
-
-  def median: Double
-
-  def maximum: Double
-
-  def mean: Double
-
-  def stdDev: Double
-
-  def skewness: Double
-
-  def kurtosis: Double
-
-  def value(u: U): Option[X]
-
-  def rank(u: U, ties: TieMethod): Option[Double]
-
-  def zScore(u: U): Option[Double]
-
-  def percentile(u: U): Option[Double]
-
-}
-
-trait Series[O, X] {
-
-  implicit def ord: Ordering[O]
-
-  def count: Int
-
-  def minKey: List[O]
-
-  def maxKey: List[O]
-
-  def firstKey: Option[O]
-
-  def lastKey: Option[O]
-
-  def first: Option[X]
-
-  def last: Option[X]
-
-  def keys: List[O]
-
-  def value(o: O):Option[X]
-
-  def rank(o: O, ties: TieMethod): Option[Double]
-
-  def zScore(o: O): Option[Double]
-
-  def percentile(o: O): Option[Double]
-
-}
+import analysis._
 
 case class Frame[O, U, X](data: Map[O, Map[U, X]] = Map.empty[O, Map[U, X]])(implicit ord: Ordering[O], num: Numeric[X]) {
   self: Frame[O, U, X] =>
