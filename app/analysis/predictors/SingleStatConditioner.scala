@@ -6,7 +6,7 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction
 import org.apache.commons.math.analysis.UnivariateRealFunction
 import controllers.Statistics
 import models.{Team, ScheduleData}
-import org.saddle.Frame
+import analysis.frame.Frame
 import org.joda.time.LocalDate
 import org.apache.commons.math.analysis.solvers.BisectionSolver
 

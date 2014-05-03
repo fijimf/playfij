@@ -6,7 +6,7 @@ import play.api.Logger
 import models._
 import models.ScheduleDao
 import org.joda.time.LocalDate
-import org.saddle.{Index, Vec, Series, Frame}
+import analysis.frame.{Series, Frame}
 import play.api.libs.json.Json._
 import play.api.libs.json.{JsArray, JsObject, Json}
 import analysis.ModelRecord
@@ -41,8 +41,8 @@ object Statistics extends Controller with SecureSocial {
 
   def createAnalysisSet(data: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): List[(Double, Double, Double, Double, Int)] = {
     data.filter(_.result.isDefined).map(d => {
-      if (frame.rowIx.contains(d.game.date)) {
-        val i: Int = frame.rowIx.getFirst(d.game.date.plusDays(-1))
+      if (frame.ordering.contains(d.game.date)) {
+        val i: Int = frame.ordering.getFirst(d.game.date.plusDays(-1))
         if (i > 0) {
           val series: Series[Team, Double] = frame.rowAt(i)
           val mean: Double = series.mean
