@@ -6,7 +6,7 @@ import play.api.Logger
 import models._
 import models.ScheduleDao
 import org.joda.time.LocalDate
-import analysis.frame.{Series, Frame}
+import analysis.frame.{LowRank, Population, Series, Frame}
 import play.api.libs.json.Json._
 import play.api.libs.json.{JsArray, JsObject, Json}
 import analysis.ModelRecord
@@ -42,25 +42,11 @@ object Statistics extends Controller with SecureSocial {
   def createAnalysisSet(data: List[ScheduleData], frame: Frame[LocalDate, Team, Double]): List[(Double, Double, Double, Double, Int)] = {
     data.filter(_.result.isDefined).map(d => {
       if (frame.ordering.contains(d.game.date)) {
-        val i: Int = frame.ordering.getFirst(d.game.date.plusDays(-1))
-        if (i > 0) {
-          val series: Series[Team, Double] = frame.rowAt(i)
-          val mean: Double = series.mean
-          val stdev: Double = series.stdev
-          if (series.index.contains(d.homeTeam) && series.index.contains(d.awayTeam)) {
-            val hv: Scalar[Double] = series.at(series.index.getFirst(d.homeTeam))
-            val av: Scalar[Double] = series.at(series.index.getFirst(d.awayTeam))
-            val mg = d.result.get.homeScore - d.result.get.awayScore
-            if (hv.isNA || av.isNA) {
-              None
-            } else {
-              Some(hv.get, av.get, (hv.get - mean) / stdev, (av.get - mean) / stdev, mg)
-            }
-          } else {
-            None
-          }
-        } else {
-          None
+        val pop: Population[Team, Double] = frame.population(d.game.date)
+        for (hv <- pop.value(d.homeTeam);
+             av <- pop.value(d.awayTeam)
+        ) {
+          Some(hv, av, (hv - pop.mean) / pop.stdDev, (av - pop.mean) / pop.stdDev, d.result.get.homeScore - d.result.get.awayScore)
         }
       } else {
         None
@@ -77,20 +63,23 @@ object Statistics extends Controller with SecureSocial {
 
           scheduleDao.statPage(key).map {
             case (statistic: Statistic, frame: Frame[LocalDate, Team, Double]) => {
-              val date = frame.rowIx.last.get
+              val date = frame.ordering.last
               val jsonSeries = createDescriptiveSeries(frame)
               val analysisSet: List[(Double, Double, Double, Double, Int)] = createAnalysisSet(scheduleData, frame)
               val gameScatter = createScatterData(analysisSet)
               val betas: List[(Double, List[Double])] = createSpreadBetas(statistic.name, scheduleData, frame)
-              val values: Series[Team, Double] = frame.rowAt(frame.rowIx.length - 1)
-              val table: List[StatRow] = values.toSeq.zipWithIndex.map {
-                case ((team, value), i) =>
-                  val rank = values.rank(RankTie.Min, !statistic.higherIsBetter).at(i).get.toInt
-                  val zScore = (value - values.mean) / values.stdev
-                  val pctile = 100.0 * (values.length - rank) / values.length
-                  StatRow(team, rank, value, pctile, zScore)
-              }.toList.sortBy(_.rank)
-              Ok(views.html.statEg(statistic, date, DescriptiveStats(values), table, jsonSeries, gameScatter, betas))
+              val pop: Population[Team, Double] = frame.population(date)
+              val table: List[StatRow] = frame.ids.map (
+                team =>
+                  for (value <- pop.value(team);
+                       rank <- pop.rank(team, LowRank);
+                       zScore <- pop.zScore(team);
+                       pctile <- pop.percentile(team))yield
+                    StatRow(team, rank, value, pctile, zScore)
+
+              ).toList.flatten
+
+              Ok(views.html.statEg(statistic, date, pop.desecriptiveStats, table, jsonSeries, gameScatter, betas))
             }
           }.getOrElse(Ok(views.html.resourceNotFound("X", "X")))
 

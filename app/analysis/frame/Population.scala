@@ -1,7 +1,5 @@
 package analysis.frame
 
-import analysis.frame.TieMethod
-
 trait Population[U, X] {
 
   def count: Int
