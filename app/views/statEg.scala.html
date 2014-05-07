@@ -1,4 +1,6 @@
-@(s: models.Statistic, dt:org.joda.time.LocalDate, ds:models.DescriptiveStats, ms:List[models.StatRow], ser:String, scat:String, betas:List[(Double,List[Double])])
+@(s: models.Statistic, dt:org.joda.time.LocalDate, pop:analysis.frame.Population[Team, Double], ms:List[models.StatRow], ser:String, scat:String, betas:List[(Double,List[Double])])
+
+@import tags._
 
 @richMain(s.name, None) {
 
@@ -21,19 +23,19 @@
                 <div class="span12">
                     <p style="padding-top: 20px;">
                         <span style="font-weight:bold;">Date:</span><span style="padding:0 35px 0 5px;"> @dt.toString("dd-MMM-yyyy")</span>
-                        <span style="font-weight:bold">N:</span><span style="padding:0 35px 0 5px;">@ds.n</span>
-                        <span style="font-weight:bold">Mean:</span><span style="padding:0 35px 0 5px;"> @ds.mean.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">Std. Deviation:</span> <span style="padding:0 35px 0 5px;">@ds.stdDev.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">Skewness:</span><span style="padding:0 35px 0 5px;">@ds.skew.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">Kurtosis:</span><span style="padding:0 35px 0 5px;">@ds.kurt.formatted("%12.4f")</span>
+                        @descriptiveStat(pop.count,"N","%5.0f")
+                        @descriptiveStat(pop.mean,"Mean","%12.4f")
+                        @descriptiveStat(pop.stdDev,"Std. Deviation","%12.4f")
+                        @descriptiveStat(pop.skewness,"Skewness","%12.4f")
+                        @descriptiveStat(pop.kurtosis,"Kurtosis","%12.4f")
                     </p>
 
                     <p>
-                        <span style="font-weight:bold">Minimum:</span><span style="padding:0 35px 0 5px;"> @ds.min.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">1st Quartile:</span><span style="padding:0 35px 0 5px;"> @ds.q1.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">Median:</span> <span style="padding:0 35px 0 5px;">@ds.med.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">3rd Quartile:</span><span style="padding:0 35px 0 5px;">@ds.q3.formatted("%12.4f")</span>
-                        <span style="font-weight:bold">Maximum:</span><span style="padding:0 35px 0 5px;">@ds.max.formatted("%12.4f")</span>
+                        @descriptiveStat(pop.minimum,"Minimum","%12.4f")
+                        @descriptiveStat(pop.q1,"1st Quartile","%12.4f")
+                        @descriptiveStat(pop.median,"Median","%12.4f")
+                        @descriptiveStat(pop.q3,"3rd Quartile","%12.4f")
+                        @descriptiveStat(pop.maximum,"Maximum","%12.4f")
                     </p>
                 </div>
             </div>

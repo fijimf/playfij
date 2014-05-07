@@ -20,11 +20,18 @@ case class Frame[O, U, X](data: Map[O, Map[U, X]] = Map.empty[O, Map[U, X]])(imp
     require(!data.isEmpty)
     new Population[U, X] {
 
+
+      override def ids: Set[U] = data(o).keySet
+
       override def count: Int = rankedSets(o).size
 
       override def skewness: Double = stats(o).getSkewness
 
       override def median: Double = stats(o).getPercentile(0.50)
+
+      override def q3: Double = stats(o).getPercentile(0.75)
+
+      override def q1: Double = stats(o).getPercentile(0.25)
 
       override def mean: Double = stats(o).getMean
 
@@ -64,19 +71,19 @@ case class Frame[O, U, X](data: Map[O, Map[U, X]] = Map.empty[O, Map[U, X]])(imp
 
     override def firstKey: Option[O] = subKeyList.headOption
 
-    override def lastKey: Option[O]= subKeyList.lastOption
+    override def lastKey: Option[O] = subKeyList.lastOption
 
     override def maxKey: List[O] = subKeyList.filter(k => data(k)(u) == subKeyList.flatMap(d => value(d)).max)
 
     override def minKey: List[O] = subKeyList.filter(k => data(k)(u) == subKeyList.flatMap(d => value(d)).min)
 
-    override def last: Option[X] = lastKey.flatMap(k=>value(k))
+    override def last: Option[X] = lastKey.flatMap(k => value(k))
 
     override def value(o: O): Option[X] = data.get(o).flatMap(_.get(u))
 
     override def keys: List[O] = subKeyList
 
-    override def first: Option[X] = firstKey.flatMap(k=>value(k))
+    override def first: Option[X] = firstKey.flatMap(k => value(k))
 
     override def rank(o: O, ties: TieMethod): Option[Double] = population(o).rank(u, ties)
 

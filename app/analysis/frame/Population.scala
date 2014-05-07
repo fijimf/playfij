@@ -2,11 +2,17 @@ package analysis.frame
 
 trait Population[U, X] {
 
+  def ids:Set[U]
+
   def count: Int
 
   def minimum: Double
 
+  def q1: Double
+
   def median: Double
+
+  def q3: Double
 
   def maximum: Double
 

@@ -4,14 +4,12 @@ import play.mvc.Controller
 import securesocial.core.SecureSocial
 import play.api.Logger
 import models._
-import org.saddle.{Frame, Vec, Series}
-import analysis.junkyard.SpreadDist
-import org.saddle.stats.PctMethod
 import models.ScheduleData
 import models.ScheduleDao
 import analysis.junkyard.SpreadDist
-import scala.collection.immutable.Iterable
 import org.joda.time.LocalDate
+import analysis.frame.{Population, Frame}
+import org.apache.commons.math.stat.descriptive.DescriptiveStatistics
 
 object Analysis extends Controller with SecureSocial {
 
@@ -36,16 +34,16 @@ object Analysis extends Controller with SecureSocial {
           val fakeDists = pointPredictor.map(d => {
             val frame: Frame[LocalDate, Team, Double] = d._2
             val fakeData=data.flatMap(sd => {
-              val series: Series[Team, Double] = frame.first(sd.game.date)
-              val homeScore = series.first(sd.homeTeam)
-              val awayScore = series.first(sd.awayTeam)
-              if (homeScore.isNA || awayScore.isNA){
+              val pop: Population[Team, Double] = frame.population(sd.game.date)
+              val homeScore = pop.value(sd.homeTeam)
+              val awayScore = pop.value(sd.awayTeam)
+              if (homeScore.isEmpty || awayScore.isEmpty){
                 None
               } else {
                 if (math.round(awayScore.get) == math.round(homeScore.get)) {
-                  Some(sd.copy(result = sd.result.map(_.copy(homeScore = 1 + math.round(homeScore).toInt, awayScore = math.round(awayScore).toInt))))
+                  Some(sd.copy(result = sd.result.map(_.copy(homeScore = 1 + math.round(homeScore.get).toInt, awayScore = math.round(awayScore.get).toInt))))
                 } else {
-                  Some(sd.copy(result = sd.result.map(_.copy(homeScore = math.round(homeScore).toInt, awayScore = math.round(awayScore).toInt))))
+                  Some(sd.copy(result = sd.result.map(_.copy(homeScore = math.round(homeScore.get).toInt, awayScore = math.round(awayScore.get).toInt))))
                 }
               }
             })
@@ -79,12 +77,12 @@ object Analysis extends Controller with SecureSocial {
   }
 
   def createSpreadDist(data: List[ScheduleData], name: String): SpreadDist = {
-    val spreads: List[Int] = data.map(o => math.abs(o.result.get.homeScore - o.result.get.awayScore))
-    val counts: Map[Int, Int] = spreads.groupBy((x: Int) => x).mapValues(_.size).withDefault((x: Int) => 0)
+    val spreads: List[Double] = data.map(o => math.abs(o.result.get.homeScore - o.result.get.awayScore).toDouble)
+    val counts: Map[Double, Int] = spreads.groupBy((x: Double) => x).mapValues(_.size).withDefault((x: Double) => 0)
     val hiCount = counts.map(_._2).max
     val mode = (counts.filter(_._2 == hiCount).map(_._1).toList, hiCount)
-    val vec: Vec[Int] = Vec(spreads: _*)
-    val all = SpreadDist(name, vec.length, vec.mean, vec.stdev, vec.skew, vec.kurt, 100.0 * counts(1) / vec.length, vec.min.get, vec.percentile(25.0, PctMethod.NIST), vec.median, vec.percentile(75.0, PctMethod.NIST), vec.percentile(95.0, PctMethod.NIST), vec.percentile(99.0, PctMethod.NIST), vec.max.get, mode)
+    val vec: DescriptiveStatistics = new DescriptiveStatistics(spreads.toArray[Double])
+    val all = SpreadDist(name, vec.getN, vec.getMean, vec.getStandardDeviation, vec.getSkewness, vec.getKurtosis, 100.0 * counts(1) / vec.getN, vec.getMin, vec.getPercentile(0.25), vec.getPercentile(0.50), vec.getPercentile(0.75), vec.getPercentile(0.95), vec.getPercentile(0.99), vec.getMax, (List.empty[Int], 0))
     all
   }
 }

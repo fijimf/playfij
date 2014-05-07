@@ -2,10 +2,10 @@ package models
 
 import org.joda.time.LocalDate
 import play.api.cache.Cache
-import org.saddle.{Frame, Series}
 import java.util.Date
 import play.api.Logger
 import analysis.predictors.SingleStatConditioner
+import analysis.frame.{Population, Series, Frame}
 
 case class ScheduleDao(m: Model) {
   val SCHEDULE_DATA_CACHE_KEY: String = "!game-data"
@@ -67,14 +67,14 @@ case class ScheduleDao(m: Model) {
     (observation, statistic, model, team)
   }
 
-  def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Series[Team, Double])] = {
-    Cache.getOrElse[List[(Statistic, Series[Team, Double])]]("stats:" + date.toString("yyyy-MM-dd"), 3600) {
+  def loadStats(date: LocalDate)(implicit s: scala.slick.session.Session): List[(Statistic, Population[Team, Double])] = {
+    Cache.getOrElse[List[(Statistic, Population[Team, Double])]]("stats:" + date.toString("yyyy-MM-dd"), 3600) {
       logger.info("Starting loadStats: cache miss on  stats:" + date.toString("yyyy-MM-dd"))
       val sm = statMap
       val tm = teamDao.teamMap
       val statDate: LocalDate = getStatDates(date)
       val os = (for {obs <- m.Observations if obs.date === statDate} yield obs).list
-      val stats = os.groupBy(o => sm(o.statisticId)).mapValues(lst => Series(lst.map(o => (tm(o.domainId), o.value)): _*)).toList
+      val stats = os.groupBy(o => sm(o.statisticId)).mapValues(lst => Frame(Map(date->(lst.map(o => (tm(o.domainId), o.value)).toMap))).population(date)).toList
       logger.info("Finished loadStats: " + new Date().toString)
       stats
     }
@@ -89,11 +89,11 @@ case class ScheduleDao(m: Model) {
         } yield {
           (statistic, team, observation.date, observation.value)
         }).list()
-      val series: Map[Team, Series[LocalDate, Double]] = rawData.groupBy(_._2).mapValues(lst => {
-        Series[LocalDate, Double](lst.map(x => (x._3, x._4)): _*)
+      val groupedData: Map[LocalDate, Map[Team, Double]] = rawData.groupBy(_._3).mapValues(lst => {
+        Map[Team, Double](lst.map(x => (x._2, x._4)): _*)
       })
       val stat = rawData.head._1
-      (stat, Frame.apply[LocalDate, Team, Double](series.toList: _*))
+      (stat, Frame[LocalDate, Team, Double](groupedData))
     })
   }
 

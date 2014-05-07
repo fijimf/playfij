@@ -1,7 +1,5 @@
 package analysis.frame
 
-import analysis.frame.TieMethod
-
 trait Series[O, X] {
 
   implicit def ord: Ordering[O]

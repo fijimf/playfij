@@ -6,28 +6,16 @@ import play.api.Logger
 import models._
 import models.ScheduleDao
 import org.joda.time.LocalDate
-import analysis.frame.{LowRank, Population, Series, Frame}
+import analysis.frame.{LowRank, Population, Frame}
 import play.api.libs.json.Json._
 import play.api.libs.json.{JsArray, JsObject, Json}
-import analysis.ModelRecord
-import org.saddle.scalar.Scalar
-import org.saddle.stats.RankTie
 import analysis.predictors.{SingleStatFeatureMapper, SpreadCategorizer, Predictor}
-import org.apache.commons.math3.analysis.UnivariateFunction
-import org.apache.commons.math.analysis.solvers.BisectionSolver
-import org.apache.commons.math.analysis.{DifferentiableMultivariateVectorialFunction, UnivariateRealFunction}
-import org.apache.commons.math.analysis.interpolation.{LinearInterpolator, SplineInterpolator}
-import org.apache.commons.math.analysis.polynomials.{PolynomialFunction, PolynomialSplineFunction}
-import org.apache.commons.math.optimization.fitting.PolynomialFitter
-import org.apache.commons.math.optimization.{VectorialPointValuePair, VectorialConvergenceChecker, DifferentiableMultivariateVectorialOptimizer}
-import org.apache.commons.math.optimization.general.GaussNewtonOptimizer
 
 
 object Statistics extends Controller with SecureSocial {
 
   import play.api.Play.current
 
-  private val logger = Logger("Statistics")
   private val model = new Model() {
     val profile = play.api.db.slick.DB.driver
   }
@@ -35,7 +23,7 @@ object Statistics extends Controller with SecureSocial {
   private val scheduleDao: ScheduleDao = ScheduleDao(model)
 
   def createScatterData(analysisSet: List[(Double, Double, Double, Double, Int)]): String = {
-    JsArray(analysisSet.map(tup => Json.obj("hv" -> tup._1, "av" -> tup._2, "hz" -> tup._3, "az" -> tup._4, "mg" -> tup._5)).toList).toString
+    JsArray(analysisSet.map(tup => Json.obj("hv" -> tup._1, "av" -> tup._2, "hz" -> tup._3, "az" -> tup._4, "mg" -> tup._5)).toList).toString()
   }
 
 
@@ -45,8 +33,8 @@ object Statistics extends Controller with SecureSocial {
         val pop: Population[Team, Double] = frame.population(d.game.date)
         for (hv <- pop.value(d.homeTeam);
              av <- pop.value(d.awayTeam)
-        ) {
-          Some(hv, av, (hv - pop.mean) / pop.stdDev, (av - pop.mean) / pop.stdDev, d.result.get.homeScore - d.result.get.awayScore)
+        ) yield {
+          (hv, av, (hv - pop.mean) / pop.stdDev, (av - pop.mean) / pop.stdDev, d.result.get.homeScore - d.result.get.awayScore)
         }
       } else {
         None
@@ -61,7 +49,7 @@ object Statistics extends Controller with SecureSocial {
           val teams: List[Team] = scheduleDao.teamDao.teamMap.values.toList
           val scheduleData: List[ScheduleData] = scheduleDao.loadScheduleData
 
-          scheduleDao.statPage(key).map {
+          scheduleDao.statPage(key).fold(Ok(views.html.resourceNotFound("X", "X")))({
             case (statistic: Statistic, frame: Frame[LocalDate, Team, Double]) => {
               val date = frame.ordering.last
               val jsonSeries = createDescriptiveSeries(frame)
@@ -69,19 +57,19 @@ object Statistics extends Controller with SecureSocial {
               val gameScatter = createScatterData(analysisSet)
               val betas: List[(Double, List[Double])] = createSpreadBetas(statistic.name, scheduleData, frame)
               val pop: Population[Team, Double] = frame.population(date)
-              val table: List[StatRow] = frame.ids.map (
+              val table: List[StatRow] = frame.ids.map(
                 team =>
                   for (value <- pop.value(team);
                        rank <- pop.rank(team, LowRank);
                        zScore <- pop.zScore(team);
-                       pctile <- pop.percentile(team))yield
+                       pctile <- pop.percentile(team)) yield
                     StatRow(team, rank, value, pctile, zScore)
 
               ).toList.flatten
 
-              Ok(views.html.statEg(statistic, date, pop.desecriptiveStats, table, jsonSeries, gameScatter, betas))
+              Ok(views.html.statEg(statistic, date, pop, table, jsonSeries, gameScatter, betas))
             }
-          }.getOrElse(Ok(views.html.resourceNotFound("X", "X")))
+          })
 
       }
   }
@@ -97,16 +85,16 @@ object Statistics extends Controller with SecureSocial {
 
 
   def createDescriptiveSeries(frame: Frame[LocalDate, Team, Double]): String = {
-    Json.obj("series" -> JsArray(frame.rowIx.toSeq.map {
+    Json.obj("series" -> JsArray(frame.ordering.map {
       date =>
-        val descriptiveStats: DescriptiveStats = DescriptiveStats(frame.first(date))
+        val pop: Population[Team, Double] = frame.population(date)
         Json.obj(
           "date" -> date.toString("yyyy-MM-dd"),
-          "mean" -> descriptiveStats.mean,
-          "stdDev" -> descriptiveStats.stdDev,
-          "min" -> descriptiveStats.min,
-          "med" -> descriptiveStats.med,
-          "max" -> descriptiveStats.max
+          "mean" -> pop.mean,
+          "stdDev" -> pop.stdDev,
+          "min" -> pop.minimum,
+          "med" -> pop.median,
+          "max" -> pop.maximum
         )
     }.toList)).toString()
   }
@@ -148,21 +136,20 @@ object Statistics extends Controller with SecureSocial {
 
   def jsonData(stat: Statistic, frame: Frame[LocalDate, Team, Double]): JsArray = {
     JsArray(
-      for (dt <- frame.rowIx.toSeq.reverse) yield {
-        val row: Series[Team, Double] = frame.first(dt)
+      for (dt <- frame.ordering.reverse) yield {
+        val row: Population[Team, Double] = frame.population(dt)
         jsonByDate(stat, dt, row)
       }
     )
   }
 
-  def jsonByDate(stat: Statistic, dt: LocalDate, row: Series[Team, Double]): JsObject = {
-    val observations: IndexedSeq[JsObject] = row.index.toSeq.map(t => {
-      val ix: Int = row.index.getFirst(t)
-      val value = row.at(ix)
-      val rank = row.rank(RankTie.Min, !stat.higherIsBetter).at(ix)
+  def jsonByDate(stat: Statistic, dt: LocalDate, row: Population[Team, Double]): JsObject = {
+    val observations: IndexedSeq[JsObject] = row.ids.map(t => {
+      val value = row.value(t)
+      val rank = row.rank(t,LowRank)
       (t, value, rank)
-    }).filter(tup => !(tup._2.isNA || tup._3.isNA)).sortBy(_._3).map {
-      case (t: Team, value: Scalar[Double], rank: Scalar[Double]) => {
+    }).filter(tup => !(tup._2.isEmpty || tup._3.isEmpty)).toIndexedSeq.sortBy(_._3.get).map {
+      case (t: Team, value: Option[Double], rank: Option[Double]) => {
         Json.obj(
           "teamKey" -> t.key,
           "value" -> value.get,
@@ -175,9 +162,9 @@ object Statistics extends Controller with SecureSocial {
     Json.obj(
       "date" -> dt,
       "mean" -> row.mean,
-      "stdDev" -> row.stdev,
-      "max" -> row.max.get,
-      "min" -> row.min.get,
+      "stdDev" -> row.stdDev,
+      "max" -> row.maximum,
+      "min" -> row.minimum,
       "median" -> row.median,
       "observations" -> JsArray(observations)
     )

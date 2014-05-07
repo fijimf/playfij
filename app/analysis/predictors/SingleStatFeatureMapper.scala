@@ -1,10 +1,10 @@
 package analysis.predictors
 
-import org.saddle.{Series, Frame}
 import org.joda.time.LocalDate
 import models.{ScheduleData, Team}
 import org.apache.mahout.math.{DenseVector, Vector}
 import org.saddle.scalar.Scalar
+import analysis.frame.{Population, Series, Frame}
 
 case class SingleStatFeatureMapper(name:String, frame: Frame[LocalDate, Team, Double], useZ: Boolean) extends FeatureMapper {
 
@@ -12,17 +12,16 @@ case class SingleStatFeatureMapper(name:String, frame: Frame[LocalDate, Team, Do
 
   override def feature(obs: ScheduleData): Option[Vector] = {
     if (obs.result.isDefined) {
-      if (frame.rowIx.contains(obs.game.date)) {
-        val i: Int = frame.rowIx.getFirst(obs.game.date.plusDays(-1))
-        if (i > 0) {
-          val series: Series[Team, Double] = frame.rowAt(i)
-          val mean: Double = series.mean
-          val stdev: Double = series.stdev
-          if (series.index.contains(obs.homeTeam) && series.index.contains(obs.awayTeam)) {
-            val hv: Scalar[Double] = series.at(series.index.getFirst(obs.homeTeam))
-            val av: Scalar[Double] = series.at(series.index.getFirst(obs.awayTeam))
+      if (frame.ordering.contains(obs.game.date)) {
 
-            if (hv.isNA || av.isNA) {
+          val series: Population[Team, Double] = frame.population(obs.game.date)
+          val mean: Double = series.mean
+          val stdev: Double = series.stdDev
+          if (frame.ids.contains(obs.homeTeam) && frame.ids.contains(obs.awayTeam)) {
+            val hv: Option[Double] = series.value(obs.homeTeam)
+            val av: Option[Double] = series.value(obs.awayTeam)
+
+            if (hv.isEmpty || av.isEmpty) {
               None
             } else {
 
@@ -41,9 +40,6 @@ case class SingleStatFeatureMapper(name:String, frame: Frame[LocalDate, Team, Do
       } else {
         None
       }
-    } else {
-      None
-    }
   }
 
   override def featureName(i: Int): String = if (i==0) "Constant" else name

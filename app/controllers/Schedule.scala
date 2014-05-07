@@ -12,6 +12,7 @@ import org.saddle.scalar.Scalar
 import org.saddle.stats.RankTie
 import scala.collection.immutable.IndexedSeq
 import play.api.cache.Cached
+import analysis.frame.Population
 
 object Schedule extends Controller with SecureSocial {
 
@@ -41,7 +42,7 @@ object Schedule extends Controller with SecureSocial {
       play.api.db.slick.DB.withSession {
         implicit s =>
           val d = scheduleDao.getStatDates(null)
-          val ss: List[(Statistic, Series[Team, Double])] = scheduleDao.loadStats(d)
+          val ss: List[(Statistic, Population[Team, Double])] = scheduleDao.loadStats(d)
           val data: List[(Statistic, List[(Team,ModelRecord)])] = ss.map {
             case (stat: Statistic, ser: Series[Team, Double]) => {
               val rankings: List[(Team, ModelRecord)] = 0.until(ser.length).map(i => (ser.index.at(i).get, ModelRecord.fromStatValue(stat, i, ser))).filter(p => p._2.rank.toInt <= 15).sortBy(p => p._2.rank.toInt).take(20).toList
